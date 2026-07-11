@@ -7,7 +7,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 3;
+  static const int _dbVersion = 4;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -65,6 +65,11 @@ class DatabaseService {
       } catch (e) {
         // Ignore if column already exists
       }
+    }
+    if (oldVersion < 4) {
+      // Schema was mixed up with createdAt vs created_at, drop and recreate for a clean slate
+      await db.execute('DROP TABLE IF EXISTS $_tableName');
+      await _onCreate(db, newVersion);
     }
   }
 
