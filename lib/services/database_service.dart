@@ -7,7 +7,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 1;
+  static const int _dbVersion = 3;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -52,7 +52,20 @@ class DatabaseService {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Handle migrations here for future versions
+    if (oldVersion < 2) {
+      try {
+        await db.execute('ALTER TABLE $_tableName ADD COLUMN title TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
+    }
+    if (oldVersion < 3) {
+      try {
+        await db.execute('ALTER TABLE $_tableName ADD COLUMN created_at TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
+    }
   }
 
   Future<void> _seedSampleData(Database db) async {
@@ -133,6 +146,11 @@ class DatabaseService {
   Future<int> deleteTransaction(int id) async {
     final db = await database;
     return db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> clearAllTransactions() async {
+    final db = await database;
+    await db.delete(_tableName);
   }
 
   // ─── Queries ─────────────────────────────────────────────────────────────────

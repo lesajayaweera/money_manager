@@ -25,13 +25,13 @@ class MainScaffoldState extends State<MainScaffold> {
 
   static const List<_NavItem> _navItems = [
     _NavItem(
-      icon: Icons.home_rounded,
+      icon: Icons.home_outlined,
       activeIcon: Icons.home_rounded,
       label: 'Dashboard',
     ),
     _NavItem(
-      icon: Icons.receipt_long_outlined,
-      activeIcon: Icons.receipt_long_rounded,
+      icon: Icons.grid_view_outlined,
+      activeIcon: Icons.grid_view_rounded,
       label: 'Transactions',
     ),
     _NavItem(

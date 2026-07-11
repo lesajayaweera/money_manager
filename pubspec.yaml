@@ -19,6 +19,7 @@ dependencies:
   crypto: ^3.0.2
   google_fonts: ^6.1.0
   shared_preferences: ^2.2.2
+  path: ^1.9.1
 
 flutter:
   uses-material-design: true

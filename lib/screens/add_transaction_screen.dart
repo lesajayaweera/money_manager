@@ -4,10 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../core/constants/app_colors.dart';
-
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
-import '../providers/settings_provider.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionType initialType;
@@ -23,58 +21,52 @@ class AddTransactionScreen extends StatefulWidget {
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  late TransactionType _selectedType;
+class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
 
   String? _selectedCategory;
+  String _selectedPaymentMethod = 'Cash';
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
+  late TransactionType _type;
+
+  // Payment methods with icon + color
+  static const List<_PayMethod> _payMethods = [
+    _PayMethod('Cash', Icons.payments_rounded, AppColors.income),
+    _PayMethod('Credit Card', Icons.credit_card_rounded, AppColors.expense),
+    _PayMethod('Debit Card', Icons.credit_card_outlined, AppColors.budget),
+    _PayMethod('UPI', Icons.qr_code_rounded, AppColors.primary),
+    _PayMethod('Net Banking', Icons.account_balance_rounded, AppColors.spending),
+    _PayMethod('Other', Icons.more_horiz_rounded, AppColors.catOther),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _selectedType = widget.initialType;
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-      initialIndex: _selectedType == TransactionType.income ? 0 : 1,
-    );
-    _tabController.addListener(_onTabChanged);
+    _type = widget.initialType;
 
     if (widget.editTransaction != null) {
       final tx = widget.editTransaction!;
-      _titleController.text = tx.title;
       _amountController.text = tx.amount.toStringAsFixed(0);
       _noteController.text = tx.note ?? '';
       _selectedCategory = tx.category;
       _selectedDate = tx.date;
-      _selectedType = tx.type;
+      _type = tx.type;
     }
   }
 
-  void _onTabChanged() {
-    if (!_tabController.indexIsChanging) {
-      setState(() {
-        _selectedType = _tabController.index == 0
-            ? TransactionType.income
-            : TransactionType.expense;
-        _selectedCategory = null;
-      });
-    }
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
   }
 
-  List<CategoryModel> get _categories {
-    return _selectedType == TransactionType.income
-        ? CategoryModel.incomeCategories
-        : CategoryModel.expenseCategories;
-  }
+  List<CategoryModel> get _categories => _type == TransactionType.income
+      ? CategoryModel.incomeCategories
+      : CategoryModel.expenseCategories;
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -82,441 +74,513 @@ class _AddTransactionScreenState extends State<AddTransactionScreen>
       initialDate: _selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-            ),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.primary,
+            onPrimary: Colors.white,
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
+  // ─── FIXED SAVE METHOD ────────────────────────────────────────────────────
   Future<void> _save() async {
+    // 1. Validate form fields
     if (!_formKey.currentState!.validate()) return;
+
+    // 2. Validate category selection
     if (_selectedCategory == null) {
-      _showError('Please select a category');
+      _showSnack('Please select a category');
+      return;
+    }
+
+    // 3. Parse amount (guaranteed clean by FilteringTextInputFormatter)
+    final amountText = _amountController.text.trim();
+    final amount = double.tryParse(amountText);
+    if (amount == null || amount <= 0) {
+      _showSnack('Please enter a valid amount');
       return;
     }
 
     setState(() => _isSaving = true);
-    HapticFeedback.lightImpact();
 
-    final amount = double.tryParse(_amountController.text.replaceAll(',', ''));
-    if (amount == null || amount <= 0) {
-      _showError('Enter a valid amount');
-      setState(() => _isSaving = false);
-      return;
-    }
+    try {
+      final tx = TransactionModel(
+        id: widget.editTransaction?.id,
+        title: _selectedCategory!,
+        amount: amount,
+        type: _type,
+        category: _selectedCategory!,
+        date: DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          DateTime.now().hour,
+          DateTime.now().minute,
+        ),
+        note: _noteController.text.trim().isEmpty
+            ? null
+            : _noteController.text.trim(),
+      );
 
-    final tx = TransactionModel(
-      id: widget.editTransaction?.id,
-      title: _titleController.text.trim(),
-      amount: amount,
-      type: _selectedType,
-      category: _selectedCategory!,
-      date: _selectedDate,
-      note: _noteController.text.trim().isEmpty
-          ? null
-          : _noteController.text.trim(),
-    );
+      final provider = context.read<TransactionProvider>();
+      if (widget.editTransaction != null) {
+        await provider.updateTransaction(tx);
+      } else {
+        await provider.addTransaction(tx);
+      }
 
-    final provider = context.read<TransactionProvider>();
-    if (widget.editTransaction != null) {
-      await provider.updateTransaction(tx);
-    } else {
-      await provider.addTransaction(tx);
-    }
-
-    if (mounted) {
-      Navigator.of(context).pop(true);
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        _showSnack('Error saving: ${e.toString()}');
+        setState(() => _isSaving = false);
+      }
     }
   }
 
-  void _showError(String message) {
+  void _showSnack(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message, style: GoogleFonts.inter(fontSize: 14)),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        backgroundColor: AppColors.textPrimary,
+      ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _titleController.dispose();
-    _amountController.dispose();
-    _noteController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isExpense = _type == TransactionType.expense;
     final isEditing = widget.editTransaction != null;
-    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          isEditing ? 'Edit Transaction' : 'Add Transaction',
+          isEditing
+              ? (isExpense ? 'Edit Expense' : 'Edit Income')
+              : (isExpense ? 'Add Expense' : 'Add Income'),
           style: GoogleFonts.inter(
             fontSize: 18,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
       ),
       body: Form(
         key: _formKey,
-        child: Column(
-          children: [
-            // Type tabs
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    color: _selectedType == TransactionType.income
-                        ? AppColors.income
-                        : AppColors.primary,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicatorPadding: const EdgeInsets.all(4),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  labelStyle: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  dividerColor: Colors.transparent,
-                  tabs: const [
-                    Tab(text: 'Income'),
-                    Tab(text: 'Expense'),
-                  ],
-                ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Amount
+              _Label('Amount (Rs.)'),
+              const SizedBox(height: 8),
+              _AmountField(controller: _amountController),
+              const SizedBox(height: 20),
+
+              // Category
+              _Label(isExpense ? 'Category' : 'Source / Category'),
+              const SizedBox(height: 8),
+              _CategoryDropdown(
+                categories: _categories,
+                selectedCategory: _selectedCategory,
+                onChanged: (val) => setState(() => _selectedCategory = val),
               ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Amount field
-                    _buildAmountField(settings.currencySymbol),
-                    const SizedBox(height: 16),
-                    // Title field
-                    _buildTextField(
-                      controller: _titleController,
-                      label: 'Title',
-                      hint: 'e.g. Monthly Salary, Grocery, etc.',
-                      icon: Icons.title_rounded,
-                      validator: (v) =>
-                          v == null || v.trim().isEmpty ? 'Enter a title' : null,
+              const SizedBox(height: 20),
+
+              // Date
+              _Label('Date'),
+              const SizedBox(height: 8),
+              _DatePickerField(
+                selectedDate: _selectedDate,
+                onTap: _pickDate,
+              ),
+              const SizedBox(height: 20),
+
+              // Payment method (expense only)
+              if (isExpense) ...[
+                _Label('Payment Method'),
+                const SizedBox(height: 8),
+                _PaymentMethodDropdown(
+                  payMethods: _payMethods,
+                  selected: _selectedPaymentMethod,
+                  onChanged: (val) =>
+                      setState(() => _selectedPaymentMethod = val),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // Note
+              _Label('Note (Optional)'),
+              const SizedBox(height: 8),
+              _NoteField(
+                controller: _noteController,
+                hint: isExpense
+                    ? 'e.g. Lunch at restaurant'
+                    : 'e.g. May salary',
+              ),
+              const SizedBox(height: 36),
+
+              // Save button
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: _isSaving ? null : _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    const SizedBox(height: 16),
-                    // Category
-                    _buildSectionLabel('Category'),
-                    const SizedBox(height: 10),
-                    _buildCategoryGrid(),
-                    const SizedBox(height: 16),
-                    // Date
-                    _buildSectionLabel('Date'),
-                    const SizedBox(height: 10),
-                    _buildDatePicker(),
-                    const SizedBox(height: 16),
-                    // Note
-                    _buildTextField(
-                      controller: _noteController,
-                      label: 'Note (optional)',
-                      hint: 'Add a note...',
-                      icon: Icons.notes_rounded,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 24),
-                    // Save button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: _isSaving ? null : _save,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _selectedType == TransactionType.income
-                                  ? AppColors.income
-                                  : AppColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
                           ),
-                          elevation: 0,
+                        )
+                      : Text(
+                          isExpense ? 'Save Expense' : 'Save Income',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                        child: _isSaving
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                isEditing
-                                    ? 'Update Transaction'
-                                    : 'Save Transaction',
-                                style: GoogleFonts.inter(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildAmountField(String currencySymbol) {
+// ─── Helper Widgets ───────────────────────────────────────────────────────────
+
+class _PayMethod {
+  final String name;
+  final IconData icon;
+  final Color color;
+  const _PayMethod(this.name, this.icon, this.color);
+}
+
+class _Label extends StatelessWidget {
+  final String text;
+  const _Label(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textPrimary,
+      ),
+    );
+  }
+}
+
+class _AmountField extends StatelessWidget {
+  final TextEditingController controller;
+  const _AmountField({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      style: GoogleFonts.inter(
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textPrimary,
+      ),
+      decoration: InputDecoration(
+        hintText: '0',
+        hintStyle: GoogleFonts.inter(fontSize: 18, color: AppColors.textHint),
+        filled: true,
+        fillColor: AppColors.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.expense),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.expense, width: 1.5),
+        ),
+      ),
+      validator: (v) {
+        if (v == null || v.trim().isEmpty) return 'Enter an amount';
+        return null;
+      },
+    );
+  }
+}
+
+class _CategoryDropdown extends StatelessWidget {
+  final List<CategoryModel> categories;
+  final String? selectedCategory;
+  final ValueChanged<String?> onChanged;
+
+  const _CategoryDropdown({
+    required this.categories,
+    required this.selectedCategory,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Amount',
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedCategory,
+          isExpanded: true,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded,
+              color: AppColors.textSecondary),
+          hint: Text(
+            'Select',
             style: GoogleFonts.inter(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
+                fontSize: 15, color: AppColors.textHint),
           ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                currencySymbol,
-                style: GoogleFonts.inter(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: _selectedType == TransactionType.income
-                      ? AppColors.income
-                      : AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextFormField(
-                  controller: _amountController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  style: GoogleFonts.inter(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    hintText: '0',
-                    hintStyle: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textHint,
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
-                  ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Enter an amount';
-                    final val = double.tryParse(v.replaceAll(',', ''));
-                    if (val == null || val <= 0) return 'Enter a valid amount';
-                    return null;
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      style: GoogleFonts.inter(
-        fontSize: 14,
-        color: AppColors.textPrimary,
-        fontWeight: FontWeight.w500,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
-        filled: true,
-        fillColor: AppColors.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          dropdownColor: AppColors.surface,
+          selectedItemBuilder: (_) => categories
+              .map((cat) => _CatRow(cat: cat, isSelected: true))
+              .toList(),
+          items: categories
+              .map((cat) => DropdownMenuItem<String>(
+                    value: cat.name,
+                    child: _CatRow(cat: cat, isSelected: false),
+                  ))
+              .toList(),
+          onChanged: onChanged,
         ),
       ),
-      validator: validator,
     );
   }
+}
 
-  Widget _buildSectionLabel(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+class _CatRow extends StatelessWidget {
+  final CategoryModel cat;
+  final bool isSelected;
+  const _CatRow({required this.cat, required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration:
+              BoxDecoration(color: cat.color, shape: BoxShape.circle),
+          child: Icon(cat.icon, color: Colors.white, size: 17),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          cat.name,
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight:
+                isSelected ? FontWeight.w500 : FontWeight.w400,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PaymentMethodDropdown extends StatelessWidget {
+  final List<_PayMethod> payMethods;
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  const _PaymentMethodDropdown({
+    required this.payMethods,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selected,
+          isExpanded: true,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded,
+              color: AppColors.textSecondary),
+          dropdownColor: AppColors.surface,
+          selectedItemBuilder: (_) => payMethods
+              .map((m) => _PayRow(method: m, isSelected: true))
+              .toList(),
+          items: payMethods
+              .map((m) => DropdownMenuItem<String>(
+                    value: m.name,
+                    child: _PayRow(method: m, isSelected: false),
+                  ))
+              .toList(),
+          onChanged: (val) {
+            if (val != null) onChanged(val);
+          },
+        ),
       ),
     );
   }
+}
 
-  Widget _buildCategoryGrid() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: _categories.map((cat) {
-        final isSelected = _selectedCategory == cat.name;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedCategory = cat.name),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? cat.color : AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? cat.color : const Color(0xFFE5E7EB),
-                width: isSelected ? 1.5 : 1,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: cat.color.withOpacity(0.25),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      )
-                    ]
-                  : [],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  cat.icon,
-                  size: 16,
-                  color: isSelected ? Colors.white : cat.color,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  cat.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: isSelected ? Colors.white : AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
+class _PayRow extends StatelessWidget {
+  final _PayMethod method;
+  final bool isSelected;
+  const _PayRow({required this.method, required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+              color: method.color, shape: BoxShape.circle),
+          child: Icon(method.icon, color: Colors.white, size: 17),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          method.name,
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            fontWeight:
+                isSelected ? FontWeight.w500 : FontWeight.w400,
+            color: AppColors.textPrimary,
           ),
-        );
-      }).toList(),
+        ),
+      ],
     );
   }
+}
 
-  Widget _buildDatePicker() {
+class _DatePickerField extends StatelessWidget {
+  final DateTime selectedDate;
+  final VoidCallback onTap;
+  const _DatePickerField(
+      {required this.selectedDate, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _pickDate,
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: const Border.fromBorderSide(
-            BorderSide(color: Color(0xFFE5E7EB)),
-          ),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE0E0E0)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today_rounded,
-                color: AppColors.primary, size: 20),
+            const Icon(Icons.calendar_month_outlined,
+                color: AppColors.textSecondary, size: 20),
             const SizedBox(width: 12),
             Text(
-              DateFormat('EEEE, d MMMM yyyy').format(_selectedDate),
+              DateFormat('d MMM yyyy').format(selectedDate),
               style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontSize: 15,
                 color: AppColors.textPrimary,
               ),
             ),
-            const Spacer(),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textSecondary),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NoteField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  const _NoteField({required this.controller, required this.hint});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      maxLines: 4,
+      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.inter(
+            color: AppColors.textHint, fontSize: 14),
+        filled: true,
+        fillColor: AppColors.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide:
+              const BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );
