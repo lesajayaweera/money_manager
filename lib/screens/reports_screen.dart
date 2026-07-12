@@ -228,7 +228,9 @@ class _SimpleBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final maxVal = math.max(income, expenses);
     final safeMax = maxVal == 0 ? 1.0 : maxVal;
-    const chartHeight = 160.0;
+    // Reserve 30px at top for value labels, 160px for bars, 36px for x-labels
+    const labelAreaHeight = 30.0;
+    const chartHeight = 150.0;
     const barWidth = 60.0;
 
     // Y-axis steps
@@ -238,33 +240,74 @@ class _SimpleBarChart extends StatelessWidget {
     final y1 = step;
 
     return SizedBox(
-      height: chartHeight + 60,
+      height: labelAreaHeight + chartHeight + 36,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Y-axis labels
-          SizedBox(
-            width: 44,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _yLabel(y3),
-                SizedBox(height: chartHeight / 3 - 12),
-                _yLabel(y2),
-                SizedBox(height: chartHeight / 3 - 12),
-                _yLabel(y1),
-                SizedBox(height: chartHeight / 3 - 12),
-                _yLabel(0),
-              ],
+          // Y-axis labels – aligned to bar area only (offset by labelAreaHeight)
+          Padding(
+            padding: const EdgeInsets.only(top: labelAreaHeight),
+            child: SizedBox(
+              width: 44,
+              height: chartHeight,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _yLabel(y3),
+                  _yLabel(y2),
+                  _yLabel(y1),
+                  _yLabel(0),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),
           // Chart area
           Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Bars
+                // Label area: fixed height so bars never push labels up
+                SizedBox(
+                  height: labelAreaHeight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: barWidth,
+                        child: Text(
+                          CurrencyFormatter.format(income,
+                              symbol: currencySymbol),
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.income,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(
+                        width: barWidth,
+                        child: Text(
+                          CurrencyFormatter.format(expenses,
+                              symbol: currencySymbol),
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.expense,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Bar area
                 SizedBox(
                   height: chartHeight,
                   child: Row(
@@ -277,8 +320,6 @@ class _SimpleBarChart extends StatelessWidget {
                         totalHeight: chartHeight,
                         barWidth: barWidth,
                         color: AppColors.income,
-                        label: CurrencyFormatter.format(income,
-                            symbol: currencySymbol),
                       ),
                       _Bar(
                         value: expenses,
@@ -286,8 +327,6 @@ class _SimpleBarChart extends StatelessWidget {
                         totalHeight: chartHeight,
                         barWidth: barWidth,
                         color: AppColors.expense,
-                        label: CurrencyFormatter.format(expenses,
-                            symbol: currencySymbol),
                       ),
                     ],
                   ),
@@ -333,9 +372,7 @@ class _SimpleBarChart extends StatelessWidget {
 
   Widget _yLabel(double value) {
     String label;
-    if (value >= 100000) {
-      label = '${(value / 1000).round()}K';
-    } else if (value >= 1000) {
+    if (value >= 1000) {
       label = '${(value / 1000).round()}K';
     } else {
       label = value.toInt().toString();
@@ -353,7 +390,6 @@ class _Bar extends StatelessWidget {
   final double totalHeight;
   final double barWidth;
   final Color color;
-  final String label;
 
   const _Bar({
     required this.value,
@@ -361,7 +397,6 @@ class _Bar extends StatelessWidget {
     required this.totalHeight,
     required this.barWidth,
     required this.color,
-    required this.label,
   });
 
   @override
@@ -369,35 +404,16 @@ class _Bar extends StatelessWidget {
     final barHeight = (value / maxValue) * totalHeight;
     return SizedBox(
       width: barWidth,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // Value label on top
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          // Bar
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutCubic,
-            width: barWidth,
-            height: math.max(barHeight, value > 0 ? 4 : 0),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(6)),
-            ),
-          ),
-        ],
+      // Bar only — label is in the dedicated label area above
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
+        width: barWidth,
+        height: math.max(barHeight, value > 0 ? 4 : 0),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+        ),
       ),
     );
   }

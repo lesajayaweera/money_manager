@@ -8,6 +8,7 @@ import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
 import '../main_scaffold.dart';
 import 'add_transaction_screen.dart';
+import 'lends_borrowed_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -91,6 +92,25 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
       ),
       actions: [
+        // Quick-nav icon (Goals + Lends) — Budge-app style
+        IconButton(
+          icon: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: AppColors.primarySurface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.grid_view_rounded,
+              color: AppColors.primary,
+              size: 18,
+            ),
+          ),
+          onPressed: () => _showQuickNav(context),
+          padding: EdgeInsets.zero,
+        ),
+        const SizedBox(width: 4),
         IconButton(
           icon: Stack(
             children: [
@@ -114,6 +134,134 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
         const SizedBox(width: 4),
       ],
+    );
+  }
+
+  void _showQuickNav(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Quick Navigation',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _QuickNavTile(
+                      icon: Icons.flag_rounded,
+                      label: 'Goals',
+                      color: AppColors.primary,
+                      lightColor: AppColors.primarySurface,
+                      onTap: () {
+                        Navigator.pop(context);
+                        final scaffold =
+                            context.findAncestorStateOfType<MainScaffoldState>();
+                        scaffold?.setTab(3);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: _QuickNavTile(
+                      icon: Icons.swap_horiz_rounded,
+                      label: 'Lends',
+                      color: AppColors.budget,
+                      lightColor: AppColors.budgetLight,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LendsBorrowedScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Quick Nav Tile ────────────────────────────────────────────────────────────
+
+class _QuickNavTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color lightColor;
+  final VoidCallback onTap;
+
+  const _QuickNavTile({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.lightColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: lightColor,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
