@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
-import '../models/transaction_model.dart';
-import '../providers/transaction_provider.dart';
-import '../providers/settings_provider.dart';
 import '../main_scaffold.dart';
+import '../models/transaction_model.dart';
+import '../providers/settings_provider.dart';
+import '../providers/transaction_provider.dart';
 import 'add_transaction_screen.dart';
 import 'lends_borrowed_screen.dart';
 
@@ -174,14 +175,16 @@ class _DashboardScreenState extends State<DashboardScreen>
                   Expanded(
                     child: _QuickNavTile(
                       icon: Icons.flag_rounded,
-                      label: 'Goals',
-                      color: AppColors.primary,
-                      lightColor: AppColors.primarySurface,
+                      label: 'Borrowed',
+                      color: AppColors.expense,
+                      lightColor: AppColors.expenseLight,
                       onTap: () {
                         Navigator.pop(context);
-                        final scaffold =
-                            context.findAncestorStateOfType<MainScaffoldState>();
-                        scaffold?.setTab(3);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LendsBorrowedScreen(),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -597,8 +600,7 @@ class _RecentTransactionsSection extends StatelessWidget {
                 endIndent: 16,
               ),
               itemBuilder: (context, index) {
-                return _TransactionTile(
-                    transaction: transactions[index]);
+                return _TransactionTile(transaction: transactions[index]);
               },
             ),
           ),
@@ -653,9 +655,8 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final category =
-        CategoryModel.findByName(transaction.category) ??
-            CategoryModel.fallback(transaction.type);
+    final category = CategoryModel.findByName(transaction.category) ??
+        CategoryModel.fallback(transaction.type);
     final settings = context.watch<SettingsProvider>();
     final isIncome = transaction.isIncome;
 
@@ -781,5 +782,3 @@ class _ActionButtons extends StatelessWidget {
     );
   }
 }
-
-
