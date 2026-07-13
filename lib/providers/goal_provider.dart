@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/goal_model.dart';
+import '../models/transaction_model.dart';
 import '../services/database_service.dart';
 
 class GoalProvider extends ChangeNotifier {
@@ -68,10 +69,25 @@ class GoalProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addSavings(GoalSavingsEntry entry) async {
+  /// Adds savings to a goal AND creates an expense transaction so the
+  /// amount is properly deducted from the overall balance.
+  Future<void> addSavings(GoalSavingsEntry entry, {String goalName = 'Goal'}) async {
     try {
+      // 1. Record the goal savings entry
       await _db.addGoalSavings(entry);
-      // Refresh the specific goal from DB to get updated saved_amount
+
+      // 2. Create an expense transaction to deduct from balance
+      final tx = TransactionModel(
+        title: 'Savings – $goalName',
+        amount: entry.amount,
+        type: TransactionType.expense,
+        category: 'Goals',
+        date: entry.date,
+        note: entry.note ?? 'Added to goal: $goalName',
+      );
+      await _db.insertTransaction(tx);
+
+      // 3. Refresh goals from DB to get updated saved_amount
       final updatedGoals = await _db.getAllGoals();
       _goals = updatedGoals;
       notifyListeners();

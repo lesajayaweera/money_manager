@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../core/constants/app_colors.dart';
 import '../models/lend_borrow_model.dart';
 import '../providers/lend_borrow_provider.dart';
+import '../providers/transaction_provider.dart';
 
 class AddLendBorrowScreen extends StatefulWidget {
   final LendBorrowType initialType;
@@ -117,6 +118,10 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
         await provider.updateEntry(entry);
       } else {
         await provider.addEntry(entry);
+      }
+      // Refresh TransactionProvider so balance updates on dashboard
+      if (mounted) {
+        await context.read<TransactionProvider>().loadAll();
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -274,7 +279,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                     foregroundColor: Colors.white,
                     elevation: 0,
                     disabledBackgroundColor:
-                        AppColors.primary.withOpacity(0.6),
+                        AppColors.primary.withValues(alpha: 0.6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

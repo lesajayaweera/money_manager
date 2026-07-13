@@ -7,6 +7,7 @@ import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../models/goal_model.dart';
 import '../providers/goal_provider.dart';
+import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
 import 'add_edit_goal_screen.dart';
 
@@ -148,11 +149,18 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     if (amount == null || amount <= 0) return;
                     Navigator.pop(ctx);
                     final provider = context.read<GoalProvider>();
-                    await provider.addSavings(GoalSavingsEntry(
-                      goalId: _goal.id!,
-                      amount: amount,
-                      date: DateTime.now(),
-                    ));
+                    await provider.addSavings(
+                      GoalSavingsEntry(
+                        goalId: _goal.id!,
+                        amount: amount,
+                        date: DateTime.now(),
+                      ),
+                      goalName: _goal.name,
+                    );
+                    // Refresh TransactionProvider so balance updates on dashboard
+                    if (mounted) {
+                      await context.read<TransactionProvider>().loadAll();
+                    }
                     await _refreshGoal();
                   },
                   style: ElevatedButton.styleFrom(
@@ -356,7 +364,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -490,7 +498,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -646,7 +654,7 @@ class _StatRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: iconColor, size: 18),

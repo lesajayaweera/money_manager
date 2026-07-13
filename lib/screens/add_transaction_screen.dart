@@ -5,7 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../core/constants/app_colors.dart';
 import '../models/transaction_model.dart';
+import '../models/category_model.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/category_provider.dart';
+import 'categories_screen.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionType initialType;
@@ -64,9 +67,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.dispose();
   }
 
-  List<CategoryModel> get _categories => _type == TransactionType.income
-      ? CategoryModel.incomeCategories
-      : CategoryModel.expenseCategories;
+  List<AppCategory> _getAppCategories(BuildContext context) {
+    final catType = _type == TransactionType.income
+        ? CategoryType.income
+        : CategoryType.expense;
+    return context.read<CategoryProvider>().categoriesForType(catType);
+  }
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -200,9 +206,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               _Label(isExpense ? 'Category' : 'Source / Category'),
               const SizedBox(height: 8),
               _CategoryDropdown(
-                categories: _categories,
+                categories: _getAppCategories(context),
                 selectedCategory: _selectedCategory,
                 onChanged: (val) => setState(() => _selectedCategory = val),
+                onManage: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CategoriesScreen(
+                        initialType: isExpense
+                            ? CategoryType.expense
+                            : CategoryType.income,
+                      ),
+                    ),
+                  );
+                  setState(() {});
+                },
               ),
               const SizedBox(height: 20),
 
@@ -359,14 +378,16 @@ class _AmountField extends StatelessWidget {
 }
 
 class _CategoryDropdown extends StatelessWidget {
-  final List<CategoryModel> categories;
+  final List<AppCategory> categories;
   final String? selectedCategory;
   final ValueChanged<String?> onChanged;
+  final VoidCallback? onManage;
 
   const _CategoryDropdown({
     required this.categories,
     required this.selectedCategory,
     required this.onChanged,
+    this.onManage,
   });
 
   @override
@@ -385,7 +406,7 @@ class _CategoryDropdown extends StatelessWidget {
           icon: const Icon(Icons.keyboard_arrow_down_rounded,
               color: AppColors.textSecondary),
           hint: Text(
-            'Select',
+            'Select category',
             style: GoogleFonts.inter(
                 fontSize: 15, color: AppColors.textHint),
           ),
@@ -393,13 +414,44 @@ class _CategoryDropdown extends StatelessWidget {
           selectedItemBuilder: (_) => categories
               .map((cat) => _CatRow(cat: cat, isSelected: true))
               .toList(),
-          items: categories
-              .map((cat) => DropdownMenuItem<String>(
-                    value: cat.name,
-                    child: _CatRow(cat: cat, isSelected: false),
-                  ))
-              .toList(),
-          onChanged: onChanged,
+          items: [
+            ...categories.map((cat) => DropdownMenuItem<String>(
+                  value: cat.name,
+                  child: _CatRow(cat: cat, isSelected: false),
+                )),
+            if (onManage != null)
+              DropdownMenuItem<String>(
+                value: '__manage__',
+                child: Row(
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                          color: AppColors.primarySurface,
+                          shape: BoxShape.circle),
+                      child: const Icon(Icons.settings_rounded,
+                          color: AppColors.primary, size: 17),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Manage Categories',
+                      style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          onChanged: (val) {
+            if (val == '__manage__') {
+              onManage?.call();
+            } else {
+              onChanged(val);
+            }
+          },
         ),
       ),
     );
@@ -407,7 +459,7 @@ class _CategoryDropdown extends StatelessWidget {
 }
 
 class _CatRow extends StatelessWidget {
-  final CategoryModel cat;
+  final AppCategory cat;
   final bool isSelected;
   const _CatRow({required this.cat, required this.isSelected});
 
@@ -418,9 +470,10 @@ class _CatRow extends StatelessWidget {
         Container(
           width: 34,
           height: 34,
-          decoration:
-              BoxDecoration(color: cat.color, shape: BoxShape.circle),
-          child: Icon(cat.icon, color: Colors.white, size: 17),
+          decoration: BoxDecoration(
+              color: cat.color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8)),
+          child: Icon(cat.icon, color: cat.color, size: 17),
         ),
         const SizedBox(width: 12),
         Text(

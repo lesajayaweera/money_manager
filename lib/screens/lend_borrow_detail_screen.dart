@@ -5,6 +5,7 @@ import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../models/lend_borrow_model.dart';
 import '../providers/lend_borrow_provider.dart';
+import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
 import 'add_lend_borrow_screen.dart';
 
@@ -35,6 +36,10 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
     try {
       final updated = _entry.copyWith(status: LendBorrowStatus.paid);
       await context.read<LendBorrowProvider>().updateEntry(updated);
+      // Refresh TransactionProvider so balance updates on dashboard
+      if (mounted) {
+        await context.read<TransactionProvider>().loadAll();
+      }
       setState(() {
         _entry = updated;
         _isMarkingSettled = false;
@@ -43,7 +48,9 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Marked as settled!',
+              _entry.isLent
+                  ? 'Payment received from ${_entry.personName}!'
+                  : 'Repayment to ${_entry.personName} recorded!',
               style: GoogleFonts.inter(fontSize: 14),
             ),
             backgroundColor: AppColors.income,
@@ -260,7 +267,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -341,7 +348,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -596,7 +603,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -666,7 +673,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
