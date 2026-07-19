@@ -438,7 +438,9 @@ class _TxTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      transaction.title,
+                      (transaction.note != null && transaction.note!.trim().isNotEmpty)
+                          ? transaction.note!
+                          : transaction.title,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
