@@ -57,15 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           children: [
             _SettingsList(
               children: [
-                // Monthly Budget
-                // _SettingsRow(
-                //   icon: Icons.calendar_today_rounded,
-                //   iconColor: const Color(0xFF4A6CF7),
-                //   label: 'Monthly Budget',
-                //   value: NumberFormat('#,##,###').format(settings.monthlyBudget),
-                //   valuePrefix: '${settings.currencySymbol} ',
-                //   onTap: () => _showBudgetDialog(context, settings),
-                // ),
+
                 // Currency
                 _SettingsRow(
                   icon: Icons.attach_money_rounded,
@@ -121,64 +113,6 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   // ─── Dialogs ─────────────────────────────────────────────────────────────
 
-  Future<void> _showBudgetDialog(
-      BuildContext context, SettingsProvider settings) async {
-    final controller = TextEditingController(
-      text: settings.monthlyBudget.toInt().toString(),
-    );
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Monthly Budget',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: InputDecoration(
-            prefixText: '${settings.currencySymbol} ',
-            hintText: '80,000',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                  const BorderSide(color: AppColors.primary, width: 1.5),
-            ),
-          ),
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.inter(color: AppColors.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, controller.text),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              elevation: 0,
-            ),
-            child: Text('Save',
-                style: GoogleFonts.inter(
-                    color: Colors.white, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-    if (result != null && context.mounted) {
-      final val = double.tryParse(result.replaceAll(',', ''));
-      if (val != null && val > 0) {
-        await context.read<SettingsProvider>().setMonthlyBudget(val);
-      }
-    }
-    controller.dispose();
-  }
 
   Future<void> _showCurrencySheet(
       BuildContext context, SettingsProvider settings) async {
