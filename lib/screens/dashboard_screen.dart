@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../main_scaffold.dart';
+import '../models/category_model.dart';
 import '../models/transaction_model.dart';
+import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'add_transaction_screen.dart';
-import 'lends_borrowed_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -179,12 +180,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: AppColors.expense,
                       lightColor: AppColors.expenseLight,
                       onTap: () {
-                        Navigator.pop(context);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LendsBorrowedScreen(initialIndex: 1),
-                          ),
-                        );
+                        // Navigator.pop(context);
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (_) => const LendsBorrowedScreen(initialIndex: 1),
+                        //   ),
+                        // );
                       },
                     ),
                   ),
@@ -196,12 +197,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: AppColors.budget,
                       lightColor: AppColors.budgetLight,
                       onTap: () {
-                        Navigator.pop(context);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LendsBorrowedScreen(initialIndex: 0),
-                          ),
-                        );
+                        // Navigator.pop(context);
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (_) => const LendsBorrowedScreen(initialIndex: 0),
+                        //   ),
+                        // );
                       },
                     ),
                   ),
@@ -655,8 +656,13 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final category = CategoryModel.findByName(transaction.category) ??
-        CategoryModel.fallback(transaction.type);
+    final categoryProvider = context.watch<CategoryProvider>();
+    final type =
+        transaction.isIncome ? CategoryType.income : CategoryType.expense;
+    final category = categoryProvider.findByName(transaction.category, type) ??
+        (type == CategoryType.income
+            ? AppCategory.defaultIncomeCategories.last
+            : AppCategory.defaultExpenseCategories.last);
     final settings = context.watch<SettingsProvider>();
     final isIncome = transaction.isIncome;
 
