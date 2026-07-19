@@ -1,13 +1,15 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/transaction_model.dart';
+import '../models/goal_model.dart';
+import '../models/lend_borrow_model.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 1;
+  static const int _dbVersion = 5;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -47,12 +49,108 @@ class DatabaseService {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        target_amount REAL NOT NULL,
+        saved_amount REAL NOT NULL DEFAULT 0,
+        target_date TEXT NOT NULL,
+        category_name TEXT NOT NULL,
+        note TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE goal_savings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        date TEXT NOT NULL,
+        note TEXT,
+        FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE lend_borrow (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        person_name TEXT NOT NULL,
+        amount REAL NOT NULL,
+        date TEXT NOT NULL,
+        due_date TEXT NOT NULL,
+        note TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        payment_method TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
     // Seed with sample data
     await _seedSampleData(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Handle migrations here for future versions
+    if (oldVersion < 2) {
+      try {
+        await db.execute('ALTER TABLE $_tableName ADD COLUMN title TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
+    }
+    if (oldVersion < 3) {
+      try {
+        await db.execute('ALTER TABLE $_tableName ADD COLUMN created_at TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
+    }
+    if (oldVersion < 4) {
+      // Schema was mixed up with createdAt vs created_at, drop and recreate for a clean slate
+      await db.execute('DROP TABLE IF EXISTS $_tableName');
+      await _onCreate(db, newVersion);
+    }
+    if (oldVersion < 5) {
+      // Add goals and lend_borrow tables
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS goals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          target_amount REAL NOT NULL,
+          saved_amount REAL NOT NULL DEFAULT 0,
+          target_date TEXT NOT NULL,
+          category_name TEXT NOT NULL,
+          note TEXT,
+          created_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS goal_savings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          goal_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          date TEXT NOT NULL,
+          note TEXT,
+          FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS lend_borrow (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL,
+          person_name TEXT NOT NULL,
+          amount REAL NOT NULL,
+          date TEXT NOT NULL,
+          due_date TEXT NOT NULL,
+          note TEXT,
+          status TEXT NOT NULL DEFAULT 'pending',
+          payment_method TEXT,
+          created_at TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   Future<void> _seedSampleData(Database db) async {
@@ -133,6 +231,22 @@ class DatabaseService {
   Future<int> deleteTransaction(int id) async {
     final db = await database;
     return db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> clearAllTransactions() async {
+    final db = await database;
+    await db.delete(_tableName);
+  }
+
+  Future<void> clearAllLendBorrows() async {
+    final db = await database;
+    await db.delete('lend_borrow');
+  }
+
+  Future<void> clearAllGoals() async {
+    final db = await database;
+    await db.delete('goals');
+    await db.delete('goal_savings');
   }
 
   // ─── Queries ─────────────────────────────────────────────────────────────────
@@ -273,5 +387,82 @@ class DatabaseService {
       await db.close();
       _db = null;
     }
+  }
+
+  // ─── Goals CRUD ───────────────────────────────────────────────────────────────
+
+  Future<int> insertGoal(GoalModel goal) async {
+    final db = await database;
+    final map = goal.toMap();
+    return db.insert('goals', map, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> updateGoal(GoalModel goal) async {
+    final db = await database;
+    return db.update('goals', goal.toMap(), where: 'id = ?', whereArgs: [goal.id]);
+  }
+
+  Future<int> deleteGoal(int id) async {
+    final db = await database;
+    await db.delete('goal_savings', where: 'goal_id = ?', whereArgs: [id]);
+    return db.delete('goals', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<GoalModel>> getAllGoals() async {
+    final db = await database;
+    final rows = await db.query('goals', orderBy: 'created_at DESC');
+    return rows.map(GoalModel.fromMap).toList();
+  }
+
+  Future<int> addGoalSavings(GoalSavingsEntry entry) async {
+    final db = await database;
+    final id = await db.insert('goal_savings', entry.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    // Update the goal's saved_amount
+    await db.rawUpdate(
+      'UPDATE goals SET saved_amount = saved_amount + ? WHERE id = ?',
+      [entry.amount, entry.goalId],
+    );
+    return id;
+  }
+
+  Future<List<GoalSavingsEntry>> getGoalSavings(int goalId) async {
+    final db = await database;
+    final rows = await db.query(
+      'goal_savings',
+      where: 'goal_id = ?',
+      whereArgs: [goalId],
+      orderBy: 'date DESC',
+    );
+    return rows.map(GoalSavingsEntry.fromMap).toList();
+  }
+
+  // ─── Lend/Borrow CRUD ─────────────────────────────────────────────────────────
+
+  Future<int> insertLendBorrow(LendBorrowModel entry) async {
+    final db = await database;
+    return db.insert('lend_borrow', entry.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> updateLendBorrow(LendBorrowModel entry) async {
+    final db = await database;
+    return db.update(
+      'lend_borrow',
+      entry.toMap(),
+      where: 'id = ?',
+      whereArgs: [entry.id],
+    );
+  }
+
+  Future<int> deleteLendBorrow(int id) async {
+    final db = await database;
+    return db.delete('lend_borrow', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<LendBorrowModel>> getAllLendBorrow() async {
+    final db = await database;
+    final rows = await db.query('lend_borrow', orderBy: 'created_at DESC');
+    return rows.map(LendBorrowModel.fromMap).toList();
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import '../models/transaction_model.dart';
 import '../services/database_service.dart';
 
+enum TransactionFilter { all, income, expense, today, thisMonth }
+
 class DashboardSummary {
   final double totalBalance;
   final double monthlyIncome;
@@ -36,7 +38,7 @@ class TransactionProvider extends ChangeNotifier {
   String? _error;
 
   // Filter state
-  TransactionType? _filterType;
+  TransactionFilter _activeFilter = TransactionFilter.all;
   String _searchQuery = '';
   DateTime _selectedMonth = DateTime.now();
 
@@ -46,14 +48,37 @@ class TransactionProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   DateTime get selectedMonth => _selectedMonth;
-  TransactionType? get filterType => _filterType;
+  TransactionFilter get activeFilter => _activeFilter;
   String get searchQuery => _searchQuery;
 
   List<TransactionModel> get filteredTransactions {
     var list = _allTransactions;
-    if (_filterType != null) {
-      list = list.where((t) => t.type == _filterType).toList();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    switch (_activeFilter) {
+      case TransactionFilter.income:
+        list = list.where((t) => t.type == TransactionType.income).toList();
+        break;
+      case TransactionFilter.expense:
+        list = list.where((t) => t.type == TransactionType.expense).toList();
+        break;
+      case TransactionFilter.today:
+        list = list
+            .where((t) =>
+                DateTime(t.date.year, t.date.month, t.date.day) == today)
+            .toList();
+        break;
+      case TransactionFilter.thisMonth:
+        list = list
+            .where(
+                (t) => t.date.year == now.year && t.date.month == now.month)
+            .toList();
+        break;
+      case TransactionFilter.all:
+        break;
     }
+
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       list = list
@@ -106,40 +131,54 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   Future<void> addTransaction(TransactionModel tx) async {
-    _setLoading(true);
     try {
       await _db.insertTransaction(tx);
-      await loadAll();
+      await _loadTransactions();
+      await _loadSummary();
     } catch (e) {
       _error = e.toString();
-      _setLoading(false);
+      notifyListeners();
+      rethrow;
     }
   }
 
   Future<void> updateTransaction(TransactionModel tx) async {
-    _setLoading(true);
     try {
       await _db.updateTransaction(tx);
-      await loadAll();
+      await _loadTransactions();
+      await _loadSummary();
     } catch (e) {
       _error = e.toString();
-      _setLoading(false);
+      notifyListeners();
+      rethrow;
     }
   }
 
   Future<void> deleteTransaction(int id) async {
-    _setLoading(true);
     try {
       await _db.deleteTransaction(id);
-      await loadAll();
+      await _loadTransactions();
+      await _loadSummary();
     } catch (e) {
       _error = e.toString();
-      _setLoading(false);
+      notifyListeners();
+      rethrow;
     }
   }
 
+  void setFilter(TransactionFilter filter) {
+    _activeFilter = filter;
+    notifyListeners();
+  }
+
   void setFilterType(TransactionType? type) {
-    _filterType = type;
+    if (type == null) {
+      _activeFilter = TransactionFilter.all;
+    } else if (type == TransactionType.income) {
+      _activeFilter = TransactionFilter.income;
+    } else {
+      _activeFilter = TransactionFilter.expense;
+    }
     notifyListeners();
   }
 
@@ -171,8 +210,24 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> clearAllData() async {
+    try {
+      await _db.clearAllTransactions();
+      _allTransactions = [];
+      _recentTransactions = [];
+      _summary = DashboardSummary.zero;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();
   }
 }
+
+

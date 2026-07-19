@@ -12,7 +12,6 @@ class AppTheme {
         primary: AppColors.primary,
         onPrimary: AppColors.textOnPrimary,
         surface: AppColors.surface,
-        background: AppColors.background,
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: AppColors.background,

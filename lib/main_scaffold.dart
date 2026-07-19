@@ -4,6 +4,7 @@ import '../core/constants/app_colors.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/transaction_history_screen.dart';
 import 'screens/reports_screen.dart';
+import 'screens/goals_screen.dart';
 import 'screens/settings_screen.dart';
 
 class MainScaffold extends StatefulWidget {
@@ -20,18 +21,19 @@ class MainScaffoldState extends State<MainScaffold> {
     const DashboardScreen(),
     const TransactionHistoryScreen(),
     const ReportsScreen(),
+    const GoalsScreen(),
     const SettingsScreen(),
   ];
 
   static const List<_NavItem> _navItems = [
     _NavItem(
-      icon: Icons.home_rounded,
+      icon: Icons.home_outlined,
       activeIcon: Icons.home_rounded,
       label: 'Dashboard',
     ),
     _NavItem(
-      icon: Icons.receipt_long_outlined,
-      activeIcon: Icons.receipt_long_rounded,
+      icon: Icons.grid_view_outlined,
+      activeIcon: Icons.grid_view_rounded,
       label: 'Transactions',
     ),
     _NavItem(
@@ -40,12 +42,19 @@ class MainScaffoldState extends State<MainScaffold> {
       label: 'Reports',
     ),
     _NavItem(
+      icon: Icons.flag_outlined,
+      activeIcon: Icons.flag_rounded,
+      label: 'Goals',
+    ),
+    _NavItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings_rounded,
       label: 'Settings',
     ),
   ];
 
+  /// Tab indices:
+  /// 0 = Dashboard, 1 = Transactions, 2 = Reports, 3 = Goals, 4 = Settings
   void setTab(int index) {
     setState(() => _currentIndex = index);
   }
@@ -75,7 +84,7 @@ class MainScaffoldState extends State<MainScaffold> {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _navItems.asMap().entries.map((entry) {
@@ -88,8 +97,8 @@ class MainScaffoldState extends State<MainScaffold> {
                 behavior: HitTestBehavior.opaque,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: isActive
                         ? AppColors.primary.withOpacity(0.1)
@@ -107,14 +116,14 @@ class MainScaffoldState extends State<MainScaffold> {
                           color: isActive
                               ? AppColors.primary
                               : AppColors.textHint,
-                          size: 24,
+                          size: 22,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         item.label,
                         style: GoogleFonts.inter(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: isActive
                               ? FontWeight.w600
                               : FontWeight.w400,

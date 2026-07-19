@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/goal_provider.dart';
+import 'providers/lend_borrow_provider.dart';
+import 'providers/category_provider.dart';
 import 'screens/splash_screen.dart';
 import 'main_scaffold.dart';
 import 'services/database_service.dart';
@@ -40,6 +43,9 @@ class MoneyManagerApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()..loadSettings()),
         ChangeNotifierProvider(create: (_) => TransactionProvider()..loadAll()),
+        ChangeNotifierProvider(create: (_) => GoalProvider()..loadGoals()),
+        ChangeNotifierProvider(create: (_) => LendBorrowProvider()..loadEntries()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
       ],
       child: MaterialApp(
         title: 'Money Manager',

@@ -145,6 +145,27 @@ class CategoryModel {
       type: TransactionType.expense,
     ),
     const CategoryModel(
+      name: 'Goals',
+      icon: Icons.flag_rounded,
+      color: AppColors.primary,
+      lightColor: AppColors.primarySurface,
+      type: TransactionType.expense,
+    ),
+    const CategoryModel(
+      name: 'Lent',
+      icon: Icons.arrow_outward_rounded,
+      color: AppColors.spending,
+      lightColor: Color(0xFFFFF4E3),
+      type: TransactionType.expense,
+    ),
+    const CategoryModel(
+      name: 'Borrowed',
+      icon: Icons.arrow_downward_rounded,
+      color: AppColors.income,
+      lightColor: Color(0xFFE6F9F5),
+      type: TransactionType.expense,
+    ),
+    const CategoryModel(
       name: 'Other',
       icon: Icons.more_horiz_rounded,
       color: AppColors.catOther,
@@ -187,6 +208,20 @@ class CategoryModel {
       icon: Icons.card_giftcard_rounded,
       color: AppColors.catShopping,
       lightColor: Color(0xFFFCE8F3),
+      type: TransactionType.income,
+    ),
+    const CategoryModel(
+      name: 'Lent',
+      icon: Icons.arrow_outward_rounded,
+      color: AppColors.spending,
+      lightColor: Color(0xFFFFF4E3),
+      type: TransactionType.income,
+    ),
+    const CategoryModel(
+      name: 'Borrowed',
+      icon: Icons.arrow_downward_rounded,
+      color: AppColors.income,
+      lightColor: Color(0xFFE6F9F5),
       type: TransactionType.income,
     ),
     const CategoryModel(
