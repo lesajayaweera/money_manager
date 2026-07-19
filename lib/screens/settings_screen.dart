@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+
 import '../core/constants/app_colors.dart';
-import '../providers/transaction_provider.dart';
-import '../providers/settings_provider.dart';
-import '../providers/lend_borrow_provider.dart';
 import '../providers/goal_provider.dart';
+import '../providers/lend_borrow_provider.dart';
+import '../providers/settings_provider.dart';
+import '../providers/transaction_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -58,14 +58,14 @@ class _SettingsScreenState extends State<SettingsScreen>
             _SettingsList(
               children: [
                 // Monthly Budget
-                _SettingsRow(
-                  icon: Icons.calendar_today_rounded,
-                  iconColor: const Color(0xFF4A6CF7),
-                  label: 'Monthly Budget',
-                  value: NumberFormat('#,##,###').format(settings.monthlyBudget),
-                  valuePrefix: '${settings.currencySymbol} ',
-                  onTap: () => _showBudgetDialog(context, settings),
-                ),
+                // _SettingsRow(
+                //   icon: Icons.calendar_today_rounded,
+                //   iconColor: const Color(0xFF4A6CF7),
+                //   label: 'Monthly Budget',
+                //   value: NumberFormat('#,##,###').format(settings.monthlyBudget),
+                //   valuePrefix: '${settings.currencySymbol} ',
+                //   onTap: () => _showBudgetDialog(context, settings),
+                // ),
                 // Currency
                 _SettingsRow(
                   icon: Icons.attach_money_rounded,
@@ -129,8 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Monthly Budget',
             style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         content: TextField(
@@ -149,15 +148,13 @@ class _SettingsScreenState extends State<SettingsScreen>
                   const BorderSide(color: AppColors.primary, width: 1.5),
             ),
           ),
-          style: GoogleFonts.inter(
-              fontWeight: FontWeight.w600, fontSize: 16),
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel',
-                style: GoogleFonts.inter(
-                    color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
@@ -206,8 +203,8 @@ class _SettingsScreenState extends State<SettingsScreen>
             const SizedBox(height: 16),
             ..._currencies.map((c) => ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text(c['name']!,
-                      style: GoogleFonts.inter(fontSize: 15)),
+                  title:
+                      Text(c['name']!, style: GoogleFonts.inter(fontSize: 15)),
                   trailing: settings.currencySymbol == c['symbol']
                       ? const Icon(Icons.check_rounded,
                           color: AppColors.primary)
@@ -227,21 +224,19 @@ class _SettingsScreenState extends State<SettingsScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Clear All Data',
             style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         content: Text(
           'This will permanently delete all your transactions. This action cannot be undone.',
-          style: GoogleFonts.inter(
-              color: AppColors.textSecondary, fontSize: 14),
+          style:
+              GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text('Cancel',
-                style: GoogleFonts.inter(
-                    color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -271,8 +266,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                 style: GoogleFonts.inter(fontSize: 14)),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -284,20 +279,17 @@ class _SettingsScreenState extends State<SettingsScreen>
       context: context,
       applicationName: 'Money Manager',
       applicationVersion: '1.0.0',
-      applicationLegalese:
-          '© 2024 Money Manager. All rights reserved.',
+      applicationLegalese: '© 2024 Money Manager. All rights reserved.',
     );
   }
 
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text('Coming soon!', style: GoogleFonts.inter(fontSize: 14)),
+        content: Text('Coming soon!', style: GoogleFonts.inter(fontSize: 14)),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -365,8 +357,7 @@ class _SettingsRow extends StatelessWidget {
             bottomRight: isLast ? const Radius.circular(16) : Radius.zero,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
                 // Icon in circle
