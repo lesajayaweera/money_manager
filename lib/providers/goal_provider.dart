@@ -102,6 +102,17 @@ class GoalProvider extends ChangeNotifier {
     return _db.getGoalSavings(goalId);
   }
 
+  Future<void> clearAllData() async {
+    try {
+      await _db.clearAllGoals();
+      _goals = [];
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

@@ -238,6 +238,17 @@ class DatabaseService {
     await db.delete(_tableName);
   }
 
+  Future<void> clearAllLendBorrows() async {
+    final db = await database;
+    await db.delete('lend_borrow');
+  }
+
+  Future<void> clearAllGoals() async {
+    final db = await database;
+    await db.delete('goals');
+    await db.delete('goal_savings');
+  }
+
   // ─── Queries ─────────────────────────────────────────────────────────────────
 
   Future<List<TransactionModel>> getAllTransactions() async {

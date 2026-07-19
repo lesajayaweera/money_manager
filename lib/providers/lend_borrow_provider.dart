@@ -125,6 +125,17 @@ class LendBorrowProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> clearAllData() async {
+    try {
+      await _db.clearAllLendBorrows();
+      _entries = [];
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
