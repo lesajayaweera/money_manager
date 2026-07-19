@@ -10,7 +10,8 @@ import 'add_lend_borrow_screen.dart';
 import 'lend_borrow_detail_screen.dart';
 
 class LendsBorrowedScreen extends StatefulWidget {
-  const LendsBorrowedScreen({super.key});
+  final int initialIndex;
+  const LendsBorrowedScreen({super.key, this.initialIndex = 0});
 
   @override
   State<LendsBorrowedScreen> createState() => _LendsBorrowedScreenState();
@@ -26,7 +27,7 @@ class _LendsBorrowedScreenState extends State<LendsBorrowedScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LendBorrowProvider>().loadEntries();
     });

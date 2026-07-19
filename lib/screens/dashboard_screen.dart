@@ -182,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         Navigator.pop(context);
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const LendsBorrowedScreen(),
+                            builder: (_) => const LendsBorrowedScreen(initialIndex: 1),
                           ),
                         );
                       },
@@ -199,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         Navigator.pop(context);
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const LendsBorrowedScreen(),
+                            builder: (_) => const LendsBorrowedScreen(initialIndex: 0),
                           ),
                         );
                       },
