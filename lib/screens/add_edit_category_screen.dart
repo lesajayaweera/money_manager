@@ -24,11 +24,9 @@ class AddEditCategoryScreen extends StatefulWidget {
 class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _budgetCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
 
   late CategoryType _type;
-  String? _parentCategory;
   late IconData _selectedIcon;
   late Color _selectedColor;
   bool _isSaving = false;
@@ -45,10 +43,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     if (widget.editCategory != null) {
       final e = widget.editCategory!;
       _nameCtrl.text = e.name;
-      _parentCategory = e.parentCategory;
-      if (e.monthlyBudget != null) {
-        _budgetCtrl.text = e.monthlyBudget!.toStringAsFixed(0);
-      }
       _noteCtrl.text = e.note ?? '';
     }
   }
@@ -56,7 +50,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _budgetCtrl.dispose();
     _noteCtrl.dispose();
     super.dispose();
   }
@@ -67,24 +60,29 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
     final provider = context.read<CategoryProvider>();
     final name = _nameCtrl.text.trim();
-    final budget = double.tryParse(_budgetCtrl.text.trim());
-
-    final newCategory = AppCategory(
-      name: name,
-      icon: _selectedIcon,
-      color: _selectedColor,
-      type: _type,
-      isDefault: false,
-      parentCategory: _parentCategory,
-      monthlyBudget: budget,
-      note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
-      includeInReports: true,
-      showOnDashboard: true,
-      isActive: true,
-    );
+    final newCategory = widget.editCategory?.copyWith(
+          name: name,
+          icon: _selectedIcon,
+          color: _selectedColor,
+          type: _type,
+          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+          parentCategory: null,
+          monthlyBudget: null,
+        ) ??
+        AppCategory(
+          name: name,
+          icon: _selectedIcon,
+          color: _selectedColor,
+          type: _type,
+          isDefault: false,
+          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+          includeInReports: true,
+          showOnDashboard: true,
+          isActive: true,
+        );
 
     if (widget.editCategory != null) {
-      provider.updateCategory(newCategory);
+      provider.updateCategory(widget.editCategory!, newCategory);
     } else {
       provider.addCategory(newCategory);
     }
@@ -123,165 +121,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
         key: _formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ── Left Form Column ──────────────────────────────────────────
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Category Name
-                    _FormLabel('Category Name'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _nameCtrl,
-                      onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(
-                          fontSize: 15, color: AppColors.textPrimary),
-                      decoration: _inputDecor('e.g. Pet Care'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Enter a category name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Type toggle
-                    _FormLabel('Type'),
-                    const SizedBox(height: 8),
-                    _TypeToggle(
-                      selected: _type,
-                      onChanged: (t) => setState(() => _type = t),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Parent Category dropdown
-                    _FormLabel('Parent Category'),
-                    const SizedBox(height: 8),
-                    _ParentDropdown(
-                      type: _type,
-                      selected: _parentCategory,
-                      onChanged: (v) => setState(() => _parentCategory = v),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Icon picker
-                    _FormLabel('Icon'),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _openCustomize(),
-                      child: _PickerField(
-                        child: Row(
-                          children: [
-                            Icon(_selectedIcon,
-                                color: _selectedColor, size: 22),
-                            const SizedBox(width: 10),
-                            Text(
-                              'Choose icon',
-                              style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textHint),
-                            ),
-                            const Spacer(),
-                            const Icon(Icons.chevron_right_rounded,
-                                color: AppColors.textHint, size: 20),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Color picker
-                    _FormLabel('Color'),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _openCustomize(),
-                      child: _PickerField(
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                                backgroundColor: _selectedColor, radius: 12),
-                            const SizedBox(width: 10),
-                            Text(
-                              '#${_selectedColor.toARGB32().toRadixString(16).toUpperCase().substring(2)}',
-                              style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary),
-                            ),
-                            const Spacer(),
-                            const Icon(Icons.keyboard_arrow_down_rounded,
-                                color: AppColors.textHint, size: 20),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Monthly Budget
-                    _FormLabel('Monthly Budget (Optional)'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _budgetCtrl,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: GoogleFonts.inter(
-                          fontSize: 15, color: AppColors.textPrimary),
-                      decoration: _inputDecor('₹ 0.00'),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Note
-                    _FormLabel('Note (Optional)'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _noteCtrl,
-                      maxLines: 3,
-                      style: GoogleFonts.inter(
-                          fontSize: 14, color: AppColors.textPrimary),
-                      decoration: _inputDecor('Add a note...'),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // Save button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _isSaving ? null : _save,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
-                        ),
-                        child: _isSaving
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.white),
-                              )
-                            : Text(
-                                'Save Category',
-                                style: GoogleFonts.inter(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 16),
-
               // ── Preview Card ────────────────────────────────────────────────
               Column(
                 children: [
@@ -342,6 +184,140 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 32),
+
+              // ── Form Column ──────────────────────────────────────────────
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                    // Category Name
+                    _FormLabel('Category Name'),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _nameCtrl,
+                      onChanged: (_) => setState(() {}),
+                      style: GoogleFonts.inter(
+                          fontSize: 15, color: AppColors.textPrimary),
+                      decoration: _inputDecor('e.g. Pet Care'),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Enter a category name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Type toggle
+                    _FormLabel('Type'),
+                    const SizedBox(height: 8),
+                    _TypeToggle(
+                      selected: _type,
+                      onChanged: (t) => setState(() => _type = t),
+                    ),
+                    const SizedBox(height: 18),
+
+
+
+                    // Icon picker
+                    _FormLabel('Icon'),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () => _openCustomize(),
+                      child: _PickerField(
+                        child: Row(
+                          children: [
+                            Icon(_selectedIcon,
+                                color: _selectedColor, size: 22),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Choose icon',
+                              style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: AppColors.textHint),
+                            ),
+                            const Spacer(),
+                            const Icon(Icons.chevron_right_rounded,
+                                color: AppColors.textHint, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Color picker
+                    _FormLabel('Color'),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () => _openCustomize(),
+                      child: _PickerField(
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                                backgroundColor: _selectedColor, radius: 12),
+                            const SizedBox(width: 10),
+                            Text(
+                              '#${_selectedColor.toARGB32().toRadixString(16).toUpperCase().substring(2)}',
+                              style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: AppColors.textPrimary),
+                            ),
+                            const Spacer(),
+                            const Icon(Icons.keyboard_arrow_down_rounded,
+                                color: AppColors.textHint, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+
+
+                    // Note
+                    _FormLabel('Note (Optional)'),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _noteCtrl,
+                      maxLines: 3,
+                      style: GoogleFonts.inter(
+                          fontSize: 14, color: AppColors.textPrimary),
+                      decoration: _inputDecor('Add a note...'),
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Save button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _isSaving ? null : _save,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white),
+                              )
+                            : Text(
+                                'Save Category',
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
             ],
           ),
         ),
@@ -504,53 +480,4 @@ class _ToggleBtn extends StatelessWidget {
   }
 }
 
-class _ParentDropdown extends StatelessWidget {
-  final CategoryType type;
-  final String? selected;
-  final ValueChanged<String?> onChanged;
-  const _ParentDropdown(
-      {required this.type,
-      required this.selected,
-      required this.onChanged});
 
-  List<String> get _parents => type == CategoryType.expense
-      ? ['Personal', 'Fixed', 'Variable', 'Discretionary']
-      : ['Primary', 'Secondary', 'Passive'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selected,
-          isExpanded: true,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary),
-          hint: Text(
-            'Select parent category',
-            style: GoogleFonts.inter(
-                fontSize: 14, color: AppColors.textHint),
-          ),
-          dropdownColor: AppColors.surface,
-          items: _parents
-              .map((p) => DropdownMenuItem(
-                    value: p,
-                    child: Text(p,
-                        style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: AppColors.textPrimary)),
-                  ))
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-}

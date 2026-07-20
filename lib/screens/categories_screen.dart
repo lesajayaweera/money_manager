@@ -394,14 +394,7 @@ class _CategoryTile extends StatelessWidget {
               ),
             ),
 
-            // Usage count
-            Text(
-              '${category.usageCount}',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
+
             const SizedBox(width: 8),
             const Icon(Icons.chevron_right_rounded,
                 color: AppColors.textHint, size: 20),

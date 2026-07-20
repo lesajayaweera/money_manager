@@ -27,15 +27,31 @@ class CategoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateCategory(AppCategory updated) {
-    final list = updated.type == CategoryType.expense
-        ? _expenseCategories
-        : _incomeCategories;
-    final idx = list.indexWhere((c) => c.name == updated.name);
-    if (idx != -1) {
-      list[idx] = updated;
-      notifyListeners();
+  void updateCategory(AppCategory oldCategory, AppCategory newCategory) {
+    if (oldCategory.type == newCategory.type) {
+      final list = newCategory.type == CategoryType.expense
+          ? _expenseCategories
+          : _incomeCategories;
+      final idx = list.indexWhere((c) => c.name == oldCategory.name);
+      if (idx != -1) {
+        list[idx] = newCategory;
+      } else {
+        list.add(newCategory);
+      }
+    } else {
+      if (oldCategory.type == CategoryType.expense) {
+        _expenseCategories.removeWhere((c) => c.name == oldCategory.name);
+      } else {
+        _incomeCategories.removeWhere((c) => c.name == oldCategory.name);
+      }
+      
+      if (newCategory.type == CategoryType.expense) {
+        _expenseCategories.add(newCategory);
+      } else {
+        _incomeCategories.add(newCategory);
+      }
     }
+    notifyListeners();
   }
 
   void deleteCategory(AppCategory category) {
