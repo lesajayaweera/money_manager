@@ -415,8 +415,8 @@ class _Tag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: isDefault
-            ? const Color(0xFFF0F0F5)
-            : AppColors.income.withValues(alpha: 0.12),
+            ? AppColors.income.withValues(alpha: 0.12)
+            : const Color(0xFFF0F0F5),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -425,8 +425,8 @@ class _Tag extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: isDefault
-              ? AppColors.textSecondary
-              : AppColors.income,
+              ? AppColors.income
+              : AppColors.textSecondary,
         ),
       ),
     );
