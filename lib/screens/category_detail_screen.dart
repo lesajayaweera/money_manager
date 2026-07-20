@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import '../core/constants/app_colors.dart';
 import '../models/category_model.dart';
 import '../providers/category_provider.dart';
@@ -29,8 +30,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Remove Category',
           style: GoogleFonts.inter(
@@ -38,8 +38,8 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         ),
         content: Text(
           'Are you sure you want to remove "${_category.name}"? This cannot be undone.',
-          style: GoogleFonts.inter(
-              fontSize: 14, color: AppColors.textSecondary),
+          style:
+              GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
@@ -55,8 +55,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             },
             child: Text('Remove',
                 style: GoogleFonts.inter(
-                    color: AppColors.expense,
-                    fontWeight: FontWeight.w600)),
+                    color: AppColors.expense, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -136,8 +135,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                       color: _category.color,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(_category.icon,
-                        color: Colors.white, size: 28),
+                    child: Icon(_category.icon, color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -195,12 +193,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     onTap: () => _editCategory(),
                   ),
                   _Divider(),
-                  _DetailRow(
-                    label: 'Parent Category',
-                    value: _category.parentCategory ?? 'None',
-                    onTap: () => _editCategory(),
-                  ),
-                  _Divider(),
                   _IconColorRow(
                     color: _category.color,
                     onTap: () => _openCustomize(),
@@ -211,117 +203,54 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             const SizedBox(height: 16),
 
             // ── Toggle Section ───────────────────────────────────────────────
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  _ToggleRow(
-                    label: 'Include in Reports',
-                    value: _category.includeInReports,
-                    onChanged: (v) {
-                      final updated =
-                          _category.copyWith(includeInReports: v);
-                      context
-                          .read<CategoryProvider>()
-                          .updateCategory(updated);
-                      setState(() => _category = updated);
-                    },
-                  ),
-                  _Divider(),
-                  _ToggleRow(
-                    label: 'Show on Dashboard',
-                    value: _category.showOnDashboard,
-                    onChanged: (v) {
-                      final updated =
-                          _category.copyWith(showOnDashboard: v);
-                      context
-                          .read<CategoryProvider>()
-                          .updateCategory(updated);
-                      setState(() => _category = updated);
-                    },
-                  ),
-                  _Divider(),
-                  _ToggleRow(
-                    label: 'Active Status',
-                    value: _category.isActive,
-                    onChanged: (v) {
-                      final updated = _category.copyWith(isActive: v);
-                      context
-                          .read<CategoryProvider>()
-                          .updateCategory(updated);
-                      setState(() => _category = updated);
-                    },
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   decoration: BoxDecoration(
+            //     color: AppColors.surface,
+            //     borderRadius: BorderRadius.circular(16),
+            //   ),
+            //   child: Column(
+            //     children: [
+            //       _ToggleRow(
+            //         label: 'Include in Reports',
+            //         value: _category.includeInReports,
+            //         onChanged: (v) {
+            //           final updated =
+            //               _category.copyWith(includeInReports: v);
+            //           context
+            //               .read<CategoryProvider>()
+            //               .updateCategory(updated);
+            //           setState(() => _category = updated);
+            //         },
+            //       ),
+            //       _Divider(),
+            //       _ToggleRow(
+            //         label: 'Show on Dashboard',
+            //         value: _category.showOnDashboard,
+            //         onChanged: (v) {
+            //           final updated =
+            //               _category.copyWith(showOnDashboard: v);
+            //           context
+            //               .read<CategoryProvider>()
+            //               .updateCategory(updated);
+            //           setState(() => _category = updated);
+            //         },
+            //       ),
+            //       _Divider(),
+            //       _ToggleRow(
+            //         label: 'Active Status',
+            //         value: _category.isActive,
+            //         onChanged: (v) {
+            //           final updated = _category.copyWith(isActive: v);
+            //           context
+            //               .read<CategoryProvider>()
+            //               .updateCategory(updated);
+            //           setState(() => _category = updated);
+            //         },
+            //       ),
+            //     ],
+            //   ),
+            // ),
             const SizedBox(height: 16),
-
-            // ── Subcategories ────────────────────────────────────────────────
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Subcategories',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => _editCategory(),
-                        child: Text(
-                          'Edit',
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      ..._category.subcategories.map(
-                        (sub) => _SubcategoryChip(label: sub),
-                      ),
-                      GestureDetector(
-                        onTap: () => _editCategory(),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: const Color(0xFFDDDDDD)),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Icon(Icons.add_rounded,
-                              size: 16, color: AppColors.textSecondary),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
 
             // ── Save Changes ──────────────────────────────────────────────────
             SizedBox(
@@ -394,8 +323,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.edit_rounded,
-                  color: AppColors.primary),
+              leading: const Icon(Icons.edit_rounded, color: AppColors.primary),
               title: Text('Edit Category',
                   style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
               onTap: () {
@@ -419,8 +347,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     color: AppColors.expense),
                 title: Text('Remove Category',
                     style: GoogleFonts.inter(
-                        color: AppColors.expense,
-                        fontWeight: FontWeight.w500)),
+                        color: AppColors.expense, fontWeight: FontWeight.w500)),
                 onTap: () {
                   Navigator.pop(context);
                   _showDeleteDialog();
@@ -549,9 +476,7 @@ class _ToggleRow extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
   const _ToggleRow(
-      {required this.label,
-      required this.value,
-      required this.onChanged});
+      {required this.label, required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -562,8 +487,8 @@ class _ToggleRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
-                fontSize: 14, color: AppColors.textPrimary),
+            style:
+                GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary),
           ),
           Switch(
             value: value,
@@ -582,8 +507,11 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Divider(
-        height: 1, thickness: 1, color: Color(0xFFF5F5F5),
-        indent: 16, endIndent: 16);
+        height: 1,
+        thickness: 1,
+        color: Color(0xFFF5F5F5),
+        indent: 16,
+        endIndent: 16);
   }
 }
 
@@ -594,8 +522,7 @@ class _SubcategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.primarySurface,
         borderRadius: BorderRadius.circular(20),
