@@ -24,11 +24,9 @@ class AddEditCategoryScreen extends StatefulWidget {
 class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _budgetCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
 
   late CategoryType _type;
-  String? _parentCategory;
   late IconData _selectedIcon;
   late Color _selectedColor;
   bool _isSaving = false;
@@ -45,10 +43,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     if (widget.editCategory != null) {
       final e = widget.editCategory!;
       _nameCtrl.text = e.name;
-      _parentCategory = e.parentCategory;
-      if (e.monthlyBudget != null) {
-        _budgetCtrl.text = e.monthlyBudget!.toStringAsFixed(0);
-      }
       _noteCtrl.text = e.note ?? '';
     }
   }
@@ -56,7 +50,6 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _budgetCtrl.dispose();
     _noteCtrl.dispose();
     super.dispose();
   }
@@ -67,24 +60,29 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
     final provider = context.read<CategoryProvider>();
     final name = _nameCtrl.text.trim();
-    final budget = double.tryParse(_budgetCtrl.text.trim());
-
-    final newCategory = AppCategory(
-      name: name,
-      icon: _selectedIcon,
-      color: _selectedColor,
-      type: _type,
-      isDefault: false,
-      parentCategory: _parentCategory,
-      monthlyBudget: budget,
-      note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
-      includeInReports: true,
-      showOnDashboard: true,
-      isActive: true,
-    );
+    final newCategory = widget.editCategory?.copyWith(
+          name: name,
+          icon: _selectedIcon,
+          color: _selectedColor,
+          type: _type,
+          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+          parentCategory: null,
+          monthlyBudget: null,
+        ) ??
+        AppCategory(
+          name: name,
+          icon: _selectedIcon,
+          color: _selectedColor,
+          type: _type,
+          isDefault: false,
+          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+          includeInReports: true,
+          showOnDashboard: true,
+          isActive: true,
+        );
 
     if (widget.editCategory != null) {
-      provider.updateCategory(newCategory);
+      provider.updateCategory(widget.editCategory!, newCategory);
     } else {
       provider.addCategory(newCategory);
     }
@@ -158,15 +156,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     ),
                     const SizedBox(height: 18),
 
-                    // Parent Category dropdown
-                    _FormLabel('Parent Category'),
-                    const SizedBox(height: 8),
-                    _ParentDropdown(
-                      type: _type,
-                      selected: _parentCategory,
-                      onChanged: (v) => setState(() => _parentCategory = v),
-                    ),
-                    const SizedBox(height: 18),
+
 
                     // Icon picker
                     _FormLabel('Icon'),
@@ -220,18 +210,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     ),
                     const SizedBox(height: 18),
 
-                    // Monthly Budget
-                    _FormLabel('Monthly Budget (Optional)'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _budgetCtrl,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: GoogleFonts.inter(
-                          fontSize: 15, color: AppColors.textPrimary),
-                      decoration: _inputDecor('₹ 0.00'),
-                    ),
-                    const SizedBox(height: 18),
+
 
                     // Note
                     _FormLabel('Note (Optional)'),
@@ -504,53 +483,4 @@ class _ToggleBtn extends StatelessWidget {
   }
 }
 
-class _ParentDropdown extends StatelessWidget {
-  final CategoryType type;
-  final String? selected;
-  final ValueChanged<String?> onChanged;
-  const _ParentDropdown(
-      {required this.type,
-      required this.selected,
-      required this.onChanged});
 
-  List<String> get _parents => type == CategoryType.expense
-      ? ['Personal', 'Fixed', 'Variable', 'Discretionary']
-      : ['Primary', 'Secondary', 'Passive'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selected,
-          isExpanded: true,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary),
-          hint: Text(
-            'Select parent category',
-            style: GoogleFonts.inter(
-                fontSize: 14, color: AppColors.textHint),
-          ),
-          dropdownColor: AppColors.surface,
-          items: _parents
-              .map((p) => DropdownMenuItem(
-                    value: p,
-                    child: Text(p,
-                        style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: AppColors.textPrimary)),
-                  ))
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-}

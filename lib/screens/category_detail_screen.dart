@@ -79,7 +79,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         icon: result['icon'] as IconData,
         color: result['color'] as Color,
       );
-      context.read<CategoryProvider>().updateCategory(updated);
+      context.read<CategoryProvider>().updateCategory(_category, updated);
       setState(() => _category = updated);
     }
   }
@@ -471,37 +471,7 @@ class _IconColorRow extends StatelessWidget {
   }
 }
 
-class _ToggleRow extends StatelessWidget {
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  const _ToggleRow(
-      {required this.label, required this.value, required this.onChanged});
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style:
-                GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: AppColors.primary,
-            activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _Divider extends StatelessWidget {
   @override
@@ -515,27 +485,4 @@ class _Divider extends StatelessWidget {
   }
 }
 
-class _SubcategoryChip extends StatelessWidget {
-  final String label;
-  const _SubcategoryChip({required this.label});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.primarySurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppColors.primary,
-        ),
-      ),
-    );
-  }
-}
