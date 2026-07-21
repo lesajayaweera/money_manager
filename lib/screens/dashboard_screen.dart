@@ -11,6 +11,7 @@ import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'add_transaction_screen.dart';
+import 'goals_screen.dart';
 import 'lends_borrowed_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -95,30 +96,10 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
       ),
       actions: [
-        // Quick-nav icon (Goals + Lends) — Budge-app style
-        IconButton(
-          icon: Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: AppColors.primarySurface,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.grid_view_rounded,
-              color: AppColors.primary,
-              size: 18,
-            ),
-          ),
-          onPressed: () => _showQuickNav(context),
-          padding: EdgeInsets.zero,
-        ),
-        const SizedBox(width: 4),
         IconButton(
           icon: Stack(
             children: [
-              const Icon(Icons.notifications_outlined,
-                  color: AppColors.textPrimary, size: 26),
+              const Icon(Icons.menu, color: AppColors.textPrimary, size: 26),
               Positioned(
                 right: 0,
                 top: 0,
@@ -133,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
             ],
           ),
-          onPressed: () {},
+          onPressed: () => _showQuickNav(context),
         ),
         const SizedBox(width: 4),
       ],
@@ -174,6 +155,23 @@ class _DashboardScreenState extends State<DashboardScreen>
               const SizedBox(height: 20),
               Row(
                 children: [
+                  Expanded(
+                    child: _QuickNavTile(
+                      icon: Icons.flag_rounded,
+                      label: 'Goals',
+                      color: AppColors.primary,
+                      lightColor: AppColors.primarySurface,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const GoalsScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: _QuickNavTile(
                       icon: Icons.flag_rounded,

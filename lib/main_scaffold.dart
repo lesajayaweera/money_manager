@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/constants/app_colors.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/transaction_history_screen.dart';
+import 'screens/wallets_screen.dart';
 import 'screens/reports_screen.dart';
-import 'screens/goals_screen.dart';
 import 'screens/settings_screen.dart';
 
 class MainScaffold extends StatefulWidget {
@@ -20,8 +20,8 @@ class MainScaffoldState extends State<MainScaffold> {
   static final List<Widget> _screens = [
     const DashboardScreen(),
     const TransactionHistoryScreen(),
+    const WalletsScreen(),
     const ReportsScreen(),
-    const GoalsScreen(),
     const SettingsScreen(),
   ];
 
@@ -37,14 +37,14 @@ class MainScaffoldState extends State<MainScaffold> {
       label: 'Transactions',
     ),
     _NavItem(
+      icon: Icons.account_balance_wallet_outlined,
+      activeIcon: Icons.account_balance_wallet_rounded,
+      label: 'Wallets',
+    ),
+    _NavItem(
       icon: Icons.bar_chart_outlined,
       activeIcon: Icons.bar_chart_rounded,
       label: 'Reports',
-    ),
-    _NavItem(
-      icon: Icons.flag_outlined,
-      activeIcon: Icons.flag_rounded,
-      label: 'Goals',
     ),
     _NavItem(
       icon: Icons.settings_outlined,
@@ -54,7 +54,7 @@ class MainScaffoldState extends State<MainScaffold> {
   ];
 
   /// Tab indices:
-  /// 0 = Dashboard, 1 = Transactions, 2 = Reports, 3 = Goals, 4 = Settings
+  /// 0 = Dashboard, 1 = Transactions, 2 = Wallets, 3 = Reports, 4 = Settings
   void setTab(int index) {
     setState(() => _currentIndex = index);
   }
