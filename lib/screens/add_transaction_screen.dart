@@ -234,18 +234,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Payment method (expense only)
-              if (isExpense) ...[
-                _Label('Payment Method'),
-                const SizedBox(height: 8),
-                _PaymentMethodDropdown(
-                  payMethods: _payMethods,
-                  selected: _selectedPaymentMethod,
-                  onChanged: (val) =>
-                      setState(() => _selectedPaymentMethod = val),
-                ),
-                const SizedBox(height: 20),
-              ],
+              // Payment method
+              _Label('Payment Method'),
+              const SizedBox(height: 8),
+              _PaymentMethodDropdown(
+                payMethods: _payMethods,
+                selected: _selectedPaymentMethod,
+                onChanged: (val) =>
+                    setState(() => _selectedPaymentMethod = val),
+              ),
+              const SizedBox(height: 20),
 
               // Note
               _Label('Note (Optional)'),
