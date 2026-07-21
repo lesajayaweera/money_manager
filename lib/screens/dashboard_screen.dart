@@ -183,7 +183,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                         // Navigator.pop(context);
                         // Navigator.of(context).push(
                         //   MaterialPageRoute(
-                        //     builder: (_) => const LendsBorrowedScreen(initialIndex: 1),
+                        //     builder: (_) =>
+                        //         const LendsBorrowedScreen(initialIndex: 1),
                         //   ),
                         // );
                       },
@@ -200,7 +201,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                         // Navigator.pop(context);
                         // Navigator.of(context).push(
                         //   MaterialPageRoute(
-                        //     builder: (_) => const LendsBorrowedScreen(initialIndex: 0),
+                        //     builder: (_) =>
+                        //         const LendsBorrowedScreen(initialIndex: 0),
                         //   ),
                         // );
                       },
@@ -687,7 +689,8 @@ class _TransactionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  (transaction.note != null && transaction.note!.trim().isNotEmpty)
+                  (transaction.note != null &&
+                          transaction.note!.trim().isNotEmpty)
                       ? transaction.note!
                       : transaction.title,
                   style: GoogleFonts.inter(
