@@ -7,6 +7,7 @@ import '../providers/goal_provider.dart';
 import '../providers/lend_borrow_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/wallet_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -193,6 +194,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       await context.read<LendBorrowProvider>().clearAllData();
       if (!context.mounted) return;
       await context.read<GoalProvider>().clearAllData();
+      if (!context.mounted) return;
+      await context.read<WalletProvider>().clearAllData();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

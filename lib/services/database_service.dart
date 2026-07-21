@@ -391,6 +391,12 @@ class DatabaseService {
     await db.delete('goal_savings');
   }
 
+  Future<void> clearAllWallets() async {
+    final db = await database;
+    await db.delete('wallets');
+    await db.delete('wallet_transfers');
+  }
+
   // ─── Queries ─────────────────────────────────────────────────────────────────
 
   Future<List<TransactionModel>> getAllTransactions() async {
