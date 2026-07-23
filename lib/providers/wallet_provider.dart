@@ -146,9 +146,7 @@ class WalletProvider extends ChangeNotifier {
   Future<void> clearAllData() async {
     try {
       await _db.clearAllWallets();
-      _wallets = [];
-      _thisMonthTransfers = 0;
-      notifyListeners();
+      await loadWallets();
     } catch (e) {
       _error = e.toString();
       notifyListeners();

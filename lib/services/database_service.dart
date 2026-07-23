@@ -338,7 +338,8 @@ class DatabaseService {
 
   Future<void> clearAllWallets() async {
     final db = await database;
-    await db.delete('wallets');
+    await db.delete('wallets', where: 'name != ?', whereArgs: ['Cash']);
+    await db.rawUpdate('UPDATE wallets SET balance = 0 WHERE name = ?', ['Cash']);
     await db.delete('wallet_transfers');
   }
 
