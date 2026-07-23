@@ -101,6 +101,14 @@ class LendBorrowModel {
   final LendBorrowStatus status;
   final String? paymentMethod;
   final DateTime createdAt;
+  /// Name of the wallet to deduct/credit from.
+  final String? walletName;
+  /// ID of the auto-created mirror transaction (for deletion/update).
+  final int? transactionId;
+  /// ID of the settlement reverse transaction (for deletion on entry delete).
+  final int? settlementTransactionId;
+  /// Amount already paid back
+  final double accumulatedAmount;
 
   const LendBorrowModel({
     this.id,
@@ -113,10 +121,27 @@ class LendBorrowModel {
     required this.status,
     this.paymentMethod,
     required this.createdAt,
+    this.walletName,
+    this.transactionId,
+    this.settlementTransactionId,
+    this.accumulatedAmount = 0.0,
   });
 
   bool get isLent => type == LendBorrowType.lent;
   bool get isBorrowed => type == LendBorrowType.borrowed;
+
+  /// Auto-computed status based on due date, unless the entry is already paid.
+  LendBorrowStatus get effectiveStatus {
+    if (status == LendBorrowStatus.paid || accumulatedAmount >= amount) {
+      return LendBorrowStatus.paid;
+    }
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final due = DateTime(dueDate.year, dueDate.month, dueDate.day);
+    if (due.isBefore(today)) return LendBorrowStatus.overdue;
+    if (due.difference(today).inDays <= 3) return LendBorrowStatus.dueSoon;
+    return LendBorrowStatus.pending;
+  }
 
   LendBorrowModel copyWith({
     int? id,
@@ -129,6 +154,10 @@ class LendBorrowModel {
     LendBorrowStatus? status,
     String? paymentMethod,
     DateTime? createdAt,
+    String? walletName,
+    int? transactionId,
+    int? settlementTransactionId,
+    double? accumulatedAmount,
   }) =>
       LendBorrowModel(
         id: id ?? this.id,
@@ -141,6 +170,10 @@ class LendBorrowModel {
         status: status ?? this.status,
         paymentMethod: paymentMethod ?? this.paymentMethod,
         createdAt: createdAt ?? this.createdAt,
+        walletName: walletName ?? this.walletName,
+        transactionId: transactionId ?? this.transactionId,
+        settlementTransactionId: settlementTransactionId ?? this.settlementTransactionId,
+        accumulatedAmount: accumulatedAmount ?? this.accumulatedAmount,
       );
 
   Map<String, dynamic> toMap() => {
@@ -154,6 +187,11 @@ class LendBorrowModel {
         'status': status.name,
         'payment_method': paymentMethod,
         'created_at': createdAt.toIso8601String(),
+        'wallet_name': walletName ?? '',
+        if (transactionId != null) 'transaction_id': transactionId,
+        if (settlementTransactionId != null)
+          'settlement_transaction_id': settlementTransactionId,
+        'accumulated_amount': accumulatedAmount,
       };
 
   factory LendBorrowModel.fromMap(Map<String, dynamic> map) => LendBorrowModel(
@@ -167,5 +205,9 @@ class LendBorrowModel {
         status: LendBorrowStatusX.fromString(map['status'] as String),
         paymentMethod: map['payment_method'] as String?,
         createdAt: DateTime.parse(map['created_at'] as String),
+        walletName: map['wallet_name'] as String?,
+        transactionId: map['transaction_id'] as int?,
+        settlementTransactionId: map['settlement_transaction_id'] as int?,
+        accumulatedAmount: (map['accumulated_amount'] as num?)?.toDouble() ?? 0.0,
       );
 }

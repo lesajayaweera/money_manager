@@ -7,6 +7,7 @@ import '../models/lend_borrow_model.dart';
 import '../providers/lend_borrow_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/wallet_provider.dart';
 import 'add_lend_borrow_screen.dart';
 
 class LendBorrowDetailScreen extends StatefulWidget {
@@ -21,7 +22,6 @@ class LendBorrowDetailScreen extends StatefulWidget {
 
 class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
   late LendBorrowModel _entry;
-  bool _isMarkingSettled = false;
 
   @override
   void initState() {
@@ -29,41 +29,172 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
     _entry = widget.entry;
   }
 
-  // ─── Mark as Settled ─────────────────────────────────────────────────────────
-  Future<void> _markAsSettled() async {
-    if (_entry.status == LendBorrowStatus.paid) return;
-    setState(() => _isMarkingSettled = true);
-    try {
-      final updated = _entry.copyWith(status: LendBorrowStatus.paid);
-      await context.read<LendBorrowProvider>().updateEntry(updated);
-      // Refresh TransactionProvider so balance updates on dashboard
-      if (mounted) {
-        await context.read<TransactionProvider>().loadAll();
-      }
-      setState(() {
-        _entry = updated;
-        _isMarkingSettled = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _entry.isLent
-                  ? 'Payment received from ${_entry.personName}!'
-                  : 'Repayment to ${_entry.personName} recorded!',
-              style: GoogleFonts.inter(fontSize: 14),
-            ),
-            backgroundColor: AppColors.income,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            margin: const EdgeInsets.all(16),
+  // ─── Add Repayment ─────────────────────────────────────────────────────────
+  void _showAddRepayment() {
+    final controller = TextEditingController();
+    String? selectedWalletName;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-        );
-      }
-    } catch (e) {
-      setState(() => _isMarkingSettled = false);
-    }
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Add Repayment',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Amount (Rs.)',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                style: GoogleFonts.inter(
+                    fontSize: 16, color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: '0',
+                  hintStyle:
+                      GoogleFonts.inter(color: AppColors.textHint, fontSize: 15),
+                  filled: true,
+                  fillColor: AppColors.background,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Account Type',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Consumer<WalletProvider>(
+                builder: (_, walletProvider, __) {
+                  final wallets = walletProvider.wallets;
+                  final effectiveSelected = (selectedWalletName != null &&
+                          wallets.any((w) => w.name == selectedWalletName))
+                      ? selectedWalletName
+                      : (wallets.any((w) => w.name == _entry.walletName)
+                          ? _entry.walletName
+                          : null);
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFE0E0E0)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: effectiveSelected,
+                        isExpanded: true,
+                        hint: Text('Select wallet',
+                            style: GoogleFonts.inter(
+                                color: AppColors.textHint, fontSize: 15)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        items: wallets.map((w) => DropdownMenuItem<String>(
+                          value: w.name,
+                          child: Text(w.name,
+                              style: GoogleFonts.inter(
+                                  fontSize: 15, color: AppColors.textPrimary)),
+                        )).toList(),
+                        onChanged: (w) => setSheetState(() => selectedWalletName = w),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final amount = double.tryParse(controller.text.trim());
+                    if (amount == null || amount <= 0) return;
+                    if (amount + _entry.accumulatedAmount > _entry.amount) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Repayment cannot exceed total amount')),
+                      );
+                      return;
+                    }
+                    
+                    final provider = context.read<LendBorrowProvider>();
+                    final txProvider = context.read<TransactionProvider>();
+                    final walletProvider = context.read<WalletProvider>();
+                    
+                    await provider.addRepayment(_entry.id!, amount, walletName: selectedWalletName);
+                    if (mounted) {
+                      await txProvider.loadAll();
+                      await walletProvider.loadWallets();
+                      final updated = provider.entries.firstWhere((e) => e.id == _entry.id);
+                      setState(() => _entry = updated);
+                      Navigator.pop(context);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    'Save Repayment',
+                    style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      )),
+    );
   }
 
   // ─── Send Reminder ────────────────────────────────────────────────────────────
@@ -195,10 +326,16 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     ),
                   );
                   if (confirm == true && mounted) {
-                    await context
-                        .read<LendBorrowProvider>()
-                        .deleteEntry(_entry.id!);
-                    if (mounted) Navigator.pop(context);
+                    final lbProvider = context.read<LendBorrowProvider>();
+                    final txProvider = context.read<TransactionProvider>();
+                    final walletProvider = context.read<WalletProvider>();
+                    final nav = Navigator.of(context);
+                    await lbProvider.deleteEntry(_entry.id!);
+                    if (mounted) {
+                      await txProvider.loadAll();
+                      await walletProvider.loadWallets();
+                      nav.pop();
+                    }
                   }
                 },
               ),
@@ -213,7 +350,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
     final isLent = _entry.isLent;
-    final isSettled = _entry.status == LendBorrowStatus.paid;
+    final isSettled = _entry.effectiveStatus == LendBorrowStatus.paid;
 
     // Avatar
     final initials =
@@ -322,19 +459,77 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         ),
                       ),
                       // Status badge
-                      _StatusBadge(status: _entry.status),
+                      _StatusBadge(status: _entry.effectiveStatus),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Amount
-                  Text(
-                    CurrencyFormatter.format(_entry.amount,
-                        symbol: settings.currencySymbol),
-                    style: GoogleFonts.inter(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
-                    ),
+                  // Progress Bar & Amounts
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Accumulated',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                CurrencyFormatter.format(_entry.accumulatedAmount,
+                                    symbol: settings.currencySymbol),
+                                style: GoogleFonts.inter(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Total',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                CurrencyFormatter.format(_entry.amount,
+                                    symbol: settings.currencySymbol),
+                                style: GoogleFonts.inter(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: _entry.amount > 0 ? _entry.accumulatedAmount / _entry.amount : 0,
+                          minHeight: 8,
+                          backgroundColor: const Color(0xFFF0F0F0),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            (_entry.accumulatedAmount >= _entry.amount)
+                                ? AppColors.income
+                                : AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -529,37 +724,25 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
             // ── Action buttons ────────────────────────────────────────────────
             Row(
               children: [
-                // Mark as Settled
+                // Add Repayment
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed:
-                        (isSettled || _isMarkingSettled) ? null : _markAsSettled,
-                    icon: _isMarkingSettled
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
-                        : Icon(
-                            isSettled
-                                ? Icons.check_circle_rounded
-                                : Icons.check_rounded,
-                            size: 18),
+                    onPressed: isSettled ? null : _showAddRepayment,
+                    icon: const Icon(Icons.add_rounded, size: 18),
                     label: Text(
-                      isSettled ? 'Settled' : 'Mark as Settled',
+                      'Add Repayment',
                       style: GoogleFonts.inter(
                           fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isSettled ? AppColors.income : AppColors.primary,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
-                      disabledBackgroundColor: AppColors.income,
-                      disabledForegroundColor: Colors.white,
+                      disabledBackgroundColor: AppColors.primarySurface,
+                      disabledForegroundColor: AppColors.primary.withValues(alpha: 0.5),
                     ),
                   ),
                 ),

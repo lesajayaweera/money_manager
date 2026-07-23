@@ -7,6 +7,7 @@ import '../core/constants/app_colors.dart';
 import '../models/lend_borrow_model.dart';
 import '../providers/lend_borrow_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/wallet_provider.dart';
 
 class AddLendBorrowScreen extends StatefulWidget {
   final LendBorrowType initialType;
@@ -26,13 +27,14 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
   final _formKey = GlobalKey<FormState>();
   final _personController = TextEditingController();
   final _amountController = TextEditingController();
+  final _accumulatedController = TextEditingController();
   final _noteController = TextEditingController();
 
   late LendBorrowType _type;
   DateTime _date = DateTime.now();
   DateTime _dueDate = DateTime.now().add(const Duration(days: 30));
-  LendBorrowStatus _status = LendBorrowStatus.dueSoon;
-  String _paymentMethod = 'Cash';
+  LendBorrowStatus _status = LendBorrowStatus.pending;
+  String? _selectedWalletName;
   bool _isSaving = false;
 
   bool get _isEditing => widget.editEntry != null;
@@ -45,12 +47,15 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
       final e = widget.editEntry!;
       _personController.text = e.personName;
       _amountController.text = e.amount.toStringAsFixed(0);
+      _accumulatedController.text = e.accumulatedAmount > 0 
+          ? e.accumulatedAmount.toStringAsFixed(0) 
+          : '';
       _noteController.text = e.note ?? '';
       _type = e.type;
       _date = e.date;
       _dueDate = e.dueDate;
       _status = e.status;
-      _paymentMethod = e.paymentMethod ?? 'Cash';
+      _selectedWalletName = e.walletName;
     }
   }
 
@@ -58,6 +63,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
   void dispose() {
     _personController.dispose();
     _amountController.dispose();
+    _accumulatedController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -96,9 +102,21 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
       _showSnack('Enter a valid amount');
       return;
     }
+    
+    final accumulatedAmount = _accumulatedController.text.trim().isNotEmpty
+        ? (double.tryParse(_accumulatedController.text.trim()) ?? 0.0)
+        : 0.0;
+        
+    if (accumulatedAmount > amount) {
+      _showSnack('Accumulated amount cannot exceed total amount');
+      return;
+    }
+
     setState(() => _isSaving = true);
     try {
       final provider = context.read<LendBorrowProvider>();
+      final txProvider = context.read<TransactionProvider>();
+      final walletProvider = context.read<WalletProvider>();
       final entry = LendBorrowModel(
         id: widget.editEntry?.id,
         type: _type,
@@ -110,7 +128,11 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
             ? null
             : _noteController.text.trim(),
         status: _status,
-        paymentMethod: _paymentMethod,
+        walletName: _selectedWalletName,
+        accumulatedAmount: accumulatedAmount,
+        // Preserve existing transaction IDs when editing
+        transactionId: widget.editEntry?.transactionId,
+        settlementTransactionId: widget.editEntry?.settlementTransactionId,
         createdAt: widget.editEntry?.createdAt ?? DateTime.now(),
       );
 
@@ -119,9 +141,10 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
       } else {
         await provider.addEntry(entry);
       }
-      // Refresh TransactionProvider so balance updates on dashboard
+      // Refresh balance providers
       if (mounted) {
-        await context.read<TransactionProvider>().loadAll();
+        await txProvider.loadAll();
+        await walletProvider.loadWallets();
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -208,6 +231,19 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                     (v == null || v.trim().isEmpty) ? 'Enter amount' : null,
               ),
               const SizedBox(height: 20),
+              
+              // Accumulated Amount
+              _FormLabel('Accumulated Amount (Rs.) - Optional'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _accumulatedController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                style: GoogleFonts.inter(
+                    fontSize: 15, color: AppColors.textPrimary),
+                decoration: _inputDecoration('e.g. 1,000 (Already paid)'),
+              ),
+              const SizedBox(height: 20),
 
               // Date and Due Date
               Row(
@@ -259,12 +295,12 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Payment Method
-              _FormLabel('Payment Method (Optional)'),
+              // Account Type (Wallet)
+              _FormLabel('Account Type'),
               const SizedBox(height: 8),
-              _PaymentMethodDropdown(
-                selected: _paymentMethod,
-                onChanged: (m) => setState(() => _paymentMethod = m),
+              _WalletDropdown(
+                selected: _selectedWalletName,
+                onChanged: (w) => setState(() => _selectedWalletName = w),
               ),
               const SizedBox(height: 36),
 
@@ -434,17 +470,22 @@ class _StatusDropdown extends StatelessWidget {
   }
 }
 
-// ─── Payment Method Dropdown ──────────────────────────────────────────────────
+// ─── Wallet Dropdown ─────────────────────────────────────────────────────────
 
-class _PaymentMethodDropdown extends StatelessWidget {
-  final String selected;
-  final ValueChanged<String> onChanged;
+class _WalletDropdown extends StatelessWidget {
+  final String? selected;
+  final ValueChanged<String?> onChanged;
 
-  const _PaymentMethodDropdown(
-      {required this.selected, required this.onChanged});
+  const _WalletDropdown({required this.selected, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
+    final wallets = context.watch<WalletProvider>().wallets;
+    final effectiveSelected =
+        (selected != null && wallets.any((w) => w.name == selected))
+            ? selected
+            : null;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -453,38 +494,47 @@ class _PaymentMethodDropdown extends StatelessWidget {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: selected,
+          value: effectiveSelected,
           isExpanded: true,
+          hint: Text(
+            'Select wallet',
+            style: GoogleFonts.inter(color: AppColors.textHint, fontSize: 15),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: const Icon(Icons.keyboard_arrow_down_rounded,
               color: AppColors.textSecondary),
           dropdownColor: AppColors.surface,
-          items: LBPaymentMethod.all
-              .map((m) => DropdownMenuItem<String>(
-                    value: m.name,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: AppColors.primarySurface,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(m.icon,
-                              color: AppColors.primary, size: 16),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(m.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 15, color: AppColors.textPrimary)),
-                      ],
+          items: [
+            DropdownMenuItem<String>(
+              value: null,
+              child: Text('None',
+                  style: GoogleFonts.inter(
+                      fontSize: 15, color: AppColors.textSecondary)),
+            ),
+            ...wallets.map((w) => DropdownMenuItem<String>(
+                  value: w.name,
+                  child: Row(children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: Color(w.colorValue).withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        IconData(w.iconCodePoint, fontFamily: 'MaterialIcons'),
+                        color: Color(w.colorValue),
+                        size: 17,
+                      ),
                     ),
-                  ))
-              .toList(),
-          onChanged: (v) {
-            if (v != null) onChanged(v);
-          },
+                    const SizedBox(width: 12),
+                    Text(w.name,
+                        style: GoogleFonts.inter(
+                            fontSize: 15, color: AppColors.textPrimary)),
+                  ]),
+                ))
+          ],
+          onChanged: onChanged,
         ),
       ),
     );
