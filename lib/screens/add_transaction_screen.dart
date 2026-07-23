@@ -8,6 +8,7 @@ import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/category_provider.dart';
+import '../providers/wallet_provider.dart';
 import 'categories_screen.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -35,15 +36,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   bool _isSaving = false;
   late TransactionType _type;
 
-  // Payment methods with icon + color
-  static const List<_PayMethod> _payMethods = [
-    _PayMethod('Cash', Icons.payments_rounded, AppColors.income),
-    _PayMethod('Credit Card', Icons.credit_card_rounded, AppColors.expense),
-    _PayMethod('Debit Card', Icons.credit_card_outlined, AppColors.budget),
-    _PayMethod('UPI', Icons.qr_code_rounded, AppColors.primary),
-    _PayMethod('Net Banking', Icons.account_balance_rounded, AppColors.spending),
-    _PayMethod('Other', Icons.more_horiz_rounded, AppColors.catOther),
-  ];
+  // (Will be dynamically populated in build method)
 
   @override
   void initState() {
@@ -134,10 +127,33 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       );
 
       final provider = context.read<TransactionProvider>();
+      final walletProvider = context.read<WalletProvider>();
+
       if (widget.editTransaction != null) {
         await provider.updateTransaction(tx);
+        
+        // Update wallet balance by difference
+        try {
+          final wallet = walletProvider.wallets.firstWhere((w) => w.name == _selectedPaymentMethod);
+          final diff = amount - widget.editTransaction!.amount;
+          if (diff != 0) {
+            final newBalance = _type == TransactionType.income 
+                ? wallet.balance + diff 
+                : wallet.balance - diff;
+            await walletProvider.updateWallet(wallet.copyWith(balance: newBalance));
+          }
+        } catch (_) {}
       } else {
         await provider.addTransaction(tx);
+
+        // Update wallet balance
+        try {
+          final wallet = walletProvider.wallets.firstWhere((w) => w.name == _selectedPaymentMethod);
+          final newBalance = _type == TransactionType.income 
+              ? wallet.balance + amount 
+              : wallet.balance - amount;
+          await walletProvider.updateWallet(wallet.copyWith(balance: newBalance));
+        } catch (_) {}
       }
 
       if (mounted) Navigator.of(context).pop(true);
@@ -166,6 +182,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     final isExpense = _type == TransactionType.expense;
     final isEditing = widget.editTransaction != null;
+
+    final wallets = context.watch<WalletProvider>().wallets;
+    final List<_PayMethod> payMethods = wallets
+        .map((w) => _PayMethod(w.name, w.icon, w.color))
+        .toList();
+
+    // Ensure 'Cash' is available if not in wallets
+    if (!payMethods.any((m) => m.name.toLowerCase() == 'cash')) {
+      payMethods.insert(
+          0, const _PayMethod('Cash', Icons.payments_rounded, AppColors.income));
+    }
+
+    // Ensure selected is valid
+    if (!payMethods.any((m) => m.name == _selectedPaymentMethod)) {
+      _selectedPaymentMethod = payMethods.first.name;
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -234,11 +266,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Payment method
+              // Account Type
               _Label('Payment Method'),
               const SizedBox(height: 8),
               _PaymentMethodDropdown(
-                payMethods: _payMethods,
+                payMethods: payMethods,
                 selected: _selectedPaymentMethod,
                 onChanged: (val) =>
                     setState(() => _selectedPaymentMethod = val),
