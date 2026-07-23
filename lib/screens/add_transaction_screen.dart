@@ -50,6 +50,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedCategory = tx.category;
       _selectedDate = tx.date;
       _type = tx.type;
+      _selectedPaymentMethod = tx.walletName;
     }
   }
 
@@ -124,6 +125,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         note: _noteController.text.trim().isEmpty
             ? null
             : _noteController.text.trim(),
+        walletName: _selectedPaymentMethod,
       );
 
       final provider = context.read<TransactionProvider>();

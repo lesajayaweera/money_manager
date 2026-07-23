@@ -11,7 +11,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 6;
+  static const int _dbVersion = 7;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -47,6 +47,7 @@ class DatabaseService {
         category TEXT NOT NULL,
         date TEXT NOT NULL,
         note TEXT,
+        wallet_name TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )
     ''');
@@ -211,6 +212,13 @@ class DatabaseService {
       ''');
       // Seed sample wallets for existing users
       await _seedSampleWallets(db);
+    }
+    if (oldVersion < 7) {
+      try {
+        await db.execute('ALTER TABLE $_tableName ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
     }
   }
 
@@ -601,6 +609,12 @@ class DatabaseService {
       whereArgs: [walletId, walletId],
       orderBy: 'date DESC',
     );
+    return rows.map(WalletTransfer.fromMap).toList();
+  }
+
+  Future<List<WalletTransfer>> getAllTransfers() async {
+    final db = await database;
+    final rows = await db.query('wallet_transfers', orderBy: 'date DESC');
     return rows.map(WalletTransfer.fromMap).toList();
   }
 

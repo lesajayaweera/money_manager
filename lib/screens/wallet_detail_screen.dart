@@ -115,6 +115,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
         category: 'Transfer',
         date: t.date,
         note: t.note,
+        walletName: _wallet.name,
       );
     }).toList();
 
@@ -588,14 +589,27 @@ class _TxTile extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            CurrencyFormatter.formatWithSign(tx.signedAmount,
-                symbol: currencySymbol),
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: isIncome ? AppColors.income : AppColors.expense,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                CurrencyFormatter.formatWithSign(tx.signedAmount,
+                    symbol: currencySymbol),
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: isIncome ? AppColors.income : AppColors.expense,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                tx.walletName,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: AppColors.textHint,
+                ),
+              ),
+            ],
           ),
         ],
       ),

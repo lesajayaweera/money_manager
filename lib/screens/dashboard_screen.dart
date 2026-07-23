@@ -709,19 +709,31 @@ class _TransactionTile extends StatelessWidget {
               ],
             ),
           ),
-          // Amount
-          Text(
-            settings.balanceVisible
-                ? CurrencyFormatter.formatWithSign(
-                    transaction.signedAmount,
-                    symbol: settings.currencySymbol,
-                  )
-                : '••••',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: isIncome ? AppColors.income : AppColors.expense,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                settings.balanceVisible
+                    ? CurrencyFormatter.formatWithSign(
+                        transaction.signedAmount,
+                        symbol: settings.currencySymbol,
+                      )
+                    : '••••',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: isIncome ? AppColors.income : AppColors.expense,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                transaction.walletName,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: AppColors.textHint,
+                ),
+              ),
+            ],
           ),
         ],
       ),

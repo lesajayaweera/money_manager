@@ -9,6 +9,7 @@ import '../models/transaction_model.dart';
 import '../providers/category_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/wallet_provider.dart';
 import 'add_transaction_screen.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
@@ -83,9 +84,69 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
 
           // Transaction list
           Expanded(
-            child: Consumer<TransactionProvider>(
-              builder: (context, provider, _) {
-                final transactions = provider.filteredTransactions;
+            child: Consumer2<TransactionProvider, WalletProvider>(
+              builder: (context, provider, walletProvider, _) {
+                final txs = provider.filteredTransactions;
+                
+                // Map transfers to dummy transactions (Out and In)
+                final allTransfers = walletProvider.allTransfers;
+                final mappedTransfers = allTransfers.expand((t) {
+                   final fromW = walletProvider.findById(t.fromWalletId);
+                   final toW = walletProvider.findById(t.toWalletId);
+                   
+                   final baseTitleOut = (t.note != null && t.note!.isNotEmpty) 
+                       ? t.note! 
+                       : 'Transfer to ${toW?.name ?? '?'}';
+                   
+                   final baseTitleIn = (t.note != null && t.note!.isNotEmpty) 
+                       ? t.note! 
+                       : 'Transfer from ${fromW?.name ?? '?'}';
+
+                   final outTx = TransactionModel(
+                     id: -(t.id ?? 999999) * 2,
+                     title: '$baseTitleOut (Out)',
+                     amount: t.amount,
+                     type: TransactionType.expense,
+                     category: 'Transfer',
+                     date: t.date,
+                     note: null, // Note is integrated into title
+                     walletName: fromW?.name ?? 'Unknown',
+                   );
+
+                   final inTx = TransactionModel(
+                     id: -(t.id ?? 999999) * 2 - 1,
+                     title: '$baseTitleIn (In)',
+                     amount: t.amount,
+                     type: TransactionType.income,
+                     category: 'Transfer',
+                     date: t.date,
+                     note: null,
+                     walletName: toW?.name ?? 'Unknown',
+                   );
+
+                   return [outTx, inTx];
+                }).where((tx) {
+                  // Apply active filters
+                  final f = provider.activeFilter;
+                  if (f == TransactionFilter.income) return false; // Hide transfers when filtering income
+                  if (f == TransactionFilter.expense) return false; // Hide transfers when filtering expense
+                  final now = DateTime.now();
+                  if (f == TransactionFilter.today) {
+                    if (tx.date.year != now.year || tx.date.month != now.month || tx.date.day != now.day) return false;
+                  }
+                  if (f == TransactionFilter.thisMonth) {
+                    if (tx.date.year != now.year || tx.date.month != now.month) return false;
+                  }
+                  if (provider.searchQuery.isNotEmpty) {
+                    final q = provider.searchQuery.toLowerCase();
+                    if (!tx.title.toLowerCase().contains(q) && !(tx.note?.toLowerCase().contains(q) ?? false)) return false;
+                  }
+                  return true;
+                }).toList();
+                
+                final transactions = [...txs, ...mappedTransfers];
+                transactions.sort((a, b) => b.date.compareTo(a.date));
+
                 if (transactions.isEmpty) {
                   return _EmptyState(
                       hasSearch: _searchController.text.isNotEmpty);
@@ -459,18 +520,27 @@ class _TxTile extends StatelessWidget {
                 ),
               ),
               // Amount
-              Text(
-                settings.balanceVisible
-                    ? (isIncome ? '+' : '-') +
-                        '${settings.currencySymbol} ' +
-                        NumberFormat('#,##,###')
-                            .format(transaction.amount)
-                    : '••••',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: isIncome ? AppColors.income : AppColors.expense,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    CurrencyFormatter.formatWithSign(transaction.signedAmount,
+                        symbol: settings.currencySymbol),
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: isIncome ? AppColors.income : AppColors.expense,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    transaction.walletName,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: AppColors.textHint,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

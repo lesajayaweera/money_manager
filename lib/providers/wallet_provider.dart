@@ -6,11 +6,13 @@ class WalletProvider extends ChangeNotifier {
   final DatabaseService _db = DatabaseService.instance;
 
   List<WalletModel> _wallets = [];
+  List<WalletTransfer> _allTransfers = [];
   bool _isLoading = false;
   String? _error;
   double _thisMonthTransfers = 0;
 
   List<WalletModel> get wallets => _wallets;
+  List<WalletTransfer> get allTransfers => _allTransfers;
   bool get isLoading => _isLoading;
   String? get error => _error;
   double get thisMonthTransfers => _thisMonthTransfers;
@@ -27,6 +29,7 @@ class WalletProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       _wallets = await _db.getAllWallets();
+      _allTransfers = await _db.getAllTransfers();
       _thisMonthTransfers = await _db.getMonthlyTransfers();
       _error = null;
     } catch (e) {
@@ -112,6 +115,7 @@ class WalletProvider extends ChangeNotifier {
         await _db.updateWallet(list[toIdx]);
       }
       _wallets = list;
+      _allTransfers = await _db.getAllTransfers();
       _thisMonthTransfers = await _db.getMonthlyTransfers();
       notifyListeners();
     } catch (e) {
