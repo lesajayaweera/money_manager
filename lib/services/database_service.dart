@@ -11,7 +11,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 7;
+  static const int _dbVersion = 8;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -61,6 +61,7 @@ class DatabaseService {
         target_date TEXT NOT NULL,
         category_name TEXT NOT NULL,
         note TEXT,
+        wallet_name TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL
       )
     ''');
@@ -216,6 +217,13 @@ class DatabaseService {
     if (oldVersion < 7) {
       try {
         await db.execute('ALTER TABLE $_tableName ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
+    }
+    if (oldVersion < 8) {
+      try {
+        await db.execute('ALTER TABLE goals ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
       } catch (e) {
         // Ignore if column already exists
       }

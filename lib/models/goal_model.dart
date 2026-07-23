@@ -136,6 +136,7 @@ class GoalModel {
   final String categoryName;
   final String? note;
   final DateTime createdAt;
+  final String? walletName;
 
   const GoalModel({
     this.id,
@@ -146,6 +147,7 @@ class GoalModel {
     required this.categoryName,
     this.note,
     required this.createdAt,
+    this.walletName,
   });
 
   double get progressPercent =>
@@ -167,6 +169,7 @@ class GoalModel {
     String? categoryName,
     String? note,
     DateTime? createdAt,
+    String? walletName,
   }) =>
       GoalModel(
         id: id ?? this.id,
@@ -177,6 +180,7 @@ class GoalModel {
         categoryName: categoryName ?? this.categoryName,
         note: note ?? this.note,
         createdAt: createdAt ?? this.createdAt,
+        walletName: walletName ?? this.walletName,
       );
 
   Map<String, dynamic> toMap() => {
@@ -188,6 +192,7 @@ class GoalModel {
         'category_name': categoryName,
         'note': note,
         'created_at': createdAt.toIso8601String(),
+        'wallet_name': walletName ?? '',
       };
 
   factory GoalModel.fromMap(Map<String, dynamic> map) => GoalModel(
@@ -199,5 +204,6 @@ class GoalModel {
         categoryName: map['category_name'] as String,
         note: map['note'] as String?,
         createdAt: DateTime.parse(map['created_at'] as String),
+        walletName: map['wallet_name'] as String?,
       );
 }
