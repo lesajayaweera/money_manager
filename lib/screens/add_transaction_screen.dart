@@ -188,14 +188,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         .map((w) => _PayMethod(w.name, w.icon, w.color))
         .toList();
 
-    // Ensure 'Cash' is available if not in wallets
-    if (!payMethods.any((m) => m.name.toLowerCase() == 'cash')) {
-      payMethods.insert(
-          0, const _PayMethod('Cash', Icons.payments_rounded, AppColors.income));
-    }
-
     // Ensure selected is valid
-    if (!payMethods.any((m) => m.name == _selectedPaymentMethod)) {
+    if (payMethods.isEmpty) {
+      _selectedPaymentMethod = '';
+    } else if (!payMethods.any((m) => m.name == _selectedPaymentMethod)) {
       _selectedPaymentMethod = payMethods.first.name;
     }
 
