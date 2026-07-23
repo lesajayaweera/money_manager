@@ -543,14 +543,26 @@ class _TxTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = tx.isIncome;
-    // Simple icon mapping
-    final iconData = isIncome
-        ? Icons.account_balance_wallet_rounded
-        : Icons.receipt_long_rounded;
-    final iconColor =
-        isIncome ? AppColors.income : AppColors.expense;
-    final iconBgColor =
-        isIncome ? AppColors.incomeLight : AppColors.expenseLight;
+    final walletProvider = context.watch<WalletProvider>();
+    final isTransfer = tx.category == 'Transfer';
+    final matchingWallets = walletProvider.wallets.where((w) => w.name == tx.walletName);
+    final transferWallet = (isTransfer && matchingWallets.isNotEmpty) ? matchingWallets.first : null;
+
+    final IconData iconData;
+    final Color iconColor;
+    final Color iconBgColor;
+
+    if (isTransfer && transferWallet != null) {
+      iconColor = Color(transferWallet.colorValue);
+      iconBgColor = iconColor.withValues(alpha: 0.15);
+      iconData = IconData(transferWallet.iconCodePoint, fontFamily: 'MaterialIcons');
+    } else {
+      iconData = isIncome
+          ? Icons.account_balance_wallet_rounded
+          : Icons.receipt_long_rounded;
+      iconColor = isIncome ? AppColors.income : AppColors.expense;
+      iconBgColor = isIncome ? AppColors.incomeLight : AppColors.expenseLight;
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

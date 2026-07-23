@@ -444,13 +444,28 @@ class _TxTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryProvider = context.watch<CategoryProvider>();
+    final walletProvider = context.watch<WalletProvider>();
     final type = transaction.isIncome ? CategoryType.income : CategoryType.expense;
-    final cat = categoryProvider.findByName(transaction.category, type) ??
-        (type == CategoryType.income
-            ? AppCategory.defaultIncomeCategories.last
-            : AppCategory.defaultExpenseCategories.last);
     final settings = context.watch<SettingsProvider>();
     final isIncome = transaction.isIncome;
+    
+    final isTransfer = transaction.category == 'Transfer';
+    final matchingWallets = walletProvider.wallets.where((w) => w.name == transaction.walletName);
+    final transferWallet = (isTransfer && matchingWallets.isNotEmpty) ? matchingWallets.first : null;
+
+    final Color bgColor;
+    final IconData iconData;
+    if (isTransfer && transferWallet != null) {
+      bgColor = Color(transferWallet.colorValue);
+      iconData = IconData(transferWallet.iconCodePoint, fontFamily: 'MaterialIcons');
+    } else {
+      final cat = categoryProvider.findByName(transaction.category, type) ??
+          (type == CategoryType.income
+              ? AppCategory.defaultIncomeCategories.last
+              : AppCategory.defaultExpenseCategories.last);
+      bgColor = cat.color;
+      iconData = cat.icon;
+    }
 
     return Dismissible(
       key: ValueKey('tx-${transaction.id}'),
@@ -487,10 +502,10 @@ class _TxTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: cat.color,
+                  color: bgColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(cat.icon, color: Colors.white, size: 20),
+                child: Icon(iconData, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 14),
               // Title + date
