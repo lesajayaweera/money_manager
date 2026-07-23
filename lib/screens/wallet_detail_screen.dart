@@ -27,6 +27,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
   double _monthIncome = 0;
   double _monthExpenses = 0;
   double _transfers = 0;
+  List<WalletTransfer> _transfersList = [];
 
   @override
   void initState() {
@@ -65,6 +66,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
         _monthIncome = income;
         _monthExpenses = expenses;
         _transfers = transferTotal;
+        _transfersList = transfers;
       });
     }
   }
@@ -94,7 +96,37 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
     final txProvider = context.watch<TransactionProvider>();
-    final recentTxs = txProvider.allTransactions.take(5).toList();
+    final walletProvider = context.watch<WalletProvider>();
+    
+    // Convert transfers to TransactionModel for unified display
+    final mappedTransfers = _transfersList.map((t) {
+      final isIncome = t.toWalletId == _wallet.id;
+      final otherWalletId = isIncome ? t.fromWalletId : t.toWalletId;
+      final otherWallet = walletProvider.findById(otherWalletId);
+      final title = isIncome 
+          ? 'Transfer from ${otherWallet?.name ?? 'Wallet'}' 
+          : 'Transfer to ${otherWallet?.name ?? 'Wallet'}';
+      
+      return TransactionModel(
+        id: -(t.id ?? 999999), // Dummy negative id
+        title: title,
+        amount: t.amount,
+        type: isIncome ? TransactionType.income : TransactionType.expense,
+        category: 'Transfer',
+        date: t.date,
+        note: t.note,
+      );
+    }).toList();
+
+    // Combine standard recent transactions with transfers
+    final combinedTxs = [
+      ...txProvider.allTransactions,
+      ...mappedTransfers
+    ];
+    // Sort combined by date descending
+    combinedTxs.sort((a, b) => b.date.compareTo(a.date));
+    
+    final recentTxs = combinedTxs.take(5).toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
