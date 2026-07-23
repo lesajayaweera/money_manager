@@ -469,7 +469,7 @@ class _TxTile extends StatelessWidget {
 
     return Dismissible(
       key: ValueKey('tx-${transaction.id}'),
-      direction: DismissDirection.endToStart,
+      direction: isTransfer ? DismissDirection.none : DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
@@ -485,7 +485,7 @@ class _TxTile extends StatelessWidget {
         return false;
       },
       child: InkWell(
-        onTap: onEdit,
+        onTap: isTransfer ? null : onEdit,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
