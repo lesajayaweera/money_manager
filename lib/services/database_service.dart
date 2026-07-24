@@ -11,7 +11,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 8;
+  static const int _dbVersion = 10;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -47,7 +47,8 @@ class DatabaseService {
         category TEXT NOT NULL,
         date TEXT NOT NULL,
         note TEXT,
-        wallet_name TEXT NOT NULL DEFAULT '',
+        wallet_name TEXT NOT NULL DEFAULT 'Cash',
+        lend_borrow_id INTEGER,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )
     ''');
@@ -88,6 +89,10 @@ class DatabaseService {
         note TEXT,
         status TEXT NOT NULL DEFAULT 'pending',
         payment_method TEXT,
+        wallet_name TEXT NOT NULL DEFAULT '',
+        transaction_id INTEGER,
+        settlement_transaction_id INTEGER,
+        accumulated_amount REAL NOT NULL DEFAULT 0.0,
         created_at TEXT NOT NULL
       )
     ''');
@@ -228,6 +233,35 @@ class DatabaseService {
         // Ignore if column already exists
       }
     }
+    if (oldVersion < 9) {
+      // Add wallet linking and transaction tracking to lend_borrow
+      final alterations = [
+        'ALTER TABLE lend_borrow ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""',
+        'ALTER TABLE lend_borrow ADD COLUMN transaction_id INTEGER',
+        'ALTER TABLE lend_borrow ADD COLUMN settlement_transaction_id INTEGER',
+      ];
+      for (final sql in alterations) {
+        try {
+          await db.execute(sql);
+        } catch (_) {
+          // Column already exists — ignore
+        }
+      }
+    }
+    if (oldVersion < 10) {
+      // Add accumulated_amount to lend_borrow and lend_borrow_id to transactions
+      final alterations = [
+        'ALTER TABLE $_tableName ADD COLUMN lend_borrow_id INTEGER',
+        'ALTER TABLE lend_borrow ADD COLUMN accumulated_amount REAL NOT NULL DEFAULT 0.0',
+      ];
+      for (final sql in alterations) {
+        try {
+          await db.execute(sql);
+        } catch (_) {
+          // Column already exists — ignore
+        }
+      }
+    }
   }
 
   Future<void> _seedSampleWallets(Database db) async {
@@ -334,6 +368,11 @@ class DatabaseService {
   Future<int> deleteTransaction(int id) async {
     final db = await database;
     return db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteTransactionsByLendBorrowId(int lendBorrowId) async {
+    final db = await database;
+    await db.delete(_tableName, where: 'lend_borrow_id = ?', whereArgs: [lendBorrowId]);
   }
 
   Future<void> clearAllTransactions() async {
