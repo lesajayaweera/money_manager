@@ -9,6 +9,7 @@ import '../models/goal_model.dart';
 import '../providers/goal_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/wallet_provider.dart';
 import 'add_edit_goal_screen.dart';
 
 class GoalDetailScreen extends StatefulWidget {
@@ -59,11 +60,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 
   void _showAddSavings() {
     final controller = TextEditingController();
+    String? selectedWalletName;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(ctx).viewInsets.bottom,
         ),
@@ -139,6 +142,84 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              Text(
+                'Account Type',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Consumer<WalletProvider>(
+                builder: (_, walletProvider, __) {
+                  final wallets = walletProvider.wallets;
+                  final effectiveSelected = (selectedWalletName != null &&
+                          wallets.any((w) => w.name == selectedWalletName))
+                      ? selectedWalletName
+                      : null;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFE0E0E0)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: effectiveSelected,
+                        isExpanded: true,
+                        hint: Text(
+                          'Select wallet (optional)',
+                          style: GoogleFonts.inter(
+                              color: AppColors.textHint, fontSize: 14),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                            color: AppColors.textSecondary),
+                        dropdownColor: AppColors.surface,
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text('None',
+                                style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: AppColors.textSecondary)),
+                          ),
+                          ...wallets.map((w) => DropdownMenuItem<String>(
+                                value: w.name,
+                                child: Row(children: [
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: Color(w.colorValue)
+                                          .withValues(alpha: 0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      IconData(w.iconCodePoint,
+                                          fontFamily: 'MaterialIcons'),
+                                      color: Color(w.colorValue),
+                                      size: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(w.name,
+                                      style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          color: AppColors.textPrimary)),
+                                ]),
+                              ))
+                        ],
+                        onChanged: (val) =>
+                            setSheetState(() => selectedWalletName = val),
+                      ),
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -148,7 +229,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     final amount = double.tryParse(controller.text.trim());
                     if (amount == null || amount <= 0) return;
                     Navigator.pop(ctx);
+                    // Cache providers before async gaps
                     final provider = context.read<GoalProvider>();
+                    final txProvider = context.read<TransactionProvider>();
+                    final walletProv = context.read<WalletProvider>();
                     await provider.addSavings(
                       GoalSavingsEntry(
                         goalId: _goal.id!,
@@ -156,10 +240,12 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         date: DateTime.now(),
                       ),
                       goalName: _goal.name,
+                      walletName: selectedWalletName,
                     );
-                    // Refresh TransactionProvider so balance updates on dashboard
+                    // Refresh TransactionProvider and WalletProvider so balances update
                     if (mounted) {
-                      await context.read<TransactionProvider>().loadAll();
+                      await txProvider.loadAll();
+                      await walletProv.loadWallets();
                     }
                     await _refreshGoal();
                   },
@@ -182,6 +268,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

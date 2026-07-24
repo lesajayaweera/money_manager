@@ -11,6 +11,7 @@ class TransactionModel {
   final String category;
   final DateTime date;
   final String? note;
+  final String walletName;
 
   const TransactionModel({
     this.id,
@@ -20,6 +21,7 @@ class TransactionModel {
     required this.category,
     required this.date,
     this.note,
+    this.walletName = 'Cash',
   });
 
   bool get isIncome => type == TransactionType.income;
@@ -36,6 +38,7 @@ class TransactionModel {
       'category': category,
       'date': date.toIso8601String(),
       'note': note,
+      'wallet_name': walletName,
     };
   }
 
@@ -51,6 +54,7 @@ class TransactionModel {
       category: map['category'] as String,
       date: DateTime.parse(map['date'] as String),
       note: map['note'] as String?,
+      walletName: map['wallet_name'] as String? ?? 'Cash',
     );
   }
 
@@ -62,6 +66,7 @@ class TransactionModel {
     String? category,
     DateTime? date,
     String? note,
+    String? walletName,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -71,6 +76,7 @@ class TransactionModel {
       category: category ?? this.category,
       date: date ?? this.date,
       note: note ?? this.note,
+      walletName: walletName ?? this.walletName,
     );
   }
 

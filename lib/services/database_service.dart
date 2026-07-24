@@ -1,15 +1,17 @@
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/transaction_model.dart';
 import '../models/goal_model.dart';
 import '../models/lend_borrow_model.dart';
+import '../models/wallet_model.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 5;
+  static const int _dbVersion = 8;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -45,6 +47,7 @@ class DatabaseService {
         category TEXT NOT NULL,
         date TEXT NOT NULL,
         note TEXT,
+        wallet_name TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )
     ''');
@@ -58,6 +61,7 @@ class DatabaseService {
         target_date TEXT NOT NULL,
         category_name TEXT NOT NULL,
         note TEXT,
+        wallet_name TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL
       )
     ''');
@@ -85,6 +89,35 @@ class DatabaseService {
         status TEXT NOT NULL DEFAULT 'pending',
         payment_method TEXT,
         created_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE wallets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        balance REAL NOT NULL DEFAULT 0,
+        icon_code_point INTEGER NOT NULL,
+        color_value INTEGER NOT NULL,
+        note TEXT,
+        include_in_total INTEGER NOT NULL DEFAULT 1,
+        status TEXT NOT NULL DEFAULT 'available',
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE wallet_transfers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        from_wallet_id INTEGER NOT NULL,
+        to_wallet_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        date TEXT NOT NULL,
+        note TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (from_wallet_id) REFERENCES wallets(id) ON DELETE CASCADE,
+        FOREIGN KEY (to_wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
       )
     ''');
 
@@ -151,10 +184,80 @@ class DatabaseService {
         )
       ''');
     }
+    if (oldVersion < 6) {
+      // Add wallets and wallet_transfers tables
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS wallets (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          type TEXT NOT NULL,
+          balance REAL NOT NULL DEFAULT 0,
+          icon_code_point INTEGER NOT NULL,
+          color_value INTEGER NOT NULL,
+          note TEXT,
+          include_in_total INTEGER NOT NULL DEFAULT 1,
+          status TEXT NOT NULL DEFAULT 'available',
+          created_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS wallet_transfers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          from_wallet_id INTEGER NOT NULL,
+          to_wallet_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          date TEXT NOT NULL,
+          note TEXT,
+          created_at TEXT NOT NULL
+        )
+      ''');
+      // Seed sample wallets for existing users
+      await _seedSampleWallets(db);
+    }
+    if (oldVersion < 7) {
+      try {
+        await db.execute('ALTER TABLE $_tableName ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
+    }
+    if (oldVersion < 8) {
+      try {
+        await db.execute('ALTER TABLE goals ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
+      } catch (e) {
+        // Ignore if column already exists
+      }
+    }
   }
+
+  Future<void> _seedSampleWallets(Database db) async {
+    final now = DateTime.now().toIso8601String();
+    // Color integers: 0xFFRRGGBB format (ARGB)
+    // 0xFF00B894 = green, 0xFFE17055 = orange, 0xFF6C5CE7 = purple,
+    // 0xFF0984E3 = blue, 0xFFFDAA3D = yellow
+    final wallets = [
+      {
+        'name': 'Cash',
+        'type': 'cash',
+        'balance': 0.0,
+        'icon_code_point': Icons.account_balance_wallet_rounded.codePoint,
+        'color_value': 0xFF00B894,
+        'note': null,
+        'include_in_total': 1,
+        'status': 'available',
+        'created_at': now,
+      }
+    ];
+    for (final w in wallets) {
+      await db.insert('wallets', w);
+    }
+  }
+
 
   Future<void> _seedSampleData(Database db) async {
     final now = DateTime.now();
+    // Seed sample wallets
+    await _seedSampleWallets(db);
     final samples = [
       {
         'title': 'Salary',
@@ -247,6 +350,13 @@ class DatabaseService {
     final db = await database;
     await db.delete('goals');
     await db.delete('goal_savings');
+  }
+
+  Future<void> clearAllWallets() async {
+    final db = await database;
+    await db.delete('wallets', where: 'name != ?', whereArgs: ['Cash']);
+    await db.rawUpdate('UPDATE wallets SET balance = 0 WHERE name = ?', ['Cash']);
+    await db.delete('wallet_transfers');
   }
 
   // ─── Queries ─────────────────────────────────────────────────────────────────
@@ -464,5 +574,67 @@ class DatabaseService {
     final db = await database;
     final rows = await db.query('lend_borrow', orderBy: 'created_at DESC');
     return rows.map(LendBorrowModel.fromMap).toList();
+  }
+
+  // ─── Wallets CRUD ──────────────────────────────────────────────────────────────
+
+  Future<int> insertWallet(WalletModel wallet) async {
+    final db = await database;
+    return db.insert('wallets', wallet.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> updateWallet(WalletModel wallet) async {
+    final db = await database;
+    return db.update('wallets', wallet.toMap(),
+        where: 'id = ?', whereArgs: [wallet.id]);
+  }
+
+  Future<int> deleteWallet(int id) async {
+    final db = await database;
+    await db.delete('wallet_transfers',
+        where: 'from_wallet_id = ? OR to_wallet_id = ?', whereArgs: [id, id]);
+    return db.delete('wallets', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<WalletModel>> getAllWallets() async {
+    final db = await database;
+    final rows = await db.query('wallets', orderBy: 'created_at ASC');
+    return rows.map(WalletModel.fromMap).toList();
+  }
+
+  Future<int> insertWalletTransfer(WalletTransfer transfer) async {
+    final db = await database;
+    return db.insert('wallet_transfers', transfer.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<WalletTransfer>> getTransfersByWallet(int walletId) async {
+    final db = await database;
+    final rows = await db.query(
+      'wallet_transfers',
+      where: 'from_wallet_id = ? OR to_wallet_id = ?',
+      whereArgs: [walletId, walletId],
+      orderBy: 'date DESC',
+    );
+    return rows.map(WalletTransfer.fromMap).toList();
+  }
+
+  Future<List<WalletTransfer>> getAllTransfers() async {
+    final db = await database;
+    final rows = await db.query('wallet_transfers', orderBy: 'date DESC');
+    return rows.map(WalletTransfer.fromMap).toList();
+  }
+
+  Future<double> getMonthlyTransfers() async {
+    final db = await database;
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, 1).toIso8601String();
+    final end = DateTime(now.year, now.month + 1, 1).toIso8601String();
+    final result = await db.rawQuery(
+      'SELECT COALESCE(SUM(amount), 0) as total FROM wallet_transfers WHERE date >= ? AND date < ?',
+      [start, end],
+    );
+    return (result.first['total'] as num).toDouble();
   }
 }

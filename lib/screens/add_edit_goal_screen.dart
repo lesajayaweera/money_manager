@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../core/constants/app_colors.dart';
 import '../models/goal_model.dart';
 import '../providers/goal_provider.dart';
+import '../providers/wallet_provider.dart';
 
 class AddEditGoalScreen extends StatefulWidget {
   final GoalModel? editGoal;
@@ -25,6 +26,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
 
   DateTime _targetDate = DateTime.now().add(const Duration(days: 180));
   String _selectedCategory = GoalCategory.all.first.name;
+  String? _selectedWalletName;
   bool _isSaving = false;
 
   bool get _isEditing => widget.editGoal != null;
@@ -40,6 +42,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
       _noteController.text = g.note ?? '';
       _targetDate = g.targetDate;
       _selectedCategory = g.categoryName;
+      _selectedWalletName = g.walletName;
     }
   }
 
@@ -96,6 +99,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
             ? null
             : _noteController.text.trim(),
         createdAt: widget.editGoal?.createdAt ?? DateTime.now(),
+        walletName: _selectedWalletName,
       );
 
       if (_isEditing) {
@@ -196,6 +200,15 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               _CategoryDropdown(
                 selected: _selectedCategory,
                 onChanged: (val) => setState(() => _selectedCategory = val!),
+              ),
+              const SizedBox(height: 20),
+
+              // Account Type (Wallet)
+              _FormLabel('Account Type'),
+              const SizedBox(height: 8),
+              _WalletDropdown(
+                selected: _selectedWalletName,
+                onChanged: (val) => setState(() => _selectedWalletName = val),
               ),
               const SizedBox(height: 20),
 
@@ -455,6 +468,87 @@ class _CatRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Wallet Dropdown ──────────────────────────────────────────────────────────
+
+class _WalletDropdown extends StatelessWidget {
+  final String? selected;
+  final ValueChanged<String?> onChanged;
+
+  const _WalletDropdown({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final wallets = context.watch<WalletProvider>().wallets;
+    final effectiveSelected =
+        (selected != null && wallets.any((w) => w.name == selected))
+            ? selected
+            : null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: effectiveSelected,
+          isExpanded: true,
+          hint: Text(
+            'Select wallet (optional)',
+            style: GoogleFonts.inter(
+                color: AppColors.textHint, fontSize: 15),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded,
+              color: AppColors.textSecondary),
+          dropdownColor: AppColors.surface,
+          items: [
+            DropdownMenuItem<String>(
+              value: null,
+              child: Text(
+                'None',
+                style: GoogleFonts.inter(
+                    fontSize: 15, color: AppColors.textSecondary),
+              ),
+            ),
+            ...wallets.map((w) => DropdownMenuItem<String>(
+                  value: w.name,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Color(w.colorValue).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          IconData(w.iconCodePoint,
+                              fontFamily: 'MaterialIcons'),
+                          color: Color(w.colorValue),
+                          size: 17,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        w.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/goal_model.dart';
 import '../models/transaction_model.dart';
+import '../models/wallet_model.dart';
 import '../services/database_service.dart';
 
 class GoalProvider extends ChangeNotifier {
@@ -71,7 +72,12 @@ class GoalProvider extends ChangeNotifier {
 
   /// Adds savings to a goal AND creates an expense transaction so the
   /// amount is properly deducted from the overall balance.
-  Future<void> addSavings(GoalSavingsEntry entry, {String goalName = 'Goal'}) async {
+  /// If [walletName] is provided, also deducts from that wallet's balance.
+  Future<void> addSavings(
+    GoalSavingsEntry entry, {
+    String goalName = 'Goal',
+    String? walletName,
+  }) async {
     try {
       // 1. Record the goal savings entry
       await _db.addGoalSavings(entry);
@@ -84,10 +90,33 @@ class GoalProvider extends ChangeNotifier {
         category: 'Goals',
         date: entry.date,
         note: entry.note ?? 'Added to goal: $goalName',
+        walletName: walletName ?? '',
       );
       await _db.insertTransaction(tx);
 
-      // 3. Refresh goals from DB to get updated saved_amount
+      // 3. Deduct from the chosen wallet balance if specified
+      if (walletName != null && walletName.isNotEmpty) {
+        final wallets = await _db.getAllWallets();
+        final wallet = wallets.where((w) => w.name == walletName).toList();
+        if (wallet.isNotEmpty) {
+          final w = wallet.first;
+          final updated = WalletModel(
+            id: w.id,
+            name: w.name,
+            type: w.type,
+            balance: w.balance - entry.amount,
+            iconCodePoint: w.iconCodePoint,
+            colorValue: w.colorValue,
+            note: w.note,
+            includeInTotal: w.includeInTotal,
+            status: w.status,
+            createdAt: w.createdAt,
+          );
+          await _db.updateWallet(updated);
+        }
+      }
+
+      // 4. Refresh goals from DB to get updated saved_amount
       final updatedGoals = await _db.getAllGoals();
       _goals = updatedGoals;
       notifyListeners();
