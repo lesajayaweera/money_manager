@@ -171,11 +171,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: GoogleFonts.inter(fontSize: 14)),
+        content: Text(message, style: GoogleFonts.inter(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+        backgroundColor: AppColors.expense,
       ),
     );
   }

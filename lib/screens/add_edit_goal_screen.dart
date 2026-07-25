@@ -121,9 +121,9 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: GoogleFonts.inter(fontSize: 14)),
+        content: Text(msg, style: GoogleFonts.inter(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+        backgroundColor: AppColors.expense,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
       ),
