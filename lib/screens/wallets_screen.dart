@@ -111,51 +111,14 @@ class _WalletsScreenState extends State<WalletsScreen>
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Money Manager',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-            ),
-          ),
-          Text(
-            'Wallets',
-            style: GoogleFonts.inter(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: Stack(
-            children: [
-              Icon(Icons.notifications_outlined,
-                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.expense,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          onPressed: () {},
+      title: Text(
+        'Wallets',
+        style: GoogleFonts.inter(
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
         ),
-        const SizedBox(width: 4),
-      ],
+      ),
     );
   }
 

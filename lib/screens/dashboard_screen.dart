@@ -399,7 +399,6 @@ class _StatsGrid extends StatelessWidget {
                     amount: summary.monthlyIncome,
                     icon: Icons.account_balance_wallet_rounded,
                     iconColor: AppColors.income,
-                    iconBgColor: AppColors.incomeLight,
                     visible: settings.balanceVisible,
                     currencySymbol: settings.currencySymbol,
                   ),
@@ -411,7 +410,6 @@ class _StatsGrid extends StatelessWidget {
                     amount: summary.monthlyExpenses,
                     icon: Icons.receipt_long_rounded,
                     iconColor: AppColors.expense,
-                    iconBgColor: AppColors.expenseLight,
                     visible: settings.balanceVisible,
                     currencySymbol: settings.currencySymbol,
                   ),
@@ -427,7 +425,6 @@ class _StatsGrid extends StatelessWidget {
                     amount: summary.remainingBudget,
                     icon: Icons.savings_rounded,
                     iconColor: AppColors.budget,
-                    iconBgColor: AppColors.budgetLight,
                     visible: settings.balanceVisible,
                     currencySymbol: settings.currencySymbol,
                   ),
@@ -439,7 +436,6 @@ class _StatsGrid extends StatelessWidget {
                     amount: summary.todaySpending,
                     icon: Icons.today_rounded,
                     iconColor: AppColors.spending,
-                    iconBgColor: AppColors.spendingLight,
                     visible: settings.balanceVisible,
                     currencySymbol: settings.currencySymbol,
                   ),
@@ -458,7 +454,6 @@ class _StatCard extends StatelessWidget {
   final double amount;
   final IconData icon;
   final Color iconColor;
-  final Color iconBgColor;
   final bool visible;
   final String currencySymbol;
 
@@ -467,7 +462,6 @@ class _StatCard extends StatelessWidget {
     required this.amount,
     required this.icon,
     required this.iconColor,
-    required this.iconBgColor,
     required this.visible,
     required this.currencySymbol,
   });
@@ -481,7 +475,9 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -496,7 +492,7 @@ class _StatCard extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: iconBgColor,
+                  color: iconColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: iconColor, size: 20),
