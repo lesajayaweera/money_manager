@@ -684,7 +684,7 @@ class _PieSection extends StatelessWidget {
         value: entries[i].value,
         title: '',
         color: color,
-        radius: isTouched ? 40 : 35,
+        radius: isTouched ? 28 : 22,
       ));
     }
 
@@ -697,22 +697,59 @@ class _PieSection extends StatelessWidget {
             SizedBox(
               width: 140,
               height: 140,
-              child: PieChart(
-                PieChartData(
-                  sections: sections,
-                  centerSpaceRadius: 30,
-                  sectionsSpace: 2,
-                  pieTouchData: PieTouchData(
-                    touchCallback: (event, response) {
-                      if (response?.touchedSection != null) {
-                        onTouch(response!
-                            .touchedSection!.touchedSectionIndex);
-                      } else {
-                        onTouch(-1);
-                      }
-                    },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  PieChart(
+                    PieChartData(
+                      sections: sections,
+                      centerSpaceRadius: 42,
+                      sectionsSpace: 2,
+                      pieTouchData: PieTouchData(
+                        touchCallback: (event, response) {
+                          if (response?.touchedSection != null) {
+                            onTouch(response!.touchedSection!.touchedSectionIndex);
+                          } else {
+                            onTouch(-1);
+                          }
+                        },
+                      ),
+                    ),
                   ),
-                ),
+                  if (touchedIndex >= 0 && touchedIndex < entries.length)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            entries[touchedIndex].key,
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            CurrencyFormatter.format(entries[touchedIndex].value,
+                                symbol: currencySymbol),
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isExpense ? AppColors.expense : AppColors.income,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(width: 20),
