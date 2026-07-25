@@ -63,7 +63,9 @@ class _ReportsScreenState extends State<ReportsScreen>
             child: Container(
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFEEECFD),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkSurface2
+                    : const Color(0xFFEEECFD),
                 borderRadius: BorderRadius.circular(22),
               ),
               child: TabBar(
@@ -418,7 +420,11 @@ class _PeriodChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : const Color(0xFFF0F0F0),
+          color: isSelected
+              ? AppColors.primary
+              : Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkSurface2
+                  : const Color(0xFFF0F0F0),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -800,7 +806,7 @@ class _PieSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0)),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -863,7 +869,7 @@ class _CategoriesTab extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
           itemCount: entries.length,
           separatorBuilder: (_, __) =>
-              const Divider(height: 1, color: Color(0xFFF5F5F5)),
+              Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF5F5F5)),
           itemBuilder: (ctx, i) {
             final name = entries[i].key;
             final val = entries[i].value;
@@ -871,7 +877,7 @@ class _CategoriesTab extends StatelessWidget {
             final cat = CategoryModel.findByName(name);
 
             return Container(
-              color: Colors.white,
+              color: Colors.transparent,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
@@ -907,7 +913,7 @@ class _CategoriesTab extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: val / total,
-                              backgroundColor: const Color(0xFFF0F0F0),
+                              backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F0),
                               valueColor: AlwaysStoppedAnimation<Color>(
                                   cat?.color ?? Colors.white ?? AppColors.catOther),
                               minHeight: 4,
@@ -1088,11 +1094,13 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
