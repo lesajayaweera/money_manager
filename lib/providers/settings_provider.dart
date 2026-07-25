@@ -6,16 +6,19 @@ class SettingsProvider extends ChangeNotifier {
   static const String _keyCurrencySymbol = 'currency_symbol';
   static const String _keyNotifications = 'notifications_enabled';
   static const String _keyMonthlyBudget = 'monthly_budget';
+  static const String _keyDarkMode = 'dark_mode';
 
   bool _balanceVisible = true;
   String _currencySymbol = 'Rs.';
   bool _notificationsEnabled = true;
   double _monthlyBudget = 80000;
+  bool _isDarkMode = false;
 
   bool get balanceVisible => _balanceVisible;
   String get currencySymbol => _currencySymbol;
   bool get notificationsEnabled => _notificationsEnabled;
   double get monthlyBudget => _monthlyBudget;
+  bool get isDarkMode => _isDarkMode;
 
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -23,6 +26,7 @@ class SettingsProvider extends ChangeNotifier {
     _currencySymbol = prefs.getString(_keyCurrencySymbol) ?? 'Rs.';
     _notificationsEnabled = prefs.getBool(_keyNotifications) ?? true;
     _monthlyBudget = prefs.getDouble(_keyMonthlyBudget) ?? 80000;
+    _isDarkMode = prefs.getBool(_keyDarkMode) ?? false;
     notifyListeners();
   }
 
@@ -52,5 +56,20 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_keyMonthlyBudget, budget);
+  }
+
+  Future<void> toggleDarkMode() async {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyDarkMode, _isDarkMode);
+  }
+
+  Future<void> setDarkMode(bool value) async {
+    if (_isDarkMode == value) return;
+    _isDarkMode = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyDarkMode, _isDarkMode);
   }
 }

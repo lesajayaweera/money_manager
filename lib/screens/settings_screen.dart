@@ -36,11 +36,14 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget build(BuildContext context) {
     super.build(context);
     final settings = context.watch<SettingsProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = Theme.of(context).textTheme.titleLarge?.color ?? AppColors.textPrimary;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: bgColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
@@ -48,17 +51,35 @@ class _SettingsScreenState extends State<SettingsScreen>
           style: GoogleFonts.inter(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: textPrimary,
           ),
         ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Appearance ────────────────────────────────────────────────
+            _SectionLabel('Appearance'),
+            const SizedBox(height: 8),
             _SettingsList(
               children: [
+                // Dark Mode toggle
+                _DarkModeRow(
+                  isDark: isDark,
+                  value: settings.isDarkMode,
+                  onChanged: (_) => settings.toggleDarkMode(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
 
+            // ── General ───────────────────────────────────────────────────
+            _SectionLabel('General'),
+            const SizedBox(height: 8),
+            _SettingsList(
+              children: [
                 // Currency
                 _SettingsRow(
                   icon: Icons.attach_money_rounded,
@@ -114,11 +135,11 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   // ─── Dialogs ─────────────────────────────────────────────────────────────
 
-
   Future<void> _showCurrencySheet(
       BuildContext context, SettingsProvider settings) async {
     await showModalBottomSheet(
       context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -133,16 +154,19 @@ class _SettingsScreenState extends State<SettingsScreen>
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.titleLarge?.color,
               ),
             ),
             const SizedBox(height: 16),
             ..._currencies.map((c) => ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title:
-                      Text(c['name']!, style: GoogleFonts.inter(fontSize: 15)),
+                  title: Text(c['name']!,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      )),
                   trailing: settings.currencySymbol == c['symbol']
-                      ? const Icon(Icons.check_rounded,
-                          color: AppColors.primary)
+                      ? const Icon(Icons.check_rounded, color: AppColors.primary)
                       : null,
                   onTap: () async {
                     await settings.setCurrencySymbol(c['symbol']!);
@@ -160,18 +184,25 @@ class _SettingsScreenState extends State<SettingsScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         title: Text('Clear All Data',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).textTheme.titleLarge?.color,
+            )),
         content: Text(
           'This will permanently delete all your transactions. This action cannot be undone.',
-          style:
-              GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
+          style: GoogleFonts.inter(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 14,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text('Cancel',
-                style: GoogleFonts.inter(color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(
+                    color: Theme.of(context).textTheme.bodyMedium?.color)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -235,19 +266,40 @@ class _SettingsScreenState extends State<SettingsScreen>
 
 // ─── UI Components ────────────────────────────────────────────────────────────
 
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text.toUpperCase(),
+      style: GoogleFonts.inter(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.2,
+        color: Theme.of(context).textTheme.bodySmall?.color,
+      ),
+    );
+  }
+}
+
 class _SettingsList extends StatelessWidget {
   final List<Widget> children;
   const _SettingsList({required this.children});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -255,6 +307,65 @@ class _SettingsList extends StatelessWidget {
       ),
       child: Column(
         children: children,
+      ),
+    );
+  }
+}
+
+/// Dark mode toggle row (uses a Switch instead of chevron).
+class _DarkModeRow extends StatelessWidget {
+  final bool isDark;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const _DarkModeRow(
+      {required this.isDark, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? AppColors.textPrimary;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          // Icon
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: (isDark ? AppColors.primaryLight : AppColors.primary)
+                  .withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              color: isDark ? AppColors.primaryLight : AppColors.primary,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 14),
+          // Label
+          Expanded(
+            child: Text(
+              'Dark Mode',
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: textPrimary,
+              ),
+            ),
+          ),
+          // Toggle switch
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: Colors.white,
+            activeTrackColor: AppColors.primary,
+            inactiveThumbColor: Theme.of(context).textTheme.bodySmall?.color,
+            inactiveTrackColor:
+                Theme.of(context).dividerTheme.color ?? const Color(0xFFE0E0E0),
+          ),
+        ],
       ),
     );
   }
@@ -283,6 +394,15 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? AppColors.textPrimary;
+    final textSecondary =
+        Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textSecondary;
+    final textHint =
+        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textHint;
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF5F5F5);
+
     return Column(
       children: [
         InkWell(
@@ -315,7 +435,7 @@ class _SettingsRow extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: labelColor ?? AppColors.textPrimary,
+                      color: labelColor ?? textPrimary,
                     ),
                   ),
                 ),
@@ -325,22 +445,21 @@ class _SettingsRow extends StatelessWidget {
                     '$valuePrefix$value',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: textSecondary,
                     ),
                   ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textHint, size: 20),
+                Icon(Icons.chevron_right_rounded, color: textHint, size: 20),
               ],
             ),
           ),
         ),
         if (!isLast)
-          const Divider(
+          Divider(
             height: 1,
             indent: 66,
             endIndent: 0,
-            color: Color(0xFFF5F5F5),
+            color: dividerColor,
           ),
       ],
     );

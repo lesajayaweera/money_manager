@@ -24,14 +24,6 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Transparent status bar
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ),
-  );
-
   runApp(const MoneyManagerApp());
 }
 
@@ -49,14 +41,35 @@ class MoneyManagerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => WalletProvider()..loadWallets()),
       ],
-      child: MaterialApp(
-        title: 'Money Manager',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        initialRoute: '/splash',
-        routes: {
-          '/splash': (_) => const SplashScreen(),
-          '/main': (_) => const MainScaffold(),
+      child: Consumer<SettingsProvider>(
+        builder: (context, settings, _) {
+          final isDark = settings.isDarkMode;
+
+          // Update system UI chrome to match current theme
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness:
+                  isDark ? Brightness.light : Brightness.dark,
+              systemNavigationBarColor:
+                  isDark ? const Color(0xFF1C1C2E) : const Color(0xFFFFFFFF),
+              systemNavigationBarIconBrightness:
+                  isDark ? Brightness.light : Brightness.dark,
+            ),
+          );
+
+          return MaterialApp(
+            title: 'Money Manager',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+            initialRoute: '/splash',
+            routes: {
+              '/splash': (_) => const SplashScreen(),
+              '/main': (_) => const MainScaffold(),
+            },
+          );
         },
       ),
     );
