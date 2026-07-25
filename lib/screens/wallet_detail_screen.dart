@@ -130,14 +130,14 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
     final recentTxs = combinedTxs.take(5).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: AppColors.textPrimary, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -145,7 +145,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -153,8 +153,8 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
           IconButton(
             icon: Stack(
               children: [
-                const Icon(Icons.notifications_outlined,
-                    color: AppColors.textPrimary, size: 26),
+                Icon(Icons.notifications_outlined,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
                 Positioned(
                   right: 0,
                   top: 0,
@@ -183,7 +183,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -218,7 +218,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                               ),
                             ),
                             // Status badge
@@ -259,7 +259,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                           _wallet.type.displayName,
                           style: GoogleFonts.inter(
                             fontSize: 13,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -269,7 +269,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -329,7 +329,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 GestureDetector(
@@ -354,7 +354,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
@@ -362,7 +362,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                     'No transactions yet',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                 ),
@@ -370,7 +370,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
             else
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -400,7 +400,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -484,7 +484,7 @@ class _StatMiniCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -511,7 +511,7 @@ class _StatMiniCard extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 10,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 2,
@@ -522,7 +522,7 @@ class _StatMiniCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -587,7 +587,7 @@ class _TxTile extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -595,7 +595,7 @@ class _TxTile extends StatelessWidget {
                   CurrencyFormatter.relativeDate(tx.date),
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
                 ),
               ],
@@ -618,7 +618,7 @@ class _TxTile extends StatelessWidget {
                 tx.walletName,
                 style: GoogleFonts.inter(
                   fontSize: 11,
-                  color: AppColors.textHint,
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                 ),
               ),
             ],

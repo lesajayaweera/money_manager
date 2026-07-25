@@ -34,18 +34,18 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         title: Text(
           'Remove Category',
           style: GoogleFonts.inter(
-              fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
         ),
         content: Text(
           'Are you sure you want to remove "${_category.name}"? This cannot be undone.',
           style:
-              GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary),
+              GoogleFonts.inter(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel',
-                style: GoogleFonts.inter(color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -89,13 +89,13 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     final isExpense = _category.type == CategoryType.expense;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -103,14 +103,14 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert_rounded,
-                color: AppColors.textSecondary),
+            icon: Icon(Icons.more_vert_rounded,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
             onPressed: () => _showMoreMenu(),
           ),
         ],
@@ -123,7 +123,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -148,7 +148,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -162,7 +162,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                             : 'Custom Category',
                         style: GoogleFonts.inter(
                           fontSize: 13,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                         ),
                       ),
                     ],
@@ -175,7 +175,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             // ── Details Section ──────────────────────────────────────────────
             Container(
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -205,7 +205,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             // ── Toggle Section ───────────────────────────────────────────────
             // Container(
             //   decoration: BoxDecoration(
-            //     color: AppColors.surface,
+            //     color: Theme.of(context).colorScheme.surface,
             //     borderRadius: BorderRadius.circular(16),
             //   ),
             //   child: Column(
@@ -314,7 +314,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   void _showMoreMenu() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => Padding(
@@ -410,7 +410,7 @@ class _DetailRow extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             Row(
@@ -419,13 +419,13 @@ class _DetailRow extends StatelessWidget {
                   value,
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: valueColor ?? AppColors.textSecondary,
+                    color: valueColor ?? Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textHint, size: 18),
+                Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 18),
               ],
             ),
           ],
@@ -453,15 +453,15 @@ class _IconColorRow extends StatelessWidget {
               'Icon & Color',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             Row(
               children: [
                 CircleAvatar(backgroundColor: color, radius: 10),
                 const SizedBox(width: 6),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textHint, size: 18),
+                Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 18),
               ],
             ),
           ],

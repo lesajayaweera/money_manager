@@ -41,9 +41,9 @@ class _ReportsScreenState extends State<ReportsScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
@@ -51,7 +51,7 @@ class _ReportsScreenState extends State<ReportsScreen>
           style: GoogleFonts.inter(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
       ),
@@ -74,7 +74,7 @@ class _ReportsScreenState extends State<ReportsScreen>
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: Colors.white,
-                unselectedLabelColor: AppColors.textSecondary,
+                unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 dividerColor: Colors.transparent,
                 labelStyle: GoogleFonts.inter(
                     fontSize: 14, fontWeight: FontWeight.w600),
@@ -183,10 +183,10 @@ class _OverviewTabState extends State<_OverviewTab> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           child: child!,
@@ -257,7 +257,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -306,7 +306,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -330,7 +330,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -340,7 +340,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No expenses in this period',
-                        style: GoogleFonts.inter(color: AppColors.textSecondary),
+                        style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
                       ),
                     ),
                   )
@@ -368,7 +368,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -378,7 +378,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No income in this period',
-                        style: GoogleFonts.inter(color: AppColors.textSecondary),
+                        style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
                       ),
                     ),
                   )
@@ -426,7 +426,7 @@ class _PeriodChip extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
           ),
         ),
       ),
@@ -477,10 +477,10 @@ class _SimpleBarChart extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _yLabel(y3),
-                  _yLabel(y2),
-                  _yLabel(y1),
-                  _yLabel(0),
+                  _yLabel(context, y3),
+                  _yLabel(context, y2),
+                  _yLabel(context, y1),
+                  _yLabel(context, 0),
                 ],
               ),
             ),
@@ -566,7 +566,7 @@ class _SimpleBarChart extends StatelessWidget {
                           'Income',
                           style: GoogleFonts.inter(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ),
@@ -578,7 +578,7 @@ class _SimpleBarChart extends StatelessWidget {
                           'Expenses',
                           style: GoogleFonts.inter(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ),
@@ -593,7 +593,7 @@ class _SimpleBarChart extends StatelessWidget {
     );
   }
 
-  Widget _yLabel(double value) {
+  Widget _yLabel(BuildContext context, double value) {
     String label;
     if (value >= 1000) {
       label = '${(value / 1000).round()}K';
@@ -602,7 +602,7 @@ class _SimpleBarChart extends StatelessWidget {
     }
     return Text(
       label,
-      style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary),
+      style: GoogleFonts.inter(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
     );
   }
 }
@@ -727,7 +727,7 @@ class _PieSection extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                             textAlign: TextAlign.center,
                             maxLines: 1,
@@ -779,7 +779,7 @@ class _PieSection extends StatelessWidget {
                             name,
                             style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                           ),
                         ),
@@ -788,7 +788,7 @@ class _PieSection extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ],
@@ -810,7 +810,7 @@ class _PieSection extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             Text(
@@ -853,7 +853,7 @@ class _CategoriesTab extends StatelessWidget {
         if (data.isEmpty) {
           return Center(
             child: Text('No expense data for this month',
-                style: GoogleFonts.inter(color: AppColors.textSecondary)),
+                style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
           );
         }
         final total = data.values.fold(0.0, (s, v) => s + v);
@@ -880,7 +880,7 @@ class _CategoriesTab extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: cat?.color ?? AppColors.catOther,
+                        color: cat?.color ?? Colors.white ?? AppColors.catOther,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -899,7 +899,7 @@ class _CategoriesTab extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -909,7 +909,7 @@ class _CategoriesTab extends StatelessWidget {
                               value: val / total,
                               backgroundColor: const Color(0xFFF0F0F0),
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  cat?.color ?? AppColors.catOther),
+                                  cat?.color ?? Colors.white ?? AppColors.catOther),
                               minHeight: 4,
                             ),
                           ),
@@ -933,7 +933,7 @@ class _CategoriesTab extends StatelessWidget {
                           '${pct.toStringAsFixed(1)}%',
                           style: GoogleFonts.inter(
                             fontSize: 11,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ],
@@ -978,7 +978,7 @@ class _DailyTab extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 16),
@@ -1011,7 +1011,7 @@ class _DailyTab extends StatelessWidget {
                                 fontSize: 11,
                                 color: isToday
                                     ? AppColors.primary
-                                    : AppColors.textSecondary,
+                                    : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                 fontWeight: isToday
                                     ? FontWeight.w700
                                     : FontWeight.w400,
@@ -1024,7 +1024,7 @@ class _DailyTab extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                                 color: isToday
                                     ? AppColors.primary
-                                    : AppColors.textPrimary,
+                                    : Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                               ),
                             ),
                           ],
@@ -1058,7 +1058,7 @@ class _DailyTab extends StatelessWidget {
                                 'No activity',
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
-                                  color: AppColors.textHint,
+                                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                                 ),
                               ),
                           ],

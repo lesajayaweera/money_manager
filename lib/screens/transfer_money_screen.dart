@@ -143,14 +143,14 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
     final afterTo = toBal + _amount;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: AppColors.textPrimary, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -158,7 +158,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -184,7 +184,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         'From',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -213,7 +213,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -223,7 +223,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                         symbol: sym),
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
-                                      color: AppColors.textSecondary,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                     ),
                                   ),
                               ],
@@ -265,7 +265,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         'To',
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -282,7 +282,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                                   ),
                                   textAlign: TextAlign.end,
                                   overflow: TextOverflow.ellipsis,
@@ -293,7 +293,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                         symbol: sym),
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
-                                      color: AppColors.textSecondary,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                     ),
                                   ),
                               ],
@@ -358,7 +358,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         'From Wallet',
                         style: GoogleFonts.inter(
                           fontSize: 11,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                         ),
                       ),
                       Text(
@@ -367,8 +367,8 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: _fromWallet != null
-                              ? AppColors.textPrimary
-                              : AppColors.textHint,
+                              ? Theme.of(context).textTheme.titleLarge?.color ?? Colors.white
+                              : Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                         ),
                       ),
                     ],
@@ -379,12 +379,12 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     CurrencyFormatter.format(fromBal, symbol: sym),
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textHint, size: 20),
+                Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
               ],
             ),
           ),
@@ -426,7 +426,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         'To Wallet',
                         style: GoogleFonts.inter(
                           fontSize: 11,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                         ),
                       ),
                       Text(
@@ -435,8 +435,8 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: _toWallet != null
-                              ? AppColors.textPrimary
-                              : AppColors.textHint,
+                              ? Theme.of(context).textTheme.titleLarge?.color ?? Colors.white
+                              : Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                         ),
                       ),
                     ],
@@ -447,12 +447,12 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     CurrencyFormatter.format(toBal, symbol: sym),
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textHint, size: 20),
+                Icon(Icons.chevron_right_rounded,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
               ],
             ),
           ),
@@ -481,7 +481,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         'Amount (Rs.)',
                         style: GoogleFonts.inter(
                           fontSize: 11,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                         ),
                       ),
                       TextField(
@@ -496,13 +496,13 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Enter amount',
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14,
-                            color: AppColors.textHint,
+                            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                           ),
                           border: InputBorder.none,
                           isDense: true,
@@ -541,7 +541,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         'Date',
                         style: GoogleFonts.inter(
                           fontSize: 11,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                         ),
                       ),
                       Text(
@@ -549,14 +549,14 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.calendar_today_outlined,
-                    color: AppColors.textHint, size: 20),
+                Icon(Icons.calendar_today_outlined,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
               ],
             ),
           ),
@@ -588,7 +588,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                             'Note (Optional)',
                             style: GoogleFonts.inter(
                               fontSize: 11,
-                              color: AppColors.textSecondary,
+                              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                             ),
                           ),
                           TextField(
@@ -597,13 +597,13 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                             onChanged: (_) => setState(() {}),
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                             decoration: InputDecoration(
                               hintText: 'Add a note for this transfer',
                               hintStyle: GoogleFonts.inter(
                                 fontSize: 13,
-                                color: AppColors.textHint,
+                                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                               ),
                               border: InputBorder.none,
                               counterText: '',
@@ -620,7 +620,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                           '${_noteController.text.length}/60',
                           style: GoogleFonts.inter(
                             fontSize: 10,
-                            color: AppColors.textHint,
+                            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                           ),
                         ),
                       ),
@@ -635,14 +635,14 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
           // ── Info ──────────────────────────────────────────────────────
           Row(
             children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 15, color: AppColors.textSecondary),
+              Icon(Icons.info_outline_rounded,
+                  size: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
               const SizedBox(width: 6),
               Text(
                 'Transfers do not affect total balance.',
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
               ),
             ],
@@ -656,7 +656,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
               style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             const SizedBox(height: 10),
@@ -664,7 +664,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
               padding: const EdgeInsets.symmetric(
                   horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
@@ -700,7 +700,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -767,7 +767,7 @@ class _FieldCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -823,21 +823,21 @@ class _AfterTransferRow extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               Text(
                 CurrencyFormatter.format(originalBalance, symbol: sym),
                 style: GoogleFonts.inter(
                   fontSize: 11,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
               ),
             ],
           ),
         ),
-        const Icon(Icons.arrow_forward_rounded,
-            color: AppColors.textHint, size: 16),
+        Icon(Icons.arrow_forward_rounded,
+            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 16),
         const SizedBox(width: 8),
         Text(
           isDecrease
@@ -874,8 +874,8 @@ class _WalletPickerSheet extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -896,7 +896,7 @@ class _WalletPickerSheet extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             const SizedBox(height: 16),
@@ -907,7 +907,7 @@ class _WalletPickerSheet extends StatelessWidget {
                   'No wallets available',
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
                 ),
               )
@@ -929,7 +929,7 @@ class _WalletPickerSheet extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                       ),
                     ),
                     subtitle: Text(
@@ -937,7 +937,7 @@ class _WalletPickerSheet extends StatelessWidget {
                           symbol: currencySymbol),
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),
                     ),
                     onTap: () => Navigator.pop(context, wallet),

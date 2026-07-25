@@ -35,8 +35,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -154,13 +154,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             : AppCategory.defaultExpenseCategories.last);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
           onPressed: () => Navigator.pop(context, true),
         ),
         title: Text(
@@ -168,14 +168,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert_rounded,
-                color: AppColors.textPrimary),
+            icon: Icon(Icons.more_vert_rounded,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
             onPressed: _showOptions,
           ),
         ],
@@ -189,7 +189,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -216,7 +216,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -238,7 +238,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             // Details List
             Container(
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -296,13 +296,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: AppColors.textSecondary),
+          Icon(icon, size: 20, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
           const SizedBox(width: 12),
           Text(
             label,
             style: GoogleFonts.inter(
               fontSize: 15,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -313,7 +313,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               textAlign: TextAlign.right,
               style: GoogleFonts.inter(
                 fontSize: 15,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 fontWeight: FontWeight.w600,
               ),
             ),

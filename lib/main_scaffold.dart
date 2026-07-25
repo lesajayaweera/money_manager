@@ -73,7 +73,7 @@ class MainScaffoldState extends State<MainScaffold> {
   Widget _buildBottomNav() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.07),
@@ -115,7 +115,7 @@ class MainScaffoldState extends State<MainScaffold> {
                           key: ValueKey(isActive),
                           color: isActive
                               ? AppColors.primary
-                              : AppColors.textHint,
+                              : Theme.of(context).textTheme.bodySmall?.color,
                           size: 22,
                         ),
                       ),
@@ -129,7 +129,7 @@ class MainScaffoldState extends State<MainScaffold> {
                               : FontWeight.w400,
                           color: isActive
                               ? AppColors.primary
-                              : AppColors.textHint,
+                              : Theme.of(context).textTheme.bodySmall?.color,
                         ),
                       ),
                     ],

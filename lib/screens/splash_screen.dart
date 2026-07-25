@@ -291,9 +291,9 @@ class _WalletIllustration extends StatelessWidget {
             child: Container(
               width: 160,
               height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFF6655DC),
-                borderRadius: const BorderRadius.vertical(
+              decoration: const BoxDecoration(
+                color: Color(0xFF6655DC),
+                borderRadius: BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
               ),
@@ -379,13 +379,13 @@ class _WalletIllustration extends StatelessWidget {
             ),
           ),
           // Gold coin left
-          Positioned(
+          const Positioned(
             bottom: 55,
             left: 15,
             child: _GoldCoin(size: 36),
           ),
           // Gold coin bottom-center
-          Positioned(
+          const Positioned(
             bottom: 20,
             left: 60,
             child: _GoldCoin(size: 30),

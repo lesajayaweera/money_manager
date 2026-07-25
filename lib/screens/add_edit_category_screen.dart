@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
@@ -38,7 +37,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     _selectedIcon =
         widget.editCategory?.icon ?? AppCategory.availableIcons.first;
     _selectedColor =
-        widget.editCategory?.color ?? AppCategory.availableColors.first;
+        widget.editCategory?.color ?? Colors.white ?? AppCategory.availableColors.first;
 
     if (widget.editCategory != null) {
       final e = widget.editCategory!;
@@ -98,13 +97,13 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
         _nameCtrl.text.trim().isEmpty ? 'Category' : _nameCtrl.text.trim();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -112,7 +111,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -149,7 +148,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -179,7 +178,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     'Preview',
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                 ],
@@ -191,13 +190,13 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                     // Category Name
-                    _FormLabel('Category Name'),
+                    const _FormLabel('Category Name'),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _nameCtrl,
                       onChanged: (_) => setState(() {}),
                       style: GoogleFonts.inter(
-                          fontSize: 15, color: AppColors.textPrimary),
+                          fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                       decoration: _inputDecor('e.g. Pet Care'),
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) {
@@ -209,7 +208,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     const SizedBox(height: 18),
 
                     // Type toggle
-                    _FormLabel('Type'),
+                    const _FormLabel('Type'),
                     const SizedBox(height: 8),
                     _TypeToggle(
                       selected: _type,
@@ -220,7 +219,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
 
                     // Icon picker
-                    _FormLabel('Icon'),
+                    const _FormLabel('Icon'),
                     const SizedBox(height: 8),
                     GestureDetector(
                       onTap: () => _openCustomize(),
@@ -234,11 +233,11 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                               'Choose icon',
                               style: GoogleFonts.inter(
                                   fontSize: 14,
-                                  color: AppColors.textHint),
+                                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
                             ),
                             const Spacer(),
-                            const Icon(Icons.chevron_right_rounded,
-                                color: AppColors.textHint, size: 20),
+                            Icon(Icons.chevron_right_rounded,
+                                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
                           ],
                         ),
                       ),
@@ -246,7 +245,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     const SizedBox(height: 18),
 
                     // Color picker
-                    _FormLabel('Color'),
+                    const _FormLabel('Color'),
                     const SizedBox(height: 8),
                     GestureDetector(
                       onTap: () => _openCustomize(),
@@ -260,11 +259,11 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                               '#${_selectedColor.toARGB32().toRadixString(16).toUpperCase().substring(2)}',
                               style: GoogleFonts.inter(
                                   fontSize: 14,
-                                  color: AppColors.textPrimary),
+                                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                             ),
                             const Spacer(),
-                            const Icon(Icons.keyboard_arrow_down_rounded,
-                                color: AppColors.textHint, size: 20),
+                            Icon(Icons.keyboard_arrow_down_rounded,
+                                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
                           ],
                         ),
                       ),
@@ -274,13 +273,13 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
 
                     // Note
-                    _FormLabel('Note (Optional)'),
+                    const _FormLabel('Note (Optional)'),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _noteCtrl,
                       maxLines: 3,
                       style: GoogleFonts.inter(
-                          fontSize: 14, color: AppColors.textPrimary),
+                          fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                       decoration: _inputDecor('Add a note...'),
                     ),
                     const SizedBox(height: 28),
@@ -350,9 +349,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   InputDecoration _inputDecor(String hint) => InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.inter(
-            color: AppColors.textHint, fontSize: 14),
+            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: Theme.of(context).colorScheme.surface,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         border: OutlineInputBorder(
@@ -388,7 +387,7 @@ class _FormLabel extends StatelessWidget {
       style: GoogleFonts.inter(
         fontSize: 13,
         fontWeight: FontWeight.w500,
-        color: AppColors.textPrimary,
+        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
     );
   }
@@ -404,7 +403,7 @@ class _PickerField extends StatelessWidget {
       padding:
           const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -471,7 +470,7 @@ class _ToggleBtn extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: isActive ? Colors.white : AppColors.textSecondary,
+              color: isActive ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
           ),
         ),

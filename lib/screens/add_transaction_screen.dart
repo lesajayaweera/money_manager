@@ -175,7 +175,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: AppColors.textPrimary,
+        backgroundColor: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
     );
   }
@@ -198,13 +198,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -214,7 +214,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -227,7 +227,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Amount
-              _Label('Amount (Rs.)'),
+              const _Label('Amount (Rs.)'),
               const SizedBox(height: 8),
               _AmountField(controller: _amountController),
               const SizedBox(height: 20),
@@ -256,7 +256,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(height: 20),
 
               // Date
-              _Label('Date'),
+              const _Label('Date'),
               const SizedBox(height: 8),
               _DatePickerField(
                 selectedDate: _selectedDate,
@@ -265,7 +265,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(height: 20),
 
               // Account Type
-              _Label('Payment Method'),
+              const _Label('Payment Method'),
               const SizedBox(height: 8),
               _PaymentMethodDropdown(
                 payMethods: payMethods,
@@ -276,7 +276,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(height: 20),
 
               // Note
-              _Label('Note (Optional)'),
+              const _Label('Note (Optional)'),
               const SizedBox(height: 8),
               _NoteField(
                 controller: _noteController,
@@ -348,7 +348,7 @@ class _Label extends StatelessWidget {
       style: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: AppColors.textPrimary,
+        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
     );
   }
@@ -367,13 +367,13 @@ class _AmountField extends StatelessWidget {
       style: GoogleFonts.inter(
         fontSize: 18,
         fontWeight: FontWeight.w500,
-        color: AppColors.textPrimary,
+        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
       decoration: InputDecoration(
         hintText: '0',
-        hintStyle: GoogleFonts.inter(fontSize: 18, color: AppColors.textHint),
+        hintStyle: GoogleFonts.inter(fontSize: 18, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: Theme.of(context).colorScheme.surface,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
@@ -422,7 +422,7 @@ class _CategoryDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -431,14 +431,14 @@ class _CategoryDropdown extends StatelessWidget {
           value: selectedCategory,
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary),
+          icon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
           hint: Text(
             'Select category',
             style: GoogleFonts.inter(
-                fontSize: 15, color: AppColors.textHint),
+                fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
           ),
-          dropdownColor: AppColors.surface,
+          dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (_) => categories
               .map((cat) => _CatRow(cat: cat, isSelected: true))
               .toList(),
@@ -455,7 +455,7 @@ class _CategoryDropdown extends StatelessWidget {
                     Container(
                       width: 34,
                       height: 34,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           color: AppColors.primarySurface,
                           shape: BoxShape.circle),
                       child: const Icon(Icons.settings_rounded,
@@ -510,7 +510,7 @@ class _CatRow extends StatelessWidget {
             fontSize: 15,
             fontWeight:
                 isSelected ? FontWeight.w500 : FontWeight.w400,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
       ],
@@ -533,7 +533,7 @@ class _PaymentMethodDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -542,9 +542,9 @@ class _PaymentMethodDropdown extends StatelessWidget {
           value: selected,
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary),
-          dropdownColor: AppColors.surface,
+          icon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (_) => payMethods
               .map((m) => _PayRow(method: m, isSelected: true))
               .toList(),
@@ -586,7 +586,7 @@ class _PayRow extends StatelessWidget {
             fontSize: 15,
             fontWeight:
                 isSelected ? FontWeight.w500 : FontWeight.w400,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
       ],
@@ -608,20 +608,20 @@ class _DatePickerField extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: const Color(0xFFE0E0E0)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_month_outlined,
-                color: AppColors.textSecondary, size: 20),
+            Icon(Icons.calendar_month_outlined,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 20),
             const SizedBox(width: 12),
             Text(
               DateFormat('d MMM yyyy').format(selectedDate),
               style: GoogleFonts.inter(
                 fontSize: 15,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
           ],
@@ -641,13 +641,13 @@ class _NoteField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       maxLines: 4,
-      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
+      style: GoogleFonts.inter(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.inter(
-            color: AppColors.textHint, fontSize: 14),
+            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: Theme.of(context).colorScheme.surface,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(

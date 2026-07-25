@@ -51,7 +51,7 @@ class _LendsBorrowedScreenState extends State<LendsBorrowedScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: Consumer<LendBorrowProvider>(
         builder: (context, provider, _) {
@@ -89,20 +89,20 @@ class _LendsBorrowedScreenState extends State<LendsBorrowedScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (isLent) ...[
-                            _SectionTitle('Lent to Others'),
+                            const _SectionTitle('Lent to Others'),
                             const SizedBox(height: 12),
                             if (lentEntries.isEmpty)
-                              _EmptySection(
+                              const _EmptySection(
                                 label: 'No lent entries',
                                 sub: 'Tap + Add Entry to record money you lent',
                               )
                             else
                               _EntriesList(entries: lentEntries),
                           ] else ...[
-                            _SectionTitle('Borrowed from Others'),
+                            const _SectionTitle('Borrowed from Others'),
                             const SizedBox(height: 12),
                             if (borrowedEntries.isEmpty)
-                              _EmptySection(
+                              const _EmptySection(
                                 label: 'No borrowed entries',
                                 sub: 'Tap + Add Entry to record money you borrowed',
                               )
@@ -133,7 +133,7 @@ class _LendsBorrowedScreenState extends State<LendsBorrowedScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       title: Text(
@@ -141,15 +141,15 @@ class _LendsBorrowedScreenState extends State<LendsBorrowedScreen>
         style: GoogleFonts.inter(
           fontSize: 22,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
         ),
       ),
       actions: [
         IconButton(
           icon: Stack(
             children: [
-              const Icon(Icons.notifications_outlined,
-                  color: AppColors.textPrimary, size: 26),
+              Icon(Icons.notifications_outlined,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
               Positioned(
                 right: 0,
                 top: 0,
@@ -194,7 +194,7 @@ class _ToggleTabs extends StatelessWidget {
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         labelColor: Colors.white,
-        unselectedLabelColor: AppColors.textSecondary,
+        unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
         dividerColor: Colors.transparent,
         labelStyle:
             GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
@@ -337,7 +337,7 @@ class _SectionTitle extends StatelessWidget {
       style: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
     );
   }
@@ -353,7 +353,7 @@ class _EntriesList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -441,7 +441,7 @@ class _EntryTile extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -450,14 +450,14 @@ class _EntryTile extends StatelessWidget {
                         symbol: settings.currencySymbol),
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                   Text(
                     'Due: ${CurrencyFormatter.shortDate(entry.dueDate)}',
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                 ],
@@ -508,7 +508,7 @@ class _EmptySection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -528,11 +528,11 @@ class _EmptySection extends StatelessWidget {
               style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary)),
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
           const SizedBox(height: 4),
           Text(sub,
               style:
-                  GoogleFonts.inter(fontSize: 13, color: AppColors.textHint),
+                  GoogleFonts.inter(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
               textAlign: TextAlign.center),
         ],
       ),

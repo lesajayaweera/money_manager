@@ -73,8 +73,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         ),
         child: Container(
           padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -98,7 +98,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               const SizedBox(height: 16),
@@ -107,7 +107,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               const SizedBox(height: 8),
@@ -117,13 +117,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 autofocus: true,
                 style: GoogleFonts.inter(
-                    fontSize: 16, color: AppColors.textPrimary),
+                    fontSize: 16, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: InputDecoration(
                   hintText: '0',
                   hintStyle:
-                      GoogleFonts.inter(color: AppColors.textHint, fontSize: 15),
+                      GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
                   filled: true,
-                  fillColor: AppColors.background,
+                  fillColor: Theme.of(context).scaffoldBackgroundColor,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
                   border: OutlineInputBorder(
@@ -149,7 +149,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               const SizedBox(height: 8),
@@ -162,7 +162,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                       : null;
                   return Container(
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: const Color(0xFFE0E0E0)),
                     ),
@@ -173,20 +173,20 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         hint: Text(
                           'Select wallet (optional)',
                           style: GoogleFonts.inter(
-                              color: AppColors.textHint, fontSize: 14),
+                              color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
                         ),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                            color: AppColors.textSecondary),
-                        dropdownColor: AppColors.surface,
+                        icon: Icon(Icons.keyboard_arrow_down_rounded,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                        dropdownColor: Theme.of(context).colorScheme.surface,
                         items: [
                           DropdownMenuItem<String>(
                             value: null,
                             child: Text('None',
                                 style: GoogleFonts.inter(
                                     fontSize: 14,
-                                    color: AppColors.textSecondary)),
+                                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
                           ),
                           ...wallets.map((w) => DropdownMenuItem<String>(
                                 value: w.name,
@@ -209,7 +209,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                                   Text(w.name,
                                       style: GoogleFonts.inter(
                                           fontSize: 14,
-                                          color: AppColors.textPrimary)),
+                                          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
                                 ]),
                               ))
                         ],
@@ -279,8 +279,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -352,13 +352,13 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -366,14 +366,14 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert_rounded,
-                color: AppColors.textPrimary),
+            icon: Icon(Icons.more_vert_rounded,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
             onPressed: _showOptions,
           ),
         ],
@@ -398,7 +398,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -424,14 +424,14 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                               ),
                             ),
                             Text(
                               'Completed',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
-                                color: AppColors.textSecondary,
+                                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                               ),
                             ),
                           ],
@@ -447,7 +447,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             // Stats
             Container(
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -461,11 +461,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 children: [
                   _StatRow(
                     icon: Icons.timer_outlined,
-                    iconColor: AppColors.textSecondary,
+                    iconColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     label: 'Target Amount',
                     value: CurrencyFormatter.format(_goal.targetAmount,
                         symbol: settings.currencySymbol),
-                    valueColor: AppColors.textPrimary,
+                    valueColor: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                   const Divider(height: 1, indent: 56, endIndent: 16),
                   _StatRow(
@@ -488,10 +488,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   const Divider(height: 1, indent: 56, endIndent: 16),
                   _StatRow(
                     icon: Icons.calendar_month_outlined,
-                    iconColor: AppColors.textSecondary,
+                    iconColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     label: 'Target Date',
                     value: CurrencyFormatter.shortDate(_goal.targetDate),
-                    valueColor: AppColors.textPrimary,
+                    valueColor: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ],
               ),
@@ -556,7 +556,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               style: GoogleFonts.inter(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             const SizedBox(height: 12),
@@ -567,21 +567,21 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Center(
                   child: Text(
                     'No savings added yet',
                     style: GoogleFonts.inter(
-                        color: AppColors.textSecondary, fontSize: 14),
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, fontSize: 14),
                   ),
                 ),
               )
             else
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
@@ -624,14 +624,14 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                                   ),
                                 ),
                                 Text(
                                   CurrencyFormatter.relativeDate(entry.date),
                                   style: GoogleFonts.inter(
                                     fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                   ),
                                 ),
                               ],
@@ -752,7 +752,7 @@ class _StatRow extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               ),
             ),
           ),

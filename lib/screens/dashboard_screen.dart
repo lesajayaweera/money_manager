@@ -49,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: Consumer<TransactionProvider>(
         builder: (context, provider, _) {
@@ -86,20 +86,20 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Text(
         'Dashboard',
         style: GoogleFonts.inter(
           fontSize: 24,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
         ),
       ),
       actions: [
         IconButton(
           icon: Stack(
             children: [
-              const Icon(Icons.menu, color: AppColors.textPrimary, size: 26),
+              Icon(Icons.menu, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
               Positioned(
                 right: 0,
                 top: 0,
@@ -127,8 +127,8 @@ class _DashboardScreenState extends State<DashboardScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -149,7 +149,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               const SizedBox(height: 20),
@@ -477,7 +477,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -509,7 +509,7 @@ class _StatCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -525,7 +525,7 @@ class _StatCard extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -555,7 +555,7 @@ class _RecentTransactionsSection extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             GestureDetector(
@@ -582,7 +582,7 @@ class _RecentTransactionsSection extends StatelessWidget {
         else
           Container(
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -617,15 +617,15 @@ class _EmptyTransactions extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          const Icon(
+          Icon(
             Icons.receipt_long_outlined,
             size: 48,
-            color: AppColors.textHint,
+            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
           ),
           const SizedBox(height: 12),
           Text(
@@ -633,7 +633,7 @@ class _EmptyTransactions extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 4),
@@ -641,7 +641,7 @@ class _EmptyTransactions extends StatelessWidget {
             'Add your first income or expense below',
             style: GoogleFonts.inter(
               fontSize: 13,
-              color: AppColors.textHint,
+              color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
@@ -695,7 +695,7 @@ class _TransactionTile extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -703,7 +703,7 @@ class _TransactionTile extends StatelessWidget {
                   CurrencyFormatter.relativeDate(transaction.date),
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
                 ),
               ],
@@ -730,7 +730,7 @@ class _TransactionTile extends StatelessWidget {
                 transaction.walletName,
                 style: GoogleFonts.inter(
                   fontSize: 11,
-                  color: AppColors.textHint,
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                 ),
               ),
             ],
@@ -752,7 +752,7 @@ class _ActionButtons extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           top: BorderSide(color: Colors.grey.withOpacity(0.1)),
         ),
