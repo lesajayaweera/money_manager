@@ -183,7 +183,9 @@ class _ToggleTabs extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: const Color(0xFFEEECFD),
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? AppColors.darkSurface2 
+            : const Color(0xFFEEECFD),
         borderRadius: BorderRadius.circular(22),
       ),
       child: TabBar(
@@ -225,7 +227,9 @@ class _SummaryCards extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFE6F9F5),
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.income.withValues(alpha: 0.15) 
+                  : const Color(0xFFE6F9F5),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -275,7 +279,9 @@ class _SummaryCards extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFFDF0EC),
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.expense.withValues(alpha: 0.15) 
+                  : const Color(0xFFFDF0EC),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -516,8 +522,10 @@ class _EmptySection extends StatelessWidget {
           Container(
             width: 56,
             height: 56,
-            decoration: const BoxDecoration(
-              color: AppColors.primarySurface,
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.primary.withValues(alpha: 0.2) 
+                  : AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.swap_horiz_rounded,

@@ -289,10 +289,16 @@ class _Chip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? activeColor : Colors.white,
+          color: isActive
+              ? activeColor
+              : Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkSurface2
+                  : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? activeColor : const Color(0xFFE0E0E0),
+            color: isActive
+                ? activeColor
+                : Theme.of(context).dividerTheme.color ?? const Color(0xFFE0E0E0),
           ),
           boxShadow: isActive
               ? [
