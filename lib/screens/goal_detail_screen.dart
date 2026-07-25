@@ -10,6 +10,7 @@ import '../providers/goal_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../models/wallet_model.dart';
 import 'add_edit_goal_screen.dart';
 
 class GoalDetailScreen extends StatefulWidget {
@@ -199,8 +200,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
-                                      IconData(w.iconCodePoint,
-                                          fontFamily: 'MaterialIcons'),
+                                      WalletIconHelper.fromCodePoint(w.iconCodePoint),
                                       color: Color(w.colorValue),
                                       size: 15,
                                     ),

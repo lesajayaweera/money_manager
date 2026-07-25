@@ -555,7 +555,7 @@ class _TxTile extends StatelessWidget {
     if (isTransfer && transferWallet != null) {
       iconColor = Color(transferWallet.colorValue);
       iconBgColor = iconColor.withValues(alpha: 0.15);
-      iconData = IconData(transferWallet.iconCodePoint, fontFamily: 'MaterialIcons');
+      iconData = WalletIconHelper.fromCodePoint(transferWallet.iconCodePoint);
     } else {
       iconData = isIncome
           ? Icons.account_balance_wallet_rounded

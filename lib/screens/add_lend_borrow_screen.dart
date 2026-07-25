@@ -8,6 +8,7 @@ import '../models/lend_borrow_model.dart';
 import '../providers/lend_borrow_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../models/wallet_model.dart';
 
 class AddLendBorrowScreen extends StatefulWidget {
   final LendBorrowType initialType;
@@ -522,7 +523,7 @@ class _WalletDropdown extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        IconData(w.iconCodePoint, fontFamily: 'MaterialIcons'),
+                        WalletIconHelper.fromCodePoint(w.iconCodePoint),
                         color: Color(w.colorValue),
                         size: 17,
                       ),

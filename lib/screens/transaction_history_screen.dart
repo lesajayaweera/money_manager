@@ -10,6 +10,7 @@ import '../providers/category_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../models/wallet_model.dart';
 import 'transaction_detail_screen.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
@@ -454,7 +455,7 @@ class _TxTile extends StatelessWidget {
     final IconData iconData;
     if (isTransfer && transferWallet != null) {
       bgColor = Color(transferWallet.colorValue);
-      iconData = IconData(transferWallet.iconCodePoint, fontFamily: 'MaterialIcons');
+      iconData = WalletIconHelper.fromCodePoint(transferWallet.iconCodePoint);
     } else {
       final cat = categoryProvider.findByName(transaction.category, type) ??
           (type == CategoryType.income
