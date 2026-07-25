@@ -7,6 +7,7 @@ import '../core/constants/app_colors.dart';
 import '../models/goal_model.dart';
 import '../providers/goal_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../models/wallet_model.dart';
 
 class AddEditGoalScreen extends StatefulWidget {
   final GoalModel? editGoal;
@@ -528,8 +529,7 @@ class _WalletDropdown extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          IconData(w.iconCodePoint,
-                              fontFamily: 'MaterialIcons'),
+                          WalletIconHelper.fromCodePoint(w.iconCodePoint),
                           color: Color(w.colorValue),
                           size: 17,
                         ),

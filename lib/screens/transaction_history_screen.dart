@@ -10,7 +10,8 @@ import '../providers/category_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/wallet_provider.dart';
-import 'add_transaction_screen.dart';
+import '../models/wallet_model.dart';
+import 'transaction_detail_screen.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -357,7 +358,18 @@ class _GroupedList extends StatelessWidget {
               return _TxTile(
                 transaction: tx,
                 isLast: i == txs.length - 1,
-                onEdit: () => _editTx(ctx, tx),
+                onEdit: () async {
+                        final result = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            builder: (_) => TransactionDetailScreen(
+                              transaction: tx,
+                            ),
+                          ),
+                        );
+                        if (result == true && context.mounted) {
+                          await context.read<TransactionProvider>().loadAll();
+                        }
+                      },
                 onDelete: () => _deleteTx(ctx, tx),
               );
             }),
@@ -366,20 +378,6 @@ class _GroupedList extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future<void> _editTx(BuildContext context, TransactionModel tx) async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => AddTransactionScreen(
-          initialType: tx.type,
-          editTransaction: tx,
-        ),
-      ),
-    );
-    if (result == true && context.mounted) {
-      context.read<TransactionProvider>().loadAll();
-    }
   }
 
   Future<void> _deleteTx(
@@ -457,7 +455,7 @@ class _TxTile extends StatelessWidget {
     final IconData iconData;
     if (isTransfer && transferWallet != null) {
       bgColor = Color(transferWallet.colorValue);
-      iconData = IconData(transferWallet.iconCodePoint, fontFamily: 'MaterialIcons');
+      iconData = WalletIconHelper.fromCodePoint(transferWallet.iconCodePoint);
     } else {
       final cat = categoryProvider.findByName(transaction.category, type) ??
           (type == CategoryType.income

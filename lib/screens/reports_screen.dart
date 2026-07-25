@@ -110,7 +110,9 @@ class _ReportsScreenState extends State<ReportsScreen>
 
 // ─── Overview Tab ─────────────────────────────────────────────────────────────
 
-class _OverviewTab extends StatelessWidget {
+enum ReportPeriod { daily, monthly, annually, custom }
+
+class _OverviewTab extends StatefulWidget {
   final int touchedIndex;
   final ValueChanged<int> onPieTouch;
 
@@ -118,24 +120,189 @@ class _OverviewTab extends StatelessWidget {
       {required this.touchedIndex, required this.onPieTouch});
 
   @override
+  State<_OverviewTab> createState() => _OverviewTabState();
+}
+
+class _OverviewTabState extends State<_OverviewTab> {
+  ReportPeriod _selectedPeriod = ReportPeriod.monthly;
+  DateTimeRange? _customDateRange;
+  int _touchedIncomePieIndex = -1;
+
+  List<TransactionModel> _getFilteredTransactions(List<TransactionModel> allTxs) {
+    final now = DateTime.now();
+    DateTime start;
+    DateTime end;
+
+    switch (_selectedPeriod) {
+      case ReportPeriod.daily:
+        start = DateTime(now.year, now.month, now.day);
+        end = start.add(const Duration(days: 1));
+        break;
+      case ReportPeriod.monthly:
+        start = DateTime(now.year, now.month, 1);
+        end = DateTime(now.year, now.month + 1, 1);
+        break;
+      case ReportPeriod.annually:
+        start = DateTime(now.year, 1, 1);
+        end = DateTime(now.year + 1, 1, 1);
+        break;
+      case ReportPeriod.custom:
+        if (_customDateRange != null) {
+          start = _customDateRange!.start;
+          end = _customDateRange!.end.add(const Duration(days: 1));
+        } else {
+          start = DateTime(now.year, now.month, 1);
+          end = DateTime(now.year, now.month + 1, 1);
+        }
+        break;
+    }
+
+    return allTxs.where((t) {
+      return (t.date.isAfter(start.subtract(const Duration(milliseconds: 1))) || t.date.isAtSameMomentAs(start)) && t.date.isBefore(end);
+    }).toList();
+  }
+
+  Map<String, double> _getCategoryBreakdown(List<TransactionModel> txs, TransactionType type) {
+    final Map<String, double> breakdown = {};
+    for (final tx in txs) {
+      if (tx.type == type) {
+        breakdown[tx.category] = (breakdown[tx.category] ?? 0) + tx.amount;
+      }
+    }
+    final sortedEntries = breakdown.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return Map.fromEntries(sortedEntries);
+  }
+
+  Future<void> _selectCustomDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDateRange: _customDateRange,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _customDateRange = picked;
+        _selectedPeriod = ReportPeriod.custom;
+      });
+    } else if (_selectedPeriod == ReportPeriod.custom && _customDateRange == null) {
+      // Revert if cancelled and no range was selected
+      setState(() {
+        _selectedPeriod = ReportPeriod.monthly;
+      });
+    }
+  }
+
+  String _getPeriodLabel() {
+    final now = DateTime.now();
+    switch (_selectedPeriod) {
+      case ReportPeriod.daily:
+        return DateFormat('dd MMM yyyy').format(now);
+      case ReportPeriod.monthly:
+        return DateFormat('MMMM yyyy').format(now);
+      case ReportPeriod.annually:
+        return DateFormat('yyyy').format(now);
+      case ReportPeriod.custom:
+        if (_customDateRange != null) {
+          final start = DateFormat('dd MMM').format(_customDateRange!.start);
+          final end = DateFormat('dd MMM yyyy').format(_customDateRange!.end);
+          return '$start - $end';
+        }
+        return 'Custom';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final provider = context.watch<TransactionProvider>();
     final settings = context.watch<SettingsProvider>();
-    final now = DateTime.now();
-    final summary = provider.summary;
+    
+    final filteredTxs = _getFilteredTransactions(provider.allTransactions);
+    
+    double totalIncome = 0;
+    double totalExpense = 0;
+    for (final tx in filteredTxs) {
+      if (tx.isIncome) totalIncome += tx.amount;
+      if (tx.isExpense) totalExpense += tx.amount;
+    }
+
+    final expenseBreakdown = _getCategoryBreakdown(filteredTxs, TransactionType.expense);
+    final incomeBreakdown = _getCategoryBreakdown(filteredTxs, TransactionType.income);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Period Selector
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Report Period',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _PeriodChip(
+                        label: 'Daily',
+                        isSelected: _selectedPeriod == ReportPeriod.daily,
+                        onTap: () => setState(() => _selectedPeriod = ReportPeriod.daily),
+                      ),
+                      const SizedBox(width: 8),
+                      _PeriodChip(
+                        label: 'Monthly',
+                        isSelected: _selectedPeriod == ReportPeriod.monthly,
+                        onTap: () => setState(() => _selectedPeriod = ReportPeriod.monthly),
+                      ),
+                      const SizedBox(width: 8),
+                      _PeriodChip(
+                        label: 'Annually',
+                        isSelected: _selectedPeriod == ReportPeriod.annually,
+                        onTap: () => setState(() => _selectedPeriod = ReportPeriod.annually),
+                      ),
+                      const SizedBox(width: 8),
+                      _PeriodChip(
+                        label: 'Custom',
+                        isSelected: _selectedPeriod == ReportPeriod.custom,
+                        onTap: _selectCustomDateRange,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // Income vs Expense bar chart
           _SectionCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Income vs Expense (${DateFormat('MMMM yyyy').format(now)})',
+                  'Income vs Expense (${_getPeriodLabel()})',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -144,8 +311,8 @@ class _OverviewTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 _SimpleBarChart(
-                  income: summary.monthlyIncome,
-                  expenses: summary.monthlyExpenses,
+                  income: totalIncome,
+                  expenses: totalExpense,
                   currencySymbol: settings.currencySymbol,
                 ),
               ],
@@ -167,45 +334,101 @@ class _OverviewTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                FutureBuilder<Map<String, double>>(
-                  future: provider.getCategoryBreakdown(
-                      TransactionType.expense, now.year, now.month),
-                  builder: (ctx, snap) {
-                    if (!snap.hasData) {
-                      return const SizedBox(
-                        height: 120,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                              color: AppColors.primary, strokeWidth: 2),
-                        ),
-                      );
-                    }
-                    final data = snap.data!;
-                    if (data.isEmpty) {
-                      return SizedBox(
-                        height: 80,
-                        child: Center(
-                          child: Text(
-                            'No expenses this month',
-                            style: GoogleFonts.inter(
-                                color: AppColors.textSecondary),
-                          ),
-                        ),
-                      );
-                    }
-                    return _PieSection(
-                      data: data,
-                      touchedIndex: touchedIndex,
-                      onTouch: onPieTouch,
-                      currencySymbol: settings.currencySymbol,
-                      total: summary.monthlyExpenses,
-                    );
-                  },
+                if (expenseBreakdown.isEmpty)
+                  SizedBox(
+                    height: 80,
+                    child: Center(
+                      child: Text(
+                        'No expenses in this period',
+                        style: GoogleFonts.inter(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  )
+                else
+                  _PieSection(
+                    data: expenseBreakdown,
+                    touchedIndex: widget.touchedIndex,
+                    onTouch: widget.onPieTouch,
+                    currencySymbol: settings.currencySymbol,
+                    total: totalExpense,
+                    isExpense: true,
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Category-wise income pie chart
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Category-wise Income',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
+                const SizedBox(height: 16),
+                if (incomeBreakdown.isEmpty)
+                  SizedBox(
+                    height: 80,
+                    child: Center(
+                      child: Text(
+                        'No income in this period',
+                        style: GoogleFonts.inter(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  )
+                else
+                  _PieSection(
+                    data: incomeBreakdown,
+                    touchedIndex: _touchedIncomePieIndex,
+                    onTouch: (i) => setState(() => _touchedIncomePieIndex = i),
+                    currencySymbol: settings.currencySymbol,
+                    total: totalIncome,
+                    isExpense: false,
+                  ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PeriodChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _PeriodChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : const Color(0xFFF0F0F0),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -427,6 +650,7 @@ class _PieSection extends StatelessWidget {
   final ValueChanged<int> onTouch;
   final String currencySymbol;
   final double total;
+  final bool isExpense;
 
   const _PieSection({
     required this.data,
@@ -434,6 +658,7 @@ class _PieSection extends StatelessWidget {
     required this.onTouch,
     required this.currencySymbol,
     required this.total,
+    this.isExpense = true,
   });
 
   static const List<Color> _colors = [
@@ -459,7 +684,7 @@ class _PieSection extends StatelessWidget {
         value: entries[i].value,
         title: '',
         color: color,
-        radius: isTouched ? 52 : 44,
+        radius: isTouched ? 28 : 22,
       ));
     }
 
@@ -472,22 +697,59 @@ class _PieSection extends StatelessWidget {
             SizedBox(
               width: 140,
               height: 140,
-              child: PieChart(
-                PieChartData(
-                  sections: sections,
-                  centerSpaceRadius: 40,
-                  sectionsSpace: 2,
-                  pieTouchData: PieTouchData(
-                    touchCallback: (event, response) {
-                      if (response?.touchedSection != null) {
-                        onTouch(response!
-                            .touchedSection!.touchedSectionIndex);
-                      } else {
-                        onTouch(-1);
-                      }
-                    },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  PieChart(
+                    PieChartData(
+                      sections: sections,
+                      centerSpaceRadius: 42,
+                      sectionsSpace: 2,
+                      pieTouchData: PieTouchData(
+                        touchCallback: (event, response) {
+                          if (response?.touchedSection != null) {
+                            onTouch(response!.touchedSection!.touchedSectionIndex);
+                          } else {
+                            onTouch(-1);
+                          }
+                        },
+                      ),
+                    ),
                   ),
-                ),
+                  if (touchedIndex >= 0 && touchedIndex < entries.length)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            entries[touchedIndex].key,
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            CurrencyFormatter.format(entries[touchedIndex].value,
+                                symbol: currencySymbol),
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isExpense ? AppColors.expense : AppColors.income,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
             const SizedBox(width: 20),
@@ -544,7 +806,7 @@ class _PieSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Total Expenses',
+              isExpense ? 'Total Expenses' : 'Total Income',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -557,7 +819,7 @@ class _PieSection extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.expense,
+                color: isExpense ? AppColors.expense : AppColors.income,
               ),
             ),
           ],

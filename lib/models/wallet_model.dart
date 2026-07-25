@@ -235,7 +235,7 @@ class WalletModel {
     required this.createdAt,
   });
 
-  IconData get icon => IconData(iconCodePoint, fontFamily: 'MaterialIcons');
+  IconData get icon => WalletIconHelper.fromCodePoint(iconCodePoint);
   Color get color => Color(colorValue);
   Color get lightColor {
     final base = color;
@@ -301,6 +301,83 @@ class WalletModel {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
     );
+  }
+}
+
+// ─── Wallet Icon Helper ────────────────────────────────────────────────────────
+// All IconData must be returned as const references so Flutter's icon
+// tree-shaker can analyse them at compile time. Dynamic IconData(codePoint)
+// construction breaks release builds.
+
+class WalletIconHelper {
+  /// Returns the matching const [IconData] for a stored [codePoint], or the
+  /// default wallet icon when the code point is not recognised.
+  static IconData fromCodePoint(int codePoint) {
+    switch (codePoint) {
+      case 0xe152: return Icons.account_balance_wallet_rounded;
+      case 0xe151: return Icons.account_balance_rounded;
+      case 0xe1b9: return Icons.account_box_rounded;
+      case 0xe7f7: return Icons.credit_card_rounded;
+      case 0xe8ff: return Icons.savings_rounded;
+      case 0xe4fe: return Icons.business_center_rounded;
+      case 0xe532: return Icons.payment_rounded;
+      case 0xe25a: return Icons.money_rounded;
+      case 0xe263: return Icons.monetization_on_rounded;
+      case 0xe22b: return Icons.local_atm_rounded;
+      case 0xe8d4: return Icons.receipt_rounded;
+      case 0xe1b4: return Icons.account_circle_rounded;
+      case 0xe319: return Icons.home_rounded;
+      case 0xe88b: return Icons.shopping_cart_rounded;
+      case 0xe8f9: return Icons.shopping_bag_rounded;
+      case 0xe8f8: return Icons.shopping_basket_rounded;
+      case 0xe4e4: return Icons.attach_money_rounded;
+      case 0xe57c: return Icons.card_giftcard_rounded;
+      case 0xe56c: return Icons.bar_chart_rounded;
+      case 0xe57f: return Icons.show_chart_rounded;
+      case 0xe6e1: return Icons.trending_up_rounded;
+      case 0xe6e2: return Icons.trending_down_rounded;
+      case 0xe8f5: return Icons.school_rounded;
+      case 0xe548: return Icons.local_hospital_rounded;
+      case 0xe53f: return Icons.local_dining_rounded;
+      case 0xe542: return Icons.local_gas_station_rounded;
+      case 0xe544: return Icons.local_grocery_store_rounded;
+      case 0xe54b: return Icons.local_movies_rounded;
+      case 0xe550: return Icons.local_pharmacy_rounded;
+      case 0xe554: return Icons.local_shipping_rounded;
+      case 0xe558: return Icons.local_taxi_rounded;
+      case 0xe53e: return Icons.local_cafe_rounded;
+      case 0xe543: return Icons.local_hotel_rounded;
+      case 0xe531: return Icons.park_rounded;
+      case 0xe30a: return Icons.flight_rounded;
+      case 0xe53c: return Icons.directions_car_rounded;
+      case 0xe534: return Icons.directions_bike_rounded;
+      case 0xe535: return Icons.directions_bus_rounded;
+      case 0xe57a: return Icons.train_rounded;
+      case 0xe57b: return Icons.subway_rounded;
+      case 0xe408: return Icons.phone_android_rounded;
+      case 0xe32c: return Icons.laptop_rounded;
+      case 0xe325: return Icons.headset_rounded;
+      case 0xe8b8: return Icons.settings_rounded;
+      case 0xe87d: return Icons.person_rounded;
+      case 0xe7f2: return Icons.group_rounded;
+      case 0xe8d6: return Icons.restaurant_rounded;
+      case 0xe065: return Icons.music_note_rounded;
+      case 0xe04f: return Icons.emoji_events_rounded;
+      case 0xe7fb: return Icons.child_care_rounded;
+      case 0xe63e: return Icons.pets_rounded;
+      case 0xe3f6: return Icons.photo_camera_rounded;
+      case 0xe412: return Icons.videocam_rounded;
+      case 0xe158: return Icons.build_rounded;
+      case 0xe3e1: return Icons.palette_rounded;
+      case 0xe8cc: return Icons.book_rounded;
+      case 0xe865: return Icons.lightbulb_rounded;
+      case 0xe838: return Icons.star_rounded;
+      case 0xe87e: return Icons.favorite_rounded;
+      case 0xe8b0: return Icons.security_rounded;
+      case 0xe32a: return Icons.lock_rounded;
+      case 0xe88a: return Icons.shield_rounded;
+      default:     return Icons.account_balance_wallet_rounded;
+    }
   }
 }
 
