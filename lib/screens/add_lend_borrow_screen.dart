@@ -357,7 +357,9 @@ class _TypeToggle extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: const Color(0xFFEEECFD),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.darkSurface2
+            : const Color(0xFFEEECFD),
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(

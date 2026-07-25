@@ -241,7 +241,9 @@ class _QuickNavTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: lightColor,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? color.withValues(alpha: 0.15)
+              : lightColor,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
