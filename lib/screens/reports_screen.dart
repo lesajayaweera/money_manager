@@ -684,7 +684,7 @@ class _PieSection extends StatelessWidget {
         value: entries[i].value,
         title: '',
         color: color,
-        radius: isTouched ? 52 : 44,
+        radius: isTouched ? 40 : 35,
       ));
     }
 
@@ -700,7 +700,7 @@ class _PieSection extends StatelessWidget {
               child: PieChart(
                 PieChartData(
                   sections: sections,
-                  centerSpaceRadius: 40,
+                  centerSpaceRadius: 30,
                   sectionsSpace: 2,
                   pieTouchData: PieTouchData(
                     touchCallback: (event, response) {
