@@ -483,24 +483,7 @@ class _TxTile extends StatelessWidget {
       iconData = cat.icon;
     }
 
-    return Dismissible(
-      key: ValueKey('tx-${transaction.id}'),
-      direction: isTransfer ? DismissDirection.none : DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.only(bottom: 1),
-        decoration: BoxDecoration(
-          color: AppColors.expense.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.delete_rounded, color: AppColors.expense),
-      ),
-      confirmDismiss: (_) async {
-        onDelete();
-        return false;
-      },
-      child: InkWell(
+    return InkWell(
         onTap: isTransfer ? null : onEdit,
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -576,8 +559,7 @@ class _TxTile extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
