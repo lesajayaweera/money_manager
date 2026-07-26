@@ -159,7 +159,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: GoogleFonts.inter(fontSize: 14, color: Colors.white)),
+        content: Text(msg, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.expense,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -182,7 +182,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
         ),
         title: Text(
           _isEditing ? 'Edit Entry' : 'Add Entry',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -209,7 +209,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _personController,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: _inputDecoration(context, 'Nimal Perera'),
                 validator: (v) => (v == null || v.trim().isEmpty)
@@ -225,7 +225,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: _inputDecoration(context, '5,000'),
                 validator: (v) =>
@@ -240,7 +240,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                 controller: _accumulatedController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: _inputDecoration(context, 'e.g. 1,000 (Already paid)'),
               ),
@@ -281,7 +281,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
               TextFormField(
                 controller: _noteController,
                 maxLines: 3,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: _inputDecoration(context, 'Lunch and transport'),
               ),
@@ -330,7 +330,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                         )
                       : Text(
                           _isEditing ? 'Update Entry' : 'Save Entry',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                               fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                 ),
@@ -378,7 +378,7 @@ class _TypeToggle extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   'Lent',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: selected == LendBorrowType.lent
@@ -403,7 +403,7 @@ class _TypeToggle extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   'Borrowed',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: selected == LendBorrowType.borrowed
@@ -458,7 +458,7 @@ class _StatusDropdown extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Text(s.label,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                                 fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
                       ],
                     ),
@@ -501,7 +501,7 @@ class _WalletDropdown extends StatelessWidget {
           isExpanded: true,
           hint: Text(
             'Select wallet',
-            style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+            style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
@@ -511,7 +511,7 @@ class _WalletDropdown extends StatelessWidget {
             DropdownMenuItem<String>(
               value: null,
               child: Text('None',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                       fontSize: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
             ),
             ...wallets.map((w) => DropdownMenuItem<String>(
@@ -532,7 +532,7 @@ class _WalletDropdown extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(w.name,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                             fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
                   ]),
                 ))
@@ -554,7 +554,7 @@ class _FormLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -565,7 +565,7 @@ class _FormLabel extends StatelessWidget {
 
 InputDecoration _inputDecoration(BuildContext context, String hint) => InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+      hintStyle: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
       filled: true,
       fillColor: Theme.of(context).colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -616,7 +616,7 @@ class _DateField extends StatelessWidget {
             Flexible(
               child: Text(
                 DateFormat('d MMM yyyy').format(date),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 13, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),

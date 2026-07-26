@@ -48,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         scrolledUnderElevation: 0,
         title: Text(
           'Settings',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w700,
             color: textPrimary,
@@ -151,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           children: [
             Text(
               'Select Currency',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color,
@@ -161,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             ..._currencies.map((c) => ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(c['name']!,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: Theme.of(context).textTheme.bodyLarge?.color,
                       )),
@@ -186,13 +186,13 @@ class _SettingsScreenState extends State<SettingsScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: Text('Clear All Data',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontWeight: FontWeight.w700,
               color: Theme.of(context).textTheme.titleLarge?.color,
             )),
         content: Text(
           'This will permanently delete all your transactions. This action cannot be undone.',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             color: Theme.of(context).textTheme.bodyMedium?.color,
             fontSize: 14,
           ),
@@ -201,7 +201,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text('Cancel',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     color: Theme.of(context).textTheme.bodyMedium?.color)),
           ),
           ElevatedButton(
@@ -213,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen>
               elevation: 0,
             ),
             child: Text('Clear',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     color: Colors.white, fontWeight: FontWeight.w600)),
           ),
         ],
@@ -231,7 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('All data cleared',
-                style: GoogleFonts.inter(fontSize: 14)),
+                style: GoogleFonts.poppins(fontSize: 14)),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
             shape:
@@ -254,7 +254,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Coming soon!', style: GoogleFonts.inter(fontSize: 14)),
+        content: Text('Coming soon!', style: GoogleFonts.poppins(fontSize: 14)),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -274,7 +274,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text.toUpperCase(),
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 11,
         fontWeight: FontWeight.w700,
         letterSpacing: 1.2,
@@ -348,7 +348,7 @@ class _DarkModeRow extends StatelessWidget {
           Expanded(
             child: Text(
               'Dark Mode',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: textPrimary,
@@ -432,7 +432,7 @@ class _SettingsRow extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: labelColor ?? textPrimary,
@@ -443,7 +443,7 @@ class _SettingsRow extends StatelessWidget {
                 if (value.isNotEmpty)
                   Text(
                     '$valuePrefix$value',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: textSecondary,
                     ),

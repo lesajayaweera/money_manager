@@ -155,7 +155,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
         ),
         title: Text(
           'Transfer Money',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -184,7 +184,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     children: [
                       Text(
                         'From',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           fontWeight: FontWeight.w500,
@@ -212,7 +212,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                               children: [
                                 Text(
                                   _fromWallet?.name ?? 'Select',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -223,7 +223,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   Text(
                                     CurrencyFormatter.format(fromBal,
                                         symbol: sym),
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                     ),
@@ -265,7 +265,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     children: [
                       Text(
                         'To',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           fontWeight: FontWeight.w500,
@@ -281,7 +281,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                               children: [
                                 Text(
                                   _toWallet?.name ?? 'Select',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -293,7 +293,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   Text(
                                     CurrencyFormatter.format(toBal,
                                         symbol: sym),
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                     ),
@@ -351,7 +351,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   Expanded(
                     child: Text(
                       _fromWallet?.name ?? 'Select wallet',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: _fromWallet != null
                             ? Theme.of(context).textTheme.titleLarge?.color ?? Colors.white
@@ -362,7 +362,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   if (_fromWallet != null)
                     Text(
                       CurrencyFormatter.format(fromBal, symbol: sym),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),
@@ -403,7 +403,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   Expanded(
                     child: Text(
                       _toWallet?.name ?? 'Select wallet',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: _toWallet != null
                             ? Theme.of(context).textTheme.titleLarge?.color ?? Colors.white
@@ -414,7 +414,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   if (_toWallet != null)
                     Text(
                       CurrencyFormatter.format(toBal, symbol: sym),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),
@@ -438,7 +438,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   padding: const EdgeInsets.only(left: 16, right: 10),
                   child: Text(
                     'Rs.',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -460,13 +460,13 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                           RegExp(r'^\d+\.?\d{0,2}')),
                     ],
                     onChanged: (_) => setState(() {}),
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                     ),
                     decoration: InputDecoration(
                       hintText: 'e.g., 0.00',
-                      hintStyle: GoogleFonts.inter(
+                      hintStyle: GoogleFonts.poppins(
                         fontSize: 15,
                         color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                       ),
@@ -497,7 +497,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   Expanded(
                     child: Text(
                       CurrencyFormatter.shortDate(_selectedDate),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                       ),
@@ -522,13 +522,13 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   maxLength: 60,
                   maxLines: 3,
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Add a note for this transfer...',
-                    hintStyle: GoogleFonts.inter(
+                    hintStyle: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                     ),
@@ -548,7 +548,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   bottom: 8,
                   child: Text(
                     '${_noteController.text.length}/60',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 11,
                       color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                     ),
@@ -567,7 +567,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
               const SizedBox(width: 6),
               Text(
                 'Transfers do not affect total balance.',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 12,
                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
@@ -580,7 +580,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
           if (_fromWallet != null && _toWallet != null) ...[
             Text(
               'After Transfer',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -650,7 +650,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                 : const Icon(Icons.send_rounded, size: 18),
             label: Text(
               'Confirm Transfer',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                   fontSize: 16, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
@@ -690,7 +690,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w700,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -765,7 +765,7 @@ class _AfterTransferRow extends StatelessWidget {
             children: [
               Text(
                 wallet.name,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -773,7 +773,7 @@ class _AfterTransferRow extends StatelessWidget {
               ),
               Text(
                 CurrencyFormatter.format(originalBalance, symbol: sym),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 11,
                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
@@ -788,7 +788,7 @@ class _AfterTransferRow extends StatelessWidget {
           isDecrease
               ? '${CurrencyFormatter.format(originalBalance, symbol: sym)} - Amount'
               : '${CurrencyFormatter.format(originalBalance, symbol: sym)} + Amount',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: isDecrease ? AppColors.expense : AppColors.income,
@@ -838,7 +838,7 @@ class _WalletPickerSheet extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Select Wallet',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -850,7 +850,7 @@ class _WalletPickerSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 child: Text(
                   'No wallets available',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
@@ -871,7 +871,7 @@ class _WalletPickerSheet extends StatelessWidget {
                     ),
                     title: Text(
                       wallet.name,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -880,7 +880,7 @@ class _WalletPickerSheet extends StatelessWidget {
                     subtitle: Text(
                       CurrencyFormatter.format(wallet.balance,
                           symbol: currencySymbol),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),

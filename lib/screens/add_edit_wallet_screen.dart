@@ -134,7 +134,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
         ),
         title: Text(
           _isEditMode ? 'Edit Wallet' : 'Add Wallet',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -153,11 +153,11 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
             _InputCard(
               child: TextFormField(
                 controller: _nameController,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: InputDecoration(
                   hintText: 'e.g., Emergency Fund',
-                  hintStyle: GoogleFonts.inter(
+                  hintStyle: GoogleFonts.poppins(
                       fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
                   prefixIcon: Icon(
                     Icons.account_balance_wallet_outlined,
@@ -192,7 +192,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                     padding: const EdgeInsets.only(left: 16, right: 10),
                     child: Text(
                       'Rs.',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -214,11 +214,11 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                             RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                       decoration: InputDecoration(
                         hintText: 'e.g., 0.00',
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: GoogleFonts.poppins(
                             fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
@@ -282,11 +282,11 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                     maxLength: 100,
                     maxLines: 3,
                     onChanged: (_) => setState(() {}),
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Add a note about this wallet...',
-                      hintStyle: GoogleFonts.inter(
+                      hintStyle: GoogleFonts.poppins(
                           fontSize: 14, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
                       prefixIcon: Padding(
                         padding: EdgeInsets.only(bottom: 40),
@@ -303,7 +303,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                     bottom: 8,
                     child: Text(
                       '${_noteController.text.length}/100',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                       ),
@@ -356,7 +356,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                           _nameController.text.trim().isEmpty
                               ? 'Example Wallet'
                               : _nameController.text.trim(),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -366,7 +366,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                         Text(
                           CurrencyFormatter.format(previewBalance,
                               symbol: settings.currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
@@ -396,7 +396,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                         const SizedBox(width: 5),
                         Text(
                           _selectedStatus.displayName,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: _selectedStatus.color,
@@ -433,7 +433,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                       children: [
                         Text(
                           'Include in Total Balance',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -442,7 +442,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                         const SizedBox(height: 3),
                         Text(
                           'This wallet balance will be added to your total balance.',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
@@ -488,7 +488,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                 : const Icon(Icons.save_rounded, size: 20),
             label: Text(
               _isEditMode ? 'Update Wallet' : 'Save Wallet',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                   fontSize: 16, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
@@ -516,7 +516,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w700,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -618,7 +618,7 @@ class _WalletTypeSelector extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       type.displayName,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 10,
                         fontWeight: isSelected
                             ? FontWeight.w700
@@ -702,7 +702,7 @@ class _IconDropdown extends StatelessWidget {
             Expanded(
               child: Text(
                 'Wallet Icon',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
@@ -742,7 +742,7 @@ class _IconDropdown extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Choose Icon',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -837,7 +837,7 @@ class _ColorDropdown extends StatelessWidget {
             Expanded(
               child: Text(
                 WalletColors.nameForColor(selected),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
@@ -876,7 +876,7 @@ class _ColorDropdown extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Choose Color',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -923,7 +923,7 @@ class _ColorDropdown extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           wc.name,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 10,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                             fontWeight: isSelected

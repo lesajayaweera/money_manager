@@ -138,7 +138,7 @@ class _LendsBorrowedScreenState extends State<LendsBorrowedScreen>
       scrolledUnderElevation: 0,
       title: Text(
         'Lends & Borrowed',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 22,
           fontWeight: FontWeight.w700,
           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -199,9 +199,9 @@ class _ToggleTabs extends StatelessWidget {
         unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
         dividerColor: Colors.transparent,
         labelStyle:
-            GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+            GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
         unselectedLabelStyle:
-            GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+            GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
         tabs: const [
           Tab(text: 'Lent'),
           Tab(text: 'Borrowed'),
@@ -240,7 +240,7 @@ class _SummaryCards extends StatelessWidget {
                     children: [
                       Text(
                         'You Will Receive',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: AppColors.income,
                           fontWeight: FontWeight.w500,
@@ -250,7 +250,7 @@ class _SummaryCards extends StatelessWidget {
                       Text(
                         CurrencyFormatter.format(provider.totalToReceive,
                             symbol: settings.currencySymbol),
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           color: AppColors.income,
@@ -292,7 +292,7 @@ class _SummaryCards extends StatelessWidget {
                     children: [
                       Text(
                         'You Need to Pay',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: AppColors.expense,
                           fontWeight: FontWeight.w500,
@@ -302,7 +302,7 @@ class _SummaryCards extends StatelessWidget {
                       Text(
                         CurrencyFormatter.format(provider.totalToPay,
                             symbol: settings.currencySymbol),
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           color: AppColors.expense,
@@ -340,7 +340,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w700,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -428,7 +428,7 @@ class _EntryTile extends StatelessWidget {
               child: Center(
                 child: Text(
                   initials,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -444,7 +444,7 @@ class _EntryTile extends StatelessWidget {
                 children: [
                   Text(
                     entry.personName,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -454,14 +454,14 @@ class _EntryTile extends StatelessWidget {
                   Text(
                     CurrencyFormatter.format(entry.amount,
                         symbol: settings.currencySymbol),
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                   Text(
                     'Due: ${CurrencyFormatter.shortDate(entry.dueDate)}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
@@ -492,7 +492,7 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.label,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: status.color,
@@ -533,14 +533,14 @@ class _EmptySection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
           const SizedBox(height: 4),
           Text(sub,
               style:
-                  GoogleFonts.inter(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+                  GoogleFonts.poppins(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
               textAlign: TextAlign.center),
         ],
       ),
@@ -564,7 +564,7 @@ class _AddEntryButton extends StatelessWidget {
         icon: const Icon(Icons.add, size: 20),
         label: Text(
           'Add Entry',
-          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,

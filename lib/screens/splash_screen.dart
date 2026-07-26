@@ -141,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen>
                     children: [
                       Text(
                         'Money Manager',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -152,7 +152,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const SizedBox(height: 12),
                       Text(
                         'Manage your money\nsmartly and easily',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: Colors.white.withOpacity(0.85),
@@ -497,7 +497,7 @@ class _StartButtonState extends State<_StartButton>
             children: [
               Text(
                 'Start Managing Money',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,

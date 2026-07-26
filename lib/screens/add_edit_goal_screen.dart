@@ -121,7 +121,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: GoogleFonts.inter(fontSize: 14, color: Colors.white)),
+        content: Text(msg, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.expense,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -144,7 +144,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         ),
         title: Text(
           _isEditing ? 'Edit Goal' : 'Add Goal',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -249,7 +249,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                         )
                       : Text(
                           _isEditing ? 'Update Goal' : 'Save Goal',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -275,7 +275,7 @@ class _FormLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -286,7 +286,7 @@ class _FormLabel extends StatelessWidget {
 
 InputDecoration _inputDecoration(BuildContext context, String hint) => InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+      hintStyle: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
       filled: true,
       fillColor: Theme.of(context).colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -324,7 +324,7 @@ class _TextInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      style: GoogleFonts.inter(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: _inputDecoration(context, hint),
       validator: validator,
     );
@@ -345,7 +345,7 @@ class _NumberInput extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      style: GoogleFonts.inter(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: _inputDecoration(context, hint),
       validator: required
           ? (v) => (v == null || v.trim().isEmpty) ? 'Enter an amount' : null
@@ -365,7 +365,7 @@ class _NoteInput extends StatelessWidget {
     return TextFormField(
       controller: controller,
       maxLines: 4,
-      style: GoogleFonts.inter(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: _inputDecoration(context, hint),
     );
   }
@@ -396,7 +396,7 @@ class _DateField extends StatelessWidget {
             Text(
               DateFormat('d MMM yyyy').format(date),
               style:
-                  GoogleFonts.inter(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+                  GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
             ),
           ],
         ),
@@ -462,7 +462,7 @@ class _CatRow extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           cat.name,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 15,
             fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -501,7 +501,7 @@ class _WalletDropdown extends StatelessWidget {
           isExpanded: true,
           hint: Text(
             'Select wallet (optional)',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
                 color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -513,7 +513,7 @@ class _WalletDropdown extends StatelessWidget {
               value: null,
               child: Text(
                 'None',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
               ),
             ),
@@ -537,7 +537,7 @@ class _WalletDropdown extends StatelessWidget {
                       const SizedBox(width: 12),
                       Text(
                         w.name,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 15,
                           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                         ),

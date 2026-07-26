@@ -108,7 +108,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
         ),
         title: Text(
           isEditing ? 'Edit Category' : 'Add Category',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -145,7 +145,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                         Text(
                           previewName,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -163,7 +163,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                             _type == CategoryType.expense
                                 ? 'Expense'
                                 : 'Income',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -176,7 +176,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Preview',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
@@ -195,7 +195,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     TextFormField(
                       controller: _nameCtrl,
                       onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                       decoration: _inputDecor('e.g. Pet Care'),
                       validator: (v) {
@@ -231,7 +231,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                             const SizedBox(width: 10),
                             Text(
                               'Choose icon',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
                             ),
@@ -257,7 +257,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                             const SizedBox(width: 10),
                             Text(
                               '#${_selectedColor.toARGB32().toRadixString(16).toUpperCase().substring(2)}',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                             ),
@@ -278,7 +278,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     TextFormField(
                       controller: _noteCtrl,
                       maxLines: 3,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                       decoration: _inputDecor('Add a note...'),
                     ),
@@ -307,7 +307,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                               )
                             : Text(
                                 'Save Category',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -348,7 +348,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
   InputDecoration _inputDecor(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.poppins(
             color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
@@ -384,7 +384,7 @@ class _FormLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 13,
         fontWeight: FontWeight.w500,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -467,7 +467,7 @@ class _ToggleBtn extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: isActive ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,

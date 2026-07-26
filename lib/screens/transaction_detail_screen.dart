@@ -64,7 +64,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       color: AppColors.primary, size: 18),
                 ),
                 title: Text('Edit Transaction',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                 onTap: () async {
                   Navigator.pop(context);
                   final result = await Navigator.of(context).push<bool>(
@@ -98,7 +98,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       color: AppColors.expense, size: 18),
                 ),
                 title: Text('Delete Transaction',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         color: AppColors.expense,
                         fontWeight: FontWeight.w500)),
                 onTap: () async {
@@ -109,9 +109,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                       title: Text('Delete Transaction',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
                       content: Text('Are you sure you want to delete this transaction?',
-                          style: GoogleFonts.inter()),
+                          style: GoogleFonts.poppins()),
                       actions: [
                         TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
@@ -119,7 +119,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, true),
                           child: Text('Delete',
-                              style: GoogleFonts.inter(color: AppColors.expense)),
+                              style: GoogleFonts.poppins(color: AppColors.expense)),
                         ),
                       ],
                     ),
@@ -165,7 +165,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         ),
         title: Text(
           'Transaction Details',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -213,7 +213,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   const SizedBox(height: 16),
                   Text(
                     _tx.title,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -224,7 +224,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   Text(
                     CurrencyFormatter.formatWithSign(_tx.signedAmount,
                         symbol: settings.currencySymbol),
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
                       color: _tx.isIncome ? AppColors.income : AppColors.expense,
@@ -300,7 +300,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           const SizedBox(width: 12),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 15,
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               fontWeight: FontWeight.w500,
@@ -311,7 +311,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 fontWeight: FontWeight.w600,

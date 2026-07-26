@@ -171,7 +171,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: GoogleFonts.inter(fontSize: 14, color: Colors.white)),
+        content: Text(message, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -211,7 +211,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           isEditing
               ? (isExpense ? 'Edit Expense' : 'Edit Income')
               : (isExpense ? 'Add Expense' : 'Add Income'),
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -312,7 +312,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         )
                       : Text(
                           isExpense ? 'Save Expense' : 'Save Income',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -345,7 +345,7 @@ class _Label extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -364,14 +364,14 @@ class _AmountField extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 18,
         fontWeight: FontWeight.w500,
         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
       decoration: InputDecoration(
         hintText: '0',
-        hintStyle: GoogleFonts.inter(fontSize: 18, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+        hintStyle: GoogleFonts.poppins(fontSize: 18, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
         contentPadding:
@@ -435,7 +435,7 @@ class _CategoryDropdown extends StatelessWidget {
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
           hint: Text(
             'Select category',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
                 fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
           ),
           dropdownColor: Theme.of(context).colorScheme.surface,
@@ -464,7 +464,7 @@ class _CategoryDropdown extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       'Manage Categories',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: AppColors.primary),
@@ -506,7 +506,7 @@ class _CatRow extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           cat.name,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 15,
             fontWeight:
                 isSelected ? FontWeight.w500 : FontWeight.w400,
@@ -582,7 +582,7 @@ class _PayRow extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           method.name,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 15,
             fontWeight:
                 isSelected ? FontWeight.w500 : FontWeight.w400,
@@ -619,7 +619,7 @@ class _DatePickerField extends StatelessWidget {
             const SizedBox(width: 12),
             Text(
               DateFormat('d MMM yyyy').format(selectedDate),
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
@@ -641,10 +641,10 @@ class _NoteField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       maxLines: 4,
-      style: GoogleFonts.inter(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.poppins(
             color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,

@@ -59,7 +59,7 @@ class _WalletsScreenState extends State<WalletsScreen>
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
                     child: Text(
                       'My Wallets',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -113,7 +113,7 @@ class _WalletsScreenState extends State<WalletsScreen>
       scrolledUnderElevation: 0,
       title: Text(
         'Wallets',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -208,7 +208,7 @@ class _WalletSummaryCard extends StatelessWidget {
                   children: [
                     Text(
                       'Total Balance',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.white.withOpacity(0.8),
                         fontWeight: FontWeight.w500,
@@ -221,7 +221,7 @@ class _WalletSummaryCard extends StatelessWidget {
                       child: Text(
                         CurrencyFormatter.formatCompact(provider.totalBalance,
                             symbol: settings.currencySymbol),
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -247,7 +247,7 @@ class _WalletSummaryCard extends StatelessWidget {
                   children: [
                     Text(
                       'Active Wallets',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.white.withOpacity(0.8),
                         fontWeight: FontWeight.w500,
@@ -256,7 +256,7 @@ class _WalletSummaryCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '${provider.activeWalletCount}',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
@@ -280,7 +280,7 @@ class _WalletSummaryCard extends StatelessWidget {
                   children: [
                     Text(
                       'This Month Transfers',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.white.withOpacity(0.8),
                         fontWeight: FontWeight.w500,
@@ -293,7 +293,7 @@ class _WalletSummaryCard extends StatelessWidget {
                       child: Text(
                         CurrencyFormatter.formatCompact(provider.thisMonthTransfers,
                             symbol: settings.currencySymbol),
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -359,7 +359,7 @@ class _WalletTile extends StatelessWidget {
                 children: [
                   Text(
                     wallet.name,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -371,7 +371,7 @@ class _WalletTile extends StatelessWidget {
                         ? '${CurrencyFormatter.format(wallet.balance, symbol: settings.currencySymbol)} due'
                         : CurrencyFormatter.format(wallet.balance,
                             symbol: settings.currencySymbol),
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
@@ -400,7 +400,7 @@ class _WalletTile extends StatelessWidget {
                   const SizedBox(width: 5),
                   Text(
                     status.displayName,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: status.color,
@@ -457,7 +457,7 @@ class _EmptyWallets extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Wallets Yet',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -466,7 +466,7 @@ class _EmptyWallets extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'Add your first wallet to start\ntracking your money',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 13,
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
@@ -480,7 +480,7 @@ class _EmptyWallets extends StatelessWidget {
               icon: const Icon(Icons.add, size: 18),
               label: Text(
                 'Add Wallet',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),

@@ -66,7 +66,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
               const SizedBox(height: 20),
               Text(
                 'Add Repayment',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -75,7 +75,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
               const SizedBox(height: 16),
               Text(
                 'Amount (Rs.)',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -85,12 +85,12 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
               TextField(
                 controller: controller,
                 keyboardType: TextInputType.number,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 16, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: InputDecoration(
                   hintText: '0',
                   hintStyle:
-                      GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+                      GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
                   filled: true,
                   fillColor: Theme.of(context).scaffoldBackgroundColor,
                   contentPadding: const EdgeInsets.symmetric(
@@ -104,7 +104,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
               const SizedBox(height: 16),
               Text(
                 'Account Type',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -132,14 +132,14 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         value: effectiveSelected,
                         isExpanded: true,
                         hint: Text('Select wallet',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                                 color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15)),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         items: wallets.map((w) => DropdownMenuItem<String>(
                           value: w.name,
                           child: Text(w.name,
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                   fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
                         )).toList(),
                         onChanged: (w) => setSheetState(() => selectedWalletName = w),
@@ -183,7 +183,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                   ),
                   child: Text(
                     'Save Repayment',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.white),
@@ -205,19 +205,19 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Reminder Sent',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
               fontSize: 17, fontWeight: FontWeight.w700),
         ),
         content: Text(
           'A reminder has been sent to ${_entry.personName}.',
-          style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          style: GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'OK',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                   color: AppColors.primary, fontWeight: FontWeight.w600),
             ),
           ),
@@ -262,7 +262,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       color: AppColors.primary, size: 18),
                 ),
                 title: Text('Edit Entry',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                 onTap: () async {
                   Navigator.pop(context);
                   final result = await Navigator.of(context).push<bool>(
@@ -295,7 +295,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       color: AppColors.expense, size: 18),
                 ),
                 title: Text('Delete Entry',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         color: AppColors.expense,
                         fontWeight: FontWeight.w500)),
                 onTap: () async {
@@ -306,11 +306,11 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                       title: Text('Delete Entry',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w700)),
                       content: Text(
                         'Delete entry for "${_entry.personName}"? This cannot be undone.',
-                        style: GoogleFonts.inter(),
+                        style: GoogleFonts.poppins(),
                       ),
                       actions: [
                         TextButton(
@@ -319,7 +319,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, true),
                           child: Text('Delete',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                   color: AppColors.expense)),
                         ),
                       ],
@@ -376,7 +376,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
         ),
         title: Text(
           'Entry Details',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -425,7 +425,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         child: Center(
                           child: Text(
                             initials,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -441,7 +441,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           children: [
                             Text(
                               _entry.personName,
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -450,7 +450,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                             const SizedBox(height: 2),
                             Text(
                               isLent ? 'Lent to' : 'Borrowed from',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                               ),
@@ -476,7 +476,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                             children: [
                               Text(
                                 'Accumulated',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                 ),
@@ -484,7 +484,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                               Text(
                                 CurrencyFormatter.format(_entry.accumulatedAmount,
                                     symbol: settings.currencySymbol),
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.primary,
@@ -497,7 +497,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                             children: [
                               Text(
                                 'Total',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                 ),
@@ -505,7 +505,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                               Text(
                                 CurrencyFormatter.format(_entry.amount,
                                     symbol: settings.currencySymbol),
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -578,7 +578,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         const SizedBox(width: 6),
                         Text(
                           isLent ? 'Lent' : 'Borrowed',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -608,7 +608,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         const SizedBox(width: 6),
                         Text(
                           CurrencyFormatter.shortDate(_entry.date),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
@@ -637,7 +637,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         const SizedBox(width: 6),
                         Text(
                           CurrencyFormatter.shortDate(_entry.dueDate),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
@@ -664,7 +664,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         const SizedBox(width: 6),
                         Text(
                           _entry.status.label,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
@@ -681,7 +681,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       _entry.note?.isNotEmpty == true
                           ? _entry.note!
                           : '—',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
@@ -708,7 +708,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         const SizedBox(width: 6),
                         Text(
                           _entry.paymentMethod ?? 'Cash',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
@@ -731,7 +731,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     icon: const Icon(Icons.add_rounded, size: 18),
                     label: Text(
                       'Add Repayment',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -754,7 +754,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     icon: const Icon(Icons.notifications_outlined, size: 18),
                     label: Text(
                       'Send Reminder',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     style: OutlinedButton.styleFrom(
@@ -773,7 +773,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
             // ── History ───────────────────────────────────────────────────────
             Text(
               'History',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -816,7 +816,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                         children: [
                           Text(
                             isLent ? 'Lent' : 'Borrowed',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -825,7 +825,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           const SizedBox(height: 2),
                           Text(
                             '${CurrencyFormatter.shortDate(_entry.date)} • ${_entry.paymentMethod ?? 'Cash'}',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                             ),
@@ -836,7 +836,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     // Amount
                     Text(
                       '+${CurrencyFormatter.format(_entry.amount, symbol: settings.currencySymbol)}',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColors.income,
@@ -884,7 +884,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           children: [
                             Text(
                               'Settled',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -892,7 +892,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                             ),
                             Text(
                               CurrencyFormatter.relativeDate(DateTime.now()),
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                               ),
@@ -902,7 +902,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       ),
                       Text(
                         '-${CurrencyFormatter.format(_entry.amount, symbol: settings.currencySymbol)}',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.expense,
@@ -946,7 +946,7 @@ class _DetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               ),
@@ -978,7 +978,7 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.label,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: status.color,

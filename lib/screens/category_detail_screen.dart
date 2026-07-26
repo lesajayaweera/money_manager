@@ -33,19 +33,19 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Remove Category',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
               fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
         ),
         content: Text(
           'Are you sure you want to remove "${_category.name}"? This cannot be undone.',
           style:
-              GoogleFonts.inter(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel',
-                style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
+                style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -54,7 +54,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
               Navigator.pop(context);
             },
             child: Text('Remove',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     color: AppColors.expense, fontWeight: FontWeight.w600)),
           ),
         ],
@@ -100,7 +100,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         ),
         title: Text(
           'Category Details',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -145,7 +145,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                         children: [
                           Text(
                             _category.name,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -160,7 +160,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                         _category.isDefault
                             ? 'Default Category'
                             : 'Custom Category',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 13,
                           color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                         ),
@@ -267,7 +267,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                 ),
                 child: Text(
                   'Save Changes',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -282,7 +282,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                 onPressed: _showDeleteDialog,
                 child: Text(
                   'Remove Category',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppColors.expense,
@@ -325,7 +325,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             ListTile(
               leading: const Icon(Icons.edit_rounded, color: AppColors.primary),
               title: Text('Edit Category',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
                 _editCategory();
@@ -335,7 +335,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
               leading:
                   const Icon(Icons.palette_rounded, color: AppColors.primary),
               title: Text('Customize Icon & Color',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
                 _openCustomize();
@@ -346,7 +346,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                 leading: const Icon(Icons.delete_outline_rounded,
                     color: AppColors.expense),
                 title: Text('Remove Category',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         color: AppColors.expense, fontWeight: FontWeight.w500)),
                 onTap: () {
                   Navigator.pop(context);
@@ -376,7 +376,7 @@ class _TypeBadge extends StatelessWidget {
       ),
       child: Text(
         isExpense ? 'Expense' : 'Income',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 11,
           fontWeight: FontWeight.w600,
           color: Colors.white,
@@ -408,7 +408,7 @@ class _DetailRow extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
@@ -417,7 +417,7 @@ class _DetailRow extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: valueColor ?? Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     fontWeight: FontWeight.w500,
@@ -451,7 +451,7 @@ class _IconColorRow extends StatelessWidget {
           children: [
             Text(
               'Icon & Color',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),

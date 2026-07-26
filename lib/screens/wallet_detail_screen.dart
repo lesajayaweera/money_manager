@@ -150,7 +150,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
         ),
         title: Text(
           'Wallet Details',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -223,7 +223,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                           children: [
                             Text(
                               _wallet.name,
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -251,7 +251,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                                   const SizedBox(width: 4),
                                   Text(
                                     _wallet.status.displayName,
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: _wallet.status.color,
@@ -265,7 +265,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                         const SizedBox(height: 2),
                         Text(
                           _wallet.type.displayName,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
@@ -274,7 +274,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                         Text(
                           CurrencyFormatter.format(_wallet.balance,
                               symbol: settings.currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
                             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -334,7 +334,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
               children: [
                 Text(
                   'Recent Transactions',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -348,7 +348,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   },
                   child: Text(
                     'View All',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primary,
@@ -368,7 +368,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                 child: Center(
                   child: Text(
                     'No transactions yet',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
@@ -425,7 +425,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                 icon: const Icon(Icons.swap_horiz_rounded, size: 20),
                 label: Text(
                   'Transfer Money',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -448,7 +448,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                 icon: const Icon(Icons.edit_outlined, size: 18),
                 label: Text(
                   'Edit Wallet',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -517,7 +517,7 @@ class _StatMiniCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 10,
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               fontWeight: FontWeight.w500,
@@ -527,7 +527,7 @@ class _StatMiniCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -592,7 +592,7 @@ class _TxTile extends StatelessWidget {
               children: [
                 Text(
                   tx.note?.isNotEmpty == true ? tx.note! : tx.title,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -601,7 +601,7 @@ class _TxTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   CurrencyFormatter.relativeDate(tx.date),
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
@@ -615,7 +615,7 @@ class _TxTile extends StatelessWidget {
               Text(
                 CurrencyFormatter.formatWithSign(tx.signedAmount,
                     symbol: currencySymbol),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: isIncome ? AppColors.income : AppColors.expense,
@@ -624,7 +624,7 @@ class _TxTile extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 tx.walletName,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 11,
                   color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                 ),

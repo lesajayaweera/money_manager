@@ -95,7 +95,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               const SizedBox(height: 20),
               Text(
                 'Add Savings',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -104,7 +104,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               const SizedBox(height: 16),
               Text(
                 'Amount (Rs.)',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -116,12 +116,12 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 autofocus: true,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     fontSize: 16, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: InputDecoration(
                   hintText: '0',
                   hintStyle:
-                      GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+                      GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
                   filled: true,
                   fillColor: Theme.of(context).scaffoldBackgroundColor,
                   contentPadding: const EdgeInsets.symmetric(
@@ -146,7 +146,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               const SizedBox(height: 16),
               Text(
                 'Account Type',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -172,7 +172,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         isExpanded: true,
                         hint: Text(
                           'Select wallet (optional)',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                               color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
                         ),
                         padding: const EdgeInsets.symmetric(
@@ -184,7 +184,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                           DropdownMenuItem<String>(
                             value: null,
                             child: Text('None',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
                           ),
@@ -207,7 +207,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                                   ),
                                   const SizedBox(width: 10),
                                   Text(w.name,
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.poppins(
                                           fontSize: 14,
                                           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
                                 ]),
@@ -259,7 +259,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   ),
                   child: Text(
                     'Save',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -300,7 +300,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 leading: const Icon(Icons.delete_outline_rounded,
                     color: AppColors.expense),
                 title: Text('Delete Goal',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         color: AppColors.expense,
                         fontWeight: FontWeight.w500)),
                 onTap: () async {
@@ -309,9 +309,9 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: Text('Delete Goal',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
                       content: Text('Delete "${_goal.name}"? This cannot be undone.',
-                          style: GoogleFonts.inter()),
+                          style: GoogleFonts.poppins()),
                       actions: [
                         TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
@@ -319,7 +319,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         TextButton(
                             onPressed: () => Navigator.pop(ctx, true),
                             child: Text('Delete',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                     color: AppColors.expense))),
                       ],
                     ),
@@ -363,7 +363,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         ),
         title: Text(
           'Goal Details',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -395,7 +395,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 children: [
                   Text(
                     _goal.name,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -421,7 +421,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                           children: [
                             Text(
                               '${(pct * 100).round()}%',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w800,
                                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -429,7 +429,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                             ),
                             Text(
                               'Completed',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                               ),
@@ -507,7 +507,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(
                       '+ Add Savings',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -541,7 +541,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     ),
                     child: Text(
                       'Edit Goal',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                           fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -553,7 +553,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             // Recent savings
             Text(
               'Recent Savings',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -573,7 +573,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 child: Center(
                   child: Text(
                     'No savings added yet',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                         color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, fontSize: 14),
                   ),
                 ),
@@ -621,7 +621,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                               children: [
                                 Text(
                                   'Added to Goal',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -629,7 +629,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                                 ),
                                 Text(
                                   CurrencyFormatter.relativeDate(entry.date),
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                   ),
@@ -639,7 +639,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                           ),
                           Text(
                             '+${CurrencyFormatter.format(entry.amount, symbol: settings.currencySymbol)}',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: AppColors.income,
@@ -658,7 +658,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   onPressed: () {},
                   child: Text(
                     'View All',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primary,
@@ -750,7 +750,7 @@ class _StatRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               ),
@@ -758,7 +758,7 @@ class _StatRow extends StatelessWidget {
           ),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: valueColor,

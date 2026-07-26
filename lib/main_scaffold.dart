@@ -122,7 +122,7 @@ class MainScaffoldState extends State<MainScaffold> {
                       const SizedBox(height: 3),
                       Text(
                         item.label,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 10,
                           fontWeight: isActive
                               ? FontWeight.w600

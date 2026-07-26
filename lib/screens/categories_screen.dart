@@ -129,7 +129,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       ),
                       child: Text(
                         labels[f]!,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: selected
@@ -192,7 +192,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               icon: const Icon(Icons.add_rounded, color: Colors.white),
               label: Text(
                 isExpense ? 'Add Expense Category' : 'Add Income Category',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
@@ -222,7 +222,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       ),
       title: Text(
         isExpense ? 'Expense Categories' : 'Income Categories',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -262,11 +262,11 @@ class _SearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+        style: GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle:
-              GoogleFonts.inter(fontSize: 14, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+              GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
           prefixIcon: Icon(Icons.search_rounded,
               color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
           border: InputBorder.none,
@@ -330,7 +330,7 @@ class _TabButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color:
@@ -382,7 +382,7 @@ class _CategoryTile extends StatelessWidget {
                 children: [
                   Text(
                     category.name,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -421,7 +421,7 @@ class _Tag extends StatelessWidget {
       ),
       child: Text(
         isDefault ? 'Default' : 'Custom',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: isDefault
@@ -456,7 +456,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No categories found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -467,7 +467,7 @@ class _EmptyState extends StatelessWidget {
             isExpense
                 ? 'Add your first expense category'
                 : 'Add your first income category',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 13,
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),

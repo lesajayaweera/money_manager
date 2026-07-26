@@ -52,10 +52,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                 autofocus: true,
                 onChanged: (q) =>
                     context.read<TransactionProvider>().setSearchQuery(q),
-                style: GoogleFonts.inter(fontSize: 14),
+                style: GoogleFonts.poppins(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Search transactions...',
-                  hintStyle: GoogleFonts.inter(
+                  hintStyle: GoogleFonts.poppins(
                       color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
                   prefixIcon: Icon(Icons.search_rounded,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 20),
@@ -168,7 +168,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
       scrolledUnderElevation: 0,
       title: Text(
         'Transactions',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -312,7 +312,7 @@ class _Chip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             color: isActive ? Colors.white : textColor,
@@ -351,7 +351,7 @@ class _GroupedList extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4, bottom: 12),
               child: Text(
                 month,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -394,22 +394,22 @@ class _GroupedList extends StatelessWidget {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Delete Transaction',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
         content: Text(
           'Delete "${tx.title}"?',
-          style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text('Cancel',
                 style:
-                    GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
+                    GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text('Delete',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     color: AppColors.expense,
                     fontWeight: FontWeight.w600)),
           ),
@@ -521,7 +521,7 @@ class _TxTile extends StatelessWidget {
                       (transaction.note != null && transaction.note!.trim().isNotEmpty)
                           ? transaction.note!
                           : transaction.title,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -530,7 +530,7 @@ class _TxTile extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       CurrencyFormatter.shortDate(transaction.date),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),
@@ -545,7 +545,7 @@ class _TxTile extends StatelessWidget {
                   Text(
                     CurrencyFormatter.formatWithSign(transaction.signedAmount,
                         symbol: settings.currencySymbol),
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: isIncome ? AppColors.income : AppColors.expense,
@@ -554,7 +554,7 @@ class _TxTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     transaction.walletName,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 11,
                       color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                     ),
@@ -591,7 +591,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             hasSearch ? 'No results found' : 'No transactions yet',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 17,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -602,7 +602,7 @@ class _EmptyState extends StatelessWidget {
             hasSearch
                 ? 'Try a different search term'
                 : 'Add your first transaction\nfrom the Dashboard',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
                 fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
             textAlign: TextAlign.center,
           ),

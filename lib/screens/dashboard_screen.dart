@@ -89,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Text(
         'Dashboard',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -146,7 +146,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               const SizedBox(height: 20),
               Text(
                 'Quick Navigation',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -260,7 +260,7 @@ class _QuickNavTile extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: color,
@@ -305,7 +305,7 @@ class _BalanceCard extends StatelessWidget {
                 children: [
                   Text(
                     'Total Balance',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.white.withOpacity(0.85),
@@ -353,7 +353,7 @@ class _BalanceCard extends StatelessWidget {
                               symbol: settings.currencySymbol,
                             ),
                             key: const ValueKey('visible'),
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
@@ -363,7 +363,7 @@ class _BalanceCard extends StatelessWidget {
                         : Text(
                             '${settings.currencySymbol} ••••••',
                             key: const ValueKey('hidden'),
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
@@ -504,7 +504,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 11,
               fontWeight: FontWeight.w500,
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -520,7 +520,7 @@ class _StatCard extends StatelessWidget {
                   ? CurrencyFormatter.format(amount, symbol: currencySymbol)
                   : '••••••',
               key: ValueKey(visible),
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -550,7 +550,7 @@ class _RecentTransactionsSection extends StatelessWidget {
           children: [
             Text(
               'Recent Transactions',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -565,7 +565,7 @@ class _RecentTransactionsSection extends StatelessWidget {
               },
               child: Text(
                 '+ View All',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
@@ -628,7 +628,7 @@ class _EmptyTransactions extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'No transactions yet',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -637,7 +637,7 @@ class _EmptyTransactions extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Add your first income or expense below',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 13,
               color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
             ),
@@ -690,7 +690,7 @@ class _TransactionTile extends StatelessWidget {
                           transaction.note!.trim().isNotEmpty)
                       ? transaction.note!
                       : transaction.title,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -699,7 +699,7 @@ class _TransactionTile extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   CurrencyFormatter.relativeDate(transaction.date),
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
@@ -717,7 +717,7 @@ class _TransactionTile extends StatelessWidget {
                         symbol: settings.currencySymbol,
                       )
                     : '••••',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: isIncome ? AppColors.income : AppColors.expense,
@@ -726,7 +726,7 @@ class _TransactionTile extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 transaction.walletName,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 11,
                   color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                 ),
@@ -769,7 +769,7 @@ class _ActionButtons extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                textStyle: GoogleFonts.inter(
+                textStyle: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -790,7 +790,7 @@ class _ActionButtons extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                textStyle: GoogleFonts.inter(
+                textStyle: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),

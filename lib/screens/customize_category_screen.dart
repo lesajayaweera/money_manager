@@ -47,7 +47,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
         ),
         title: Text(
           'Customize Category',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -85,7 +85,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                     children: [
                       Text(
                         widget.categoryName,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -103,7 +103,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                           widget.categoryType == CategoryType.expense
                               ? 'Expense'
                               : 'Income',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -120,7 +120,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
             // ── Choose Icon ─────────────────────────────────────────────────
             Text(
               'Choose Icon',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -173,7 +173,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
             // ── Choose Color ────────────────────────────────────────────────
             Text(
               'Choose Color',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -231,7 +231,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                 ),
                 child: Text(
                   'Apply',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),

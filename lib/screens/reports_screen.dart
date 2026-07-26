@@ -48,7 +48,7 @@ class _ReportsScreenState extends State<ReportsScreen>
         scrolledUnderElevation: 0,
         title: Text(
           'Reports',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w700,
             color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -78,10 +78,10 @@ class _ReportsScreenState extends State<ReportsScreen>
                 labelColor: Colors.white,
                 unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 dividerColor: Colors.transparent,
-                labelStyle: GoogleFonts.inter(
+                labelStyle: GoogleFonts.poppins(
                     fontSize: 14, fontWeight: FontWeight.w600),
                 unselectedLabelStyle:
-                    GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+                    GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
                 tabs: const [
                   Tab(text: 'Overview'),
                   Tab(text: 'Categories'),
@@ -256,7 +256,7 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Report Period',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -305,7 +305,7 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Income vs Expense (${_getPeriodLabel()})',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -329,7 +329,7 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Category-wise Expenses',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -342,7 +342,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No expenses in this period',
-                        style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
                       ),
                     ),
                   )
@@ -367,7 +367,7 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Category-wise Income',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -380,7 +380,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No income in this period',
-                        style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
                       ),
                     ),
                   )
@@ -429,7 +429,7 @@ class _PeriodChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -508,7 +508,7 @@ class _SimpleBarChart extends StatelessWidget {
                         child: Text(
                           CurrencyFormatter.format(income,
                               symbol: currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: AppColors.income,
@@ -523,7 +523,7 @@ class _SimpleBarChart extends StatelessWidget {
                         child: Text(
                           CurrencyFormatter.format(expenses,
                               symbol: currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: AppColors.expense,
@@ -570,7 +570,7 @@ class _SimpleBarChart extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'Income',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
@@ -582,7 +582,7 @@ class _SimpleBarChart extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'Expenses',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
@@ -608,7 +608,7 @@ class _SimpleBarChart extends StatelessWidget {
     }
     return Text(
       label,
-      style: GoogleFonts.inter(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+      style: GoogleFonts.poppins(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
     );
   }
 }
@@ -730,7 +730,7 @@ class _PieSection extends StatelessWidget {
                         children: [
                           Text(
                             entries[touchedIndex].key,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -743,7 +743,7 @@ class _PieSection extends StatelessWidget {
                           Text(
                             CurrencyFormatter.format(entries[touchedIndex].value,
                                 symbol: currencySymbol),
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: isExpense ? AppColors.expense : AppColors.income,
@@ -783,7 +783,7 @@ class _PieSection extends StatelessWidget {
                         Expanded(
                           child: Text(
                             name,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
@@ -791,7 +791,7 @@ class _PieSection extends StatelessWidget {
                         ),
                         Text(
                           '${pct.toStringAsFixed(0)}%',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -813,7 +813,7 @@ class _PieSection extends StatelessWidget {
           children: [
             Text(
               isExpense ? 'Total Expenses' : 'Total Income',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -822,7 +822,7 @@ class _PieSection extends StatelessWidget {
             Text(
               CurrencyFormatter.format(total,
                   symbol: currencySymbol),
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: isExpense ? AppColors.expense : AppColors.income,
@@ -859,7 +859,7 @@ class _CategoriesTab extends StatelessWidget {
         if (data.isEmpty) {
           return Center(
             child: Text('No expense data for this month',
-                style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
+                style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
           );
         }
         final total = data.values.fold(0.0, (s, v) => s + v);
@@ -902,7 +902,7 @@ class _CategoriesTab extends StatelessWidget {
                         children: [
                           Text(
                             name,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -929,7 +929,7 @@ class _CategoriesTab extends StatelessWidget {
                         Text(
                           CurrencyFormatter.format(val,
                               symbol: settings.currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.expense,
@@ -937,7 +937,7 @@ class _CategoriesTab extends StatelessWidget {
                         ),
                         Text(
                           '${pct.toStringAsFixed(1)}%',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 11,
                             color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
@@ -981,7 +981,7 @@ class _DailyTab extends StatelessWidget {
         children: [
           Text(
             'Daily Spending (Last 7 Days)',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -1013,7 +1013,7 @@ class _DailyTab extends StatelessWidget {
                           children: [
                             Text(
                               DateFormat('EEE').format(day),
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 11,
                                 color: isToday
                                     ? AppColors.primary
@@ -1025,7 +1025,7 @@ class _DailyTab extends StatelessWidget {
                             ),
                             Text(
                               DateFormat('d').format(day),
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: isToday
@@ -1044,7 +1044,7 @@ class _DailyTab extends StatelessWidget {
                             if (earned > 0)
                               Text(
                                 '+${CurrencyFormatter.format(earned, symbol: settings.currencySymbol)}',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   color: AppColors.income,
                                   fontWeight: FontWeight.w500,
@@ -1053,7 +1053,7 @@ class _DailyTab extends StatelessWidget {
                             if (spent > 0)
                               Text(
                                 '-${CurrencyFormatter.format(spent, symbol: settings.currencySymbol)}',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   color: AppColors.expense,
                                   fontWeight: FontWeight.w500,
@@ -1062,7 +1062,7 @@ class _DailyTab extends StatelessWidget {
                             if (spent == 0 && earned == 0)
                               Text(
                                 'No activity',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                                 ),
