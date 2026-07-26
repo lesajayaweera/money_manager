@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../core/constants/preference_keys.dart';
 import '../core/constants/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -93,7 +95,11 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  void _navigateToDashboard() {
+  Future<void> _navigateToDashboard() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PreferenceKeys.hasShownInitialSplash, true);
+    
+    if (!mounted) return;
     Navigator.of(context).pushReplacementNamed('/main');
   }
 
