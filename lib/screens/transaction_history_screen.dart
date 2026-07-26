@@ -331,10 +331,22 @@ class _GroupedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Group transactions by month
+    // Group transactions by date
     final groups = <String, List<TransactionModel>>{};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
     for (final tx in transactions) {
-      final key = DateFormat('MMMM yyyy').format(tx.date);
+      final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+      String key;
+      if (txDate == today) {
+        key = 'Today';
+      } else if (txDate == yesterday) {
+        key = 'Yesterday';
+      } else {
+        key = DateFormat('MMM dd, yyyy').format(tx.date);
+      }
       groups.putIfAbsent(key, () => []).add(tx);
     }
 
@@ -342,15 +354,15 @@ class _GroupedList extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
       itemCount: groups.length,
       itemBuilder: (ctx, groupIndex) {
-        final month = groups.keys.elementAt(groupIndex);
-        final txs = groups[month]!;
+        final dateLabel = groups.keys.elementAt(groupIndex);
+        final txs = groups[dateLabel]!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 4, bottom: 12),
               child: Text(
-                month,
+                dateLabel,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
