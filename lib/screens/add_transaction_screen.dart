@@ -191,6 +191,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         .toList();
 
     final suggestions = context.read<TransactionProvider>().allTransactions
+        .where((t) => t.type == _type)
         .map((t) => t.note)
         .where((n) => n != null && n.trim().isNotEmpty)
         .map((n) => n!.trim())
