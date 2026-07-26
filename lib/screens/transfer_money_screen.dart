@@ -94,7 +94,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
             backgroundColor: AppColors.income,
           ),
         );
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) _showError(e.toString());
@@ -143,22 +143,22 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
     final afterTo = toBal + _amount;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: AppColors.textPrimary, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Transfer Money',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -170,7 +170,9 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0EFFD),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkPrimarySurface
+                  : const Color(0xFFF0EFFD),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
@@ -182,9 +184,9 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     children: [
                       Text(
                         'From',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -210,10 +212,10 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                               children: [
                                 Text(
                                   _fromWallet?.name ?? 'Select',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -221,9 +223,9 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   Text(
                                     CurrencyFormatter.format(fromBal,
                                         symbol: sym),
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 11,
-                                      color: AppColors.textSecondary,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                     ),
                                   ),
                               ],
@@ -263,9 +265,9 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     children: [
                       Text(
                         'To',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -279,10 +281,10 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                               children: [
                                 Text(
                                   _toWallet?.name ?? 'Select',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                                   ),
                                   textAlign: TextAlign.end,
                                   overflow: TextOverflow.ellipsis,
@@ -291,9 +293,9 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   Text(
                                     CurrencyFormatter.format(toBal,
                                         symbol: sym),
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 11,
-                                      color: AppColors.textSecondary,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                                     ),
                                   ),
                               ],
@@ -323,308 +325,233 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
           const SizedBox(height: 16),
 
           // ── From Wallet Selector ──────────────────────────────────────
-          _FieldCard(
+          const _SectionLabel(label: 'From Wallet'),
+          const SizedBox(height: 8),
+          _InputCard(
             onTap: () => _pickWallet(isFrom: true),
-            child: Row(
-              children: [
-                if (_fromWallet != null)
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: _fromWallet!.lightColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(_fromWallet!.icon,
-                        color: _fromWallet!.color, size: 20),
-                  )
-                else
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.account_balance_wallet_outlined,
-                        color: AppColors.primary, size: 20),
-                  ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'From Wallet',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  if (_fromWallet != null)
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: _fromWallet!.lightColor,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      Text(
-                        _fromWallet?.name ?? 'Select wallet',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: _fromWallet != null
-                              ? AppColors.textPrimary
-                              : AppColors.textHint,
-                        ),
+                      child: Icon(_fromWallet!.icon,
+                          color: _fromWallet!.color, size: 16),
+                    )
+                  else
+                    Icon(Icons.account_balance_wallet_outlined,
+                        color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _fromWallet?.name ?? 'Select wallet',
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: _fromWallet != null
+                            ? Theme.of(context).textTheme.titleLarge?.color ?? Colors.white
+                            : Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                       ),
-                    ],
-                  ),
-                ),
-                if (_fromWallet != null)
-                  Text(
-                    CurrencyFormatter.format(fromBal, symbol: sym),
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
                     ),
                   ),
-                const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textHint, size: 20),
-              ],
+                  if (_fromWallet != null)
+                    Text(
+                      CurrencyFormatter.format(fromBal, symbol: sym),
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right_rounded,
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 22),
 
           // ── To Wallet Selector ────────────────────────────────────────
-          _FieldCard(
+          const _SectionLabel(label: 'To Wallet'),
+          const SizedBox(height: 8),
+          _InputCard(
             onTap: () => _pickWallet(isFrom: false),
-            child: Row(
-              children: [
-                if (_toWallet != null)
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: _toWallet!.lightColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(_toWallet!.icon,
-                        color: _toWallet!.color, size: 20),
-                  )
-                else
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: AppColors.incomeLight,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.account_balance_wallet_outlined,
-                        color: AppColors.income, size: 20),
-                  ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'To Wallet',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  if (_toWallet != null)
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: _toWallet!.lightColor,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      Text(
-                        _toWallet?.name ?? 'Select wallet',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: _toWallet != null
-                              ? AppColors.textPrimary
-                              : AppColors.textHint,
-                        ),
+                      child: Icon(_toWallet!.icon,
+                          color: _toWallet!.color, size: 16),
+                    )
+                  else
+                    Icon(Icons.account_balance_wallet_outlined,
+                        color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _toWallet?.name ?? 'Select wallet',
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: _toWallet != null
+                            ? Theme.of(context).textTheme.titleLarge?.color ?? Colors.white
+                            : Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                       ),
-                    ],
-                  ),
-                ),
-                if (_toWallet != null)
-                  Text(
-                    CurrencyFormatter.format(toBal, symbol: sym),
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
                     ),
                   ),
-                const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textHint, size: 20),
-              ],
+                  if (_toWallet != null)
+                    Text(
+                      CurrencyFormatter.format(toBal, symbol: sym),
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right_rounded,
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 22),
 
           // ── Amount ────────────────────────────────────────────────────
-          _FieldCard(
+          const _SectionLabel(label: 'Amount (Rs.)'),
+          const SizedBox(height: 8),
+          _InputCard(
             child: Row(
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 10),
+                  child: Text(
+                    'Rs.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    ),
                   ),
-                  child: const Icon(Icons.currency_rupee_rounded,
-                      color: AppColors.primary, size: 20),
                 ),
-                const SizedBox(width: 14),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white.withOpacity(0.3),
+                ),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Amount (Rs.)',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      TextField(
-                        controller: _amountController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}')),
-                        ],
-                        onChanged: (_) => setState(() {}),
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Enter amount',
-                          hintStyle: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: AppColors.textHint,
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
+                  child: TextField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}')),
                     ],
+                    onChanged: (_) => setState(() {}),
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'e.g., 0.00',
+                      hintStyle: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                      ),
+                      border: InputBorder.none,
+                      filled: false,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 14),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 22),
 
           // ── Date ──────────────────────────────────────────────────────
-          _FieldCard(
+          const _SectionLabel(label: 'Date'),
+          const SizedBox(height: 8),
+          _InputCard(
             onTap: _pickDate,
-            child: Row(
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.calendar_month_rounded,
-                      color: AppColors.primary, size: 20),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Date',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: AppColors.textSecondary,
-                        ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_month_outlined,
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      CurrencyFormatter.shortDate(_selectedDate),
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                       ),
-                      Text(
-                        CurrencyFormatter.shortDate(_selectedDate),
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const Icon(Icons.calendar_today_outlined,
-                    color: AppColors.textHint, size: 20),
-              ],
+                  Icon(Icons.calendar_today_outlined,
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 22),
 
           // ── Note ──────────────────────────────────────────────────────
-          _FieldCard(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const _SectionLabel(label: 'Note (Optional)'),
+          const SizedBox(height: 8),
+          _InputCard(
+            child: Stack(
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(10),
+                TextField(
+                  controller: _noteController,
+                  maxLength: 60,
+                  maxLines: 3,
+                  onChanged: (_) => setState(() {}),
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
-                  child: const Icon(Icons.description_outlined,
-                      color: AppColors.primary, size: 20),
+                  decoration: InputDecoration(
+                    hintText: 'Add a note for this transfer...',
+                    hintStyle: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                    ),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(bottom: 40),
+                      child: Icon(Icons.description_outlined,
+                          color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                    ),
+                    border: InputBorder.none,
+                    filled: false,
+                    counterText: '',
+                    contentPadding: const EdgeInsets.fromLTRB(0, 14, 14, 14),
+                  ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Note (Optional)',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          TextField(
-                            controller: _noteController,
-                            maxLength: 60,
-                            onChanged: (_) => setState(() {}),
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: AppColors.textPrimary,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Add a note for this transfer',
-                              hintStyle: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: AppColors.textHint,
-                              ),
-                              border: InputBorder.none,
-                              counterText: '',
-                              isDense: true,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Text(
-                          '${_noteController.text.length}/60',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: AppColors.textHint,
-                          ),
-                        ),
-                      ),
-                    ],
+                Positioned(
+                  right: 0,
+                  bottom: 8,
+                  child: Text(
+                    '${_noteController.text.length}/60',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -635,14 +562,14 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
           // ── Info ──────────────────────────────────────────────────────
           Row(
             children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 15, color: AppColors.textSecondary),
+              Icon(Icons.info_outline_rounded,
+                  size: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
               const SizedBox(width: 6),
               Text(
                 'Transfers do not affect total balance.',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
               ),
             ],
@@ -653,10 +580,10 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
           if (_fromWallet != null && _toWallet != null) ...[
             Text(
               'After Transfer',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             const SizedBox(height: 10),
@@ -664,7 +591,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
               padding: const EdgeInsets.symmetric(
                   horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
@@ -700,7 +627,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -723,7 +650,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                 : const Icon(Icons.send_rounded, size: 18),
             label: Text(
               'Confirm Transfer',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                   fontSize: 16, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
@@ -753,26 +680,44 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
   }
 }
 
-// ─── Field Card ────────────────────────────────────────────────────────────────
+// ─── Section Label ─────────────────────────────────────────────────────────────
 
-class _FieldCard extends StatelessWidget {
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+      ),
+    );
+  }
+}
+
+// ─── Input Card ────────────────────────────────────────────────────────────────
+
+class _InputCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
-  const _FieldCard({required this.child, this.onTap});
+  const _InputCard({required this.child, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
@@ -820,30 +765,30 @@ class _AfterTransferRow extends StatelessWidget {
             children: [
               Text(
                 wallet.name,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               Text(
                 CurrencyFormatter.format(originalBalance, symbol: sym),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 11,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
               ),
             ],
           ),
         ),
-        const Icon(Icons.arrow_forward_rounded,
-            color: AppColors.textHint, size: 16),
+        Icon(Icons.arrow_forward_rounded,
+            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 16),
         const SizedBox(width: 8),
         Text(
           isDecrease
               ? '${CurrencyFormatter.format(originalBalance, symbol: sym)} - Amount'
               : '${CurrencyFormatter.format(originalBalance, symbol: sym)} + Amount',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: isDecrease ? AppColors.expense : AppColors.income,
@@ -874,8 +819,8 @@ class _WalletPickerSheet extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -893,10 +838,10 @@ class _WalletPickerSheet extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Select Wallet',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             const SizedBox(height: 16),
@@ -905,9 +850,9 @@ class _WalletPickerSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 child: Text(
                   'No wallets available',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
                 ),
               )
@@ -926,18 +871,18 @@ class _WalletPickerSheet extends StatelessWidget {
                     ),
                     title: Text(
                       wallet.name,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                       ),
                     ),
                     subtitle: Text(
                       CurrencyFormatter.format(wallet.balance,
                           symbol: currencySymbol),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),
                     ),
                     onTap: () => Navigator.pop(context, wallet),

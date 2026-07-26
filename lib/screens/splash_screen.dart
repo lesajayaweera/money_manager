@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../core/constants/preference_keys.dart';
 import '../core/constants/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -93,7 +95,11 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  void _navigateToDashboard() {
+  Future<void> _navigateToDashboard() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PreferenceKeys.hasShownInitialSplash, true);
+    
+    if (!mounted) return;
     Navigator.of(context).pushReplacementNamed('/main');
   }
 
@@ -141,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
                     children: [
                       Text(
                         'Money Manager',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -152,7 +158,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const SizedBox(height: 12),
                       Text(
                         'Manage your money\nsmartly and easily',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: Colors.white.withOpacity(0.85),
@@ -291,9 +297,9 @@ class _WalletIllustration extends StatelessWidget {
             child: Container(
               width: 160,
               height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFF6655DC),
-                borderRadius: const BorderRadius.vertical(
+              decoration: const BoxDecoration(
+                color: Color(0xFF6655DC),
+                borderRadius: BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
               ),
@@ -379,13 +385,13 @@ class _WalletIllustration extends StatelessWidget {
             ),
           ),
           // Gold coin left
-          Positioned(
+          const Positioned(
             bottom: 55,
             left: 15,
             child: _GoldCoin(size: 36),
           ),
           // Gold coin bottom-center
-          Positioned(
+          const Positioned(
             bottom: 20,
             left: 60,
             child: _GoldCoin(size: 30),
@@ -497,7 +503,7 @@ class _StartButtonState extends State<_StartButton>
             children: [
               Text(
                 'Start Managing Money',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,

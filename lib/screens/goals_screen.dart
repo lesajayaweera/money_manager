@@ -40,7 +40,7 @@ class _GoalsScreenState extends State<GoalsScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: Consumer<GoalProvider>(
         builder: (context, provider, _) {
@@ -62,10 +62,10 @@ class _GoalsScreenState extends State<GoalsScreen>
                   const SizedBox(height: 24),
                   Text(
                     'Your Goals',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -91,23 +91,23 @@ class _GoalsScreenState extends State<GoalsScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       title: Text(
         'Goals',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 24,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
         ),
       ),
       actions: [
         IconButton(
           icon: Stack(
             children: [
-              const Icon(Icons.notifications_outlined,
-                  color: AppColors.textPrimary, size: 26),
+              Icon(Icons.notifications_outlined,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
               Positioned(
                 right: 0,
                 top: 0,
@@ -162,7 +162,7 @@ class _GoalsSummaryCard extends StatelessWidget {
               children: [
                 Text(
                   'Total Saved',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 13,
                     color: Colors.white.withOpacity(0.8),
                     fontWeight: FontWeight.w500,
@@ -172,7 +172,7 @@ class _GoalsSummaryCard extends StatelessWidget {
                 Text(
                   CurrencyFormatter.format(provider.totalSaved,
                       symbol: settings.currencySymbol),
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -195,7 +195,7 @@ class _GoalsSummaryCard extends StatelessWidget {
             children: [
               Text(
                 'Active Goals',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: Colors.white.withOpacity(0.8),
                   fontWeight: FontWeight.w500,
@@ -204,7 +204,7 @@ class _GoalsSummaryCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 '${provider.activeGoalCount}',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
@@ -260,7 +260,7 @@ class _GoalCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -290,19 +290,19 @@ class _GoalCard extends StatelessWidget {
                 children: [
                   Text(
                     goal.name,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     '${CurrencyFormatter.format(goal.savedAmount, symbol: settings.currencySymbol)} of '
                     '${CurrencyFormatter.format(goal.targetAmount, symbol: settings.currencySymbol)}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -318,7 +318,7 @@ class _GoalCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(
                     'Target Date: ${CurrencyFormatter.shortDate(goal.targetDate)}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 11,
                       color: AppColors.primary,
                       fontWeight: FontWeight.w500,
@@ -373,10 +373,10 @@ class _CircularProgressRing extends StatelessWidget {
           ),
           Text(
             '${(percent * 100).round()}%',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
         ],
@@ -436,7 +436,7 @@ class _EmptyGoals extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(36),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -444,7 +444,7 @@ class _EmptyGoals extends StatelessWidget {
           Container(
             width: 68,
             height: 68,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
@@ -454,18 +454,18 @@ class _EmptyGoals extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Goals Yet',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             'Set a savings goal and start tracking\nyour progress',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
@@ -491,7 +491,7 @@ class _AddGoalButton extends StatelessWidget {
         icon: const Icon(Icons.add, size: 20),
         label: Text(
           'Add Goal',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),

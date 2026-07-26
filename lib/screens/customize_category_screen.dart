@@ -36,21 +36,21 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Customize Category',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -64,7 +64,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -85,10 +85,10 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                     children: [
                       Text(
                         widget.categoryName,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -103,7 +103,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                           widget.categoryType == CategoryType.expense
                               ? 'Expense'
                               : 'Income',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -120,10 +120,10 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
             // ── Choose Icon ─────────────────────────────────────────────────
             Text(
               'Choose Icon',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             const SizedBox(height: 14),
@@ -148,7 +148,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.primarySurface
-                          : AppColors.surface,
+                          : Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected
@@ -161,7 +161,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                       icon,
                       color: isSelected
                           ? AppColors.primary
-                          : AppColors.textSecondary,
+                          : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       size: 22,
                     ),
                   ),
@@ -173,10 +173,10 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
             // ── Choose Color ────────────────────────────────────────────────
             Text(
               'Choose Color',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             const SizedBox(height: 14),
@@ -231,7 +231,7 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                 ),
                 child: Text(
                   'Apply',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),

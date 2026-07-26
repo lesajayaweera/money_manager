@@ -39,7 +39,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: Column(
         children: [
@@ -52,16 +52,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                 autofocus: true,
                 onChanged: (q) =>
                     context.read<TransactionProvider>().setSearchQuery(q),
-                style: GoogleFonts.inter(fontSize: 14),
+                style: GoogleFonts.poppins(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Search transactions...',
-                  hintStyle: GoogleFonts.inter(
-                      color: AppColors.textHint, fontSize: 14),
-                  prefixIcon: const Icon(Icons.search_rounded,
-                      color: AppColors.textSecondary, size: 20),
+                  hintStyle: GoogleFonts.poppins(
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
+                  prefixIcon: Icon(Icons.search_rounded,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 20),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear_rounded,
-                        size: 18, color: AppColors.textSecondary),
+                    icon: Icon(Icons.clear_rounded,
+                        size: 18, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
                     onPressed: () {
                       _searchController.clear();
                       context
@@ -70,7 +70,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                     },
                   ),
                   filled: true,
-                  fillColor: AppColors.surface,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -81,7 +81,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
             ),
 
           // Filter chips
-          _FilterChipsRow(),
+          const _FilterChipsRow(),
 
           // Transaction list
           Expanded(
@@ -163,15 +163,15 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
 
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       title: Text(
         'Transactions',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 24,
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
         ),
       ),
       actions: [
@@ -180,7 +180,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
             _showSearch
                 ? Icons.search_off_rounded
                 : Icons.filter_list_rounded,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
           onPressed: () {
             setState(() {
@@ -244,7 +244,7 @@ class _FilterChipsRow extends StatelessWidget {
                   label: 'Today',
                   isActive: activeFilter == TransactionFilter.today,
                   activeColor: AppColors.primary,
-                  textColor: AppColors.textSecondary,
+                  textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   onTap: () =>
                       provider.setFilter(TransactionFilter.today),
                 ),
@@ -253,7 +253,7 @@ class _FilterChipsRow extends StatelessWidget {
                   label: 'This Month',
                   isActive: activeFilter == TransactionFilter.thisMonth,
                   activeColor: AppColors.primary,
-                  textColor: AppColors.textSecondary,
+                  textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   onTap: () =>
                       provider.setFilter(TransactionFilter.thisMonth),
                 ),
@@ -289,10 +289,16 @@ class _Chip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? activeColor : Colors.white,
+          color: isActive
+              ? activeColor
+              : Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkSurface2
+                  : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? activeColor : const Color(0xFFE0E0E0),
+            color: isActive
+                ? activeColor
+                : Theme.of(context).dividerTheme.color ?? const Color(0xFFE0E0E0),
           ),
           boxShadow: isActive
               ? [
@@ -306,7 +312,7 @@ class _Chip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             color: isActive ? Colors.white : textColor,
@@ -325,10 +331,22 @@ class _GroupedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Group transactions by month
+    // Group transactions by date
     final groups = <String, List<TransactionModel>>{};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
     for (final tx in transactions) {
-      final key = DateFormat('MMMM yyyy').format(tx.date);
+      final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+      String key;
+      if (txDate == today) {
+        key = 'Today';
+      } else if (txDate == yesterday) {
+        key = 'Yesterday';
+      } else {
+        key = DateFormat('MMM dd, yyyy').format(tx.date);
+      }
       groups.putIfAbsent(key, () => []).add(tx);
     }
 
@@ -336,19 +354,19 @@ class _GroupedList extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
       itemCount: groups.length,
       itemBuilder: (ctx, groupIndex) {
-        final month = groups.keys.elementAt(groupIndex);
-        final txs = groups[month]!;
+        final dateLabel = groups.keys.elementAt(groupIndex);
+        final txs = groups[dateLabel]!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 4, bottom: 12),
               child: Text(
-                month,
-                style: GoogleFonts.inter(
+                dateLabel,
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
               ),
             ),
@@ -388,22 +406,22 @@ class _GroupedList extends StatelessWidget {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Delete Transaction',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
         content: Text(
           'Delete "${tx.title}"?',
-          style: GoogleFonts.inter(color: AppColors.textSecondary),
+          style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text('Cancel',
                 style:
-                    GoogleFonts.inter(color: AppColors.textSecondary)),
+                    GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text('Delete',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                     color: AppColors.expense,
                     fontWeight: FontWeight.w600)),
           ),
@@ -465,24 +483,7 @@ class _TxTile extends StatelessWidget {
       iconData = cat.icon;
     }
 
-    return Dismissible(
-      key: ValueKey('tx-${transaction.id}'),
-      direction: isTransfer ? DismissDirection.none : DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.only(bottom: 1),
-        decoration: BoxDecoration(
-          color: AppColors.expense.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.delete_rounded, color: AppColors.expense),
-      ),
-      confirmDismiss: (_) async {
-        onDelete();
-        return false;
-      },
-      child: InkWell(
+    return InkWell(
         onTap: isTransfer ? null : onEdit,
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -515,18 +516,18 @@ class _TxTile extends StatelessWidget {
                       (transaction.note != null && transaction.note!.trim().isNotEmpty)
                           ? transaction.note!
                           : transaction.title,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       CurrencyFormatter.shortDate(transaction.date),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),
                     ),
                   ],
@@ -539,7 +540,7 @@ class _TxTile extends StatelessWidget {
                   Text(
                     CurrencyFormatter.formatWithSign(transaction.signedAmount,
                         symbol: settings.currencySymbol),
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: isIncome ? AppColors.income : AppColors.expense,
@@ -548,9 +549,9 @@ class _TxTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     transaction.walletName,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 11,
-                      color: AppColors.textHint,
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                     ),
                   ),
                 ],
@@ -558,8 +559,7 @@ class _TxTile extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -580,15 +580,15 @@ class _EmptyState extends StatelessWidget {
                 ? Icons.search_off_rounded
                 : Icons.receipt_long_outlined,
             size: 64,
-            color: AppColors.textHint,
+            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
           ),
           const SizedBox(height: 16),
           Text(
             hasSearch ? 'No results found' : 'No transactions yet',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 6),
@@ -596,8 +596,8 @@ class _EmptyState extends StatelessWidget {
             hasSearch
                 ? 'Try a different search term'
                 : 'Add your first transaction\nfrom the Dashboard',
-            style: GoogleFonts.inter(
-                fontSize: 13, color: AppColors.textHint),
+            style: GoogleFonts.poppins(
+                fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
             textAlign: TextAlign.center,
           ),
         ],

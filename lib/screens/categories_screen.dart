@@ -74,7 +74,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     final displayCats = _filtered(allCats);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(isExpense),
       body: Column(
         children: [
@@ -119,7 +119,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       decoration: BoxDecoration(
                         color: selected
                             ? AppColors.primary
-                            : AppColors.surface,
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: selected
@@ -129,12 +129,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       ),
                       child: Text(
                         labels[f]!,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: selected
                               ? Colors.white
-                              : AppColors.textSecondary,
+                              : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                         ),
                       ),
                     ),
@@ -192,7 +192,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               icon: const Icon(Icons.add_rounded, color: Colors.white),
               label: Text(
                 isExpense ? 'Add Expense Category' : 'Add Income Category',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
@@ -213,26 +213,26 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   AppBar _buildAppBar(bool isExpense) {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         isExpense ? 'Expense Categories' : 'Income Categories',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
         ),
       ),
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.more_vert_rounded,
-              color: AppColors.textSecondary),
+          icon: Icon(Icons.more_vert_rounded,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
           onPressed: () {},
         ),
       ],
@@ -255,20 +255,20 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary),
+        style: GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle:
-              GoogleFonts.inter(fontSize: 14, color: AppColors.textHint),
-          prefixIcon: const Icon(Icons.search_rounded,
-              color: AppColors.textHint, size: 20),
+              GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+          prefixIcon: Icon(Icons.search_rounded,
+              color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
@@ -321,7 +321,7 @@ class _TabButton extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surface,
+          color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color:
@@ -330,11 +330,11 @@ class _TabButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color:
-                isSelected ? Colors.white : AppColors.textSecondary,
+                isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
           ),
         ),
       ),
@@ -356,7 +356,7 @@ class _CategoryTile extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(0),
           border: const Border(
             bottom: BorderSide(color: Color(0xFFF0F0F0), width: 1),
@@ -382,10 +382,10 @@ class _CategoryTile extends StatelessWidget {
                 children: [
                   Text(
                     category.name,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -396,8 +396,8 @@ class _CategoryTile extends StatelessWidget {
 
 
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textHint, size: 20),
+            Icon(Icons.chevron_right_rounded,
+                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
           ],
         ),
       ),
@@ -421,12 +421,12 @@ class _Tag extends StatelessWidget {
       ),
       child: Text(
         isDefault ? 'Default' : 'Custom',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: isDefault
               ? AppColors.income
-              : AppColors.textSecondary,
+              : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
         ),
       ),
     );
@@ -446,7 +446,7 @@ class _EmptyState extends StatelessWidget {
           Container(
             width: 72,
             height: 72,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
@@ -456,10 +456,10 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No categories found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 6),
@@ -467,9 +467,9 @@ class _EmptyState extends StatelessWidget {
             isExpense
                 ? 'Add your first expense category'
                 : 'Add your first income category',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
           ),
         ],

@@ -84,12 +84,20 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
     }
   }
 
-  void _openTransfer() {
-    Navigator.of(context).push(
+  Future<void> _openTransfer() async {
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => TransferMoneyScreen(fromWallet: _wallet),
       ),
     );
+    if (result == true && mounted) {
+      // Refresh wallet and stats
+      final updated = context.read<WalletProvider>().findById(_wallet.id!);
+      if (updated != null) {
+        setState(() => _wallet = updated);
+      }
+      _loadStats();
+    }
   }
 
   @override
@@ -130,22 +138,22 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
     final recentTxs = combinedTxs.take(5).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: AppColors.textPrimary, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Wallet Details',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -153,8 +161,8 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
           IconButton(
             icon: Stack(
               children: [
-                const Icon(Icons.notifications_outlined,
-                    color: AppColors.textPrimary, size: 26),
+                Icon(Icons.notifications_outlined,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
                 Positioned(
                   right: 0,
                   top: 0,
@@ -183,7 +191,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -215,10 +223,10 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                           children: [
                             Text(
                               _wallet.name,
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                               ),
                             ),
                             // Status badge
@@ -243,7 +251,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                                   const SizedBox(width: 4),
                                   Text(
                                     _wallet.status.displayName,
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: _wallet.status.color,
@@ -257,19 +265,19 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                         const SizedBox(height: 2),
                         Text(
                           _wallet.type.displayName,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           CurrencyFormatter.format(_wallet.balance,
                               symbol: settings.currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -288,7 +296,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   child: _StatMiniCard(
                     icon: Icons.wallet_rounded,
                     iconColor: AppColors.income,
-                    iconBgColor: AppColors.incomeLight,
+                    iconBgColor: AppColors.income.withValues(alpha: 0.15),
                     label: 'This Month Income',
                     value: CurrencyFormatter.format(_monthIncome,
                         symbol: settings.currencySymbol),
@@ -299,7 +307,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   child: _StatMiniCard(
                     icon: Icons.receipt_long_rounded,
                     iconColor: AppColors.expense,
-                    iconBgColor: AppColors.expenseLight,
+                    iconBgColor: AppColors.expense.withValues(alpha: 0.15),
                     label: 'This Month Expenses',
                     value: CurrencyFormatter.format(_monthExpenses,
                         symbol: settings.currencySymbol),
@@ -310,7 +318,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   child: _StatMiniCard(
                     icon: Icons.swap_horiz_rounded,
                     iconColor: AppColors.primary,
-                    iconBgColor: AppColors.primarySurface,
+                    iconBgColor: AppColors.primary.withValues(alpha: 0.15),
                     label: 'Transfers',
                     value: CurrencyFormatter.format(_transfers,
                         symbol: settings.currencySymbol),
@@ -326,10 +334,10 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
               children: [
                 Text(
                   'Recent Transactions',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 GestureDetector(
@@ -340,7 +348,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   },
                   child: Text(
                     'View All',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primary,
@@ -354,15 +362,15 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
                   child: Text(
                     'No transactions yet',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
                   ),
                 ),
@@ -370,7 +378,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
             else
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -400,7 +408,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -417,7 +425,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                 icon: const Icon(Icons.swap_horiz_rounded, size: 20),
                 label: Text(
                   'Transfer Money',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -440,7 +448,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                 icon: const Icon(Icons.edit_outlined, size: 18),
                 label: Text(
                   'Edit Wallet',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -484,7 +492,7 @@ class _StatMiniCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -509,9 +517,9 @@ class _StatMiniCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 10,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 2,
@@ -519,10 +527,10 @@ class _StatMiniCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -561,7 +569,7 @@ class _TxTile extends StatelessWidget {
           ? Icons.account_balance_wallet_rounded
           : Icons.receipt_long_rounded;
       iconColor = isIncome ? AppColors.income : AppColors.expense;
-      iconBgColor = isIncome ? AppColors.incomeLight : AppColors.expenseLight;
+      iconBgColor = iconColor.withValues(alpha: 0.15);
     }
 
     return Padding(
@@ -584,18 +592,18 @@ class _TxTile extends StatelessWidget {
               children: [
                 Text(
                   tx.note?.isNotEmpty == true ? tx.note! : tx.title,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   CurrencyFormatter.relativeDate(tx.date),
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                   ),
                 ),
               ],
@@ -607,7 +615,7 @@ class _TxTile extends StatelessWidget {
               Text(
                 CurrencyFormatter.formatWithSign(tx.signedAmount,
                     symbol: currencySymbol),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: isIncome ? AppColors.income : AppColors.expense,
@@ -616,9 +624,9 @@ class _TxTile extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 tx.walletName,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 11,
-                  color: AppColors.textHint,
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                 ),
               ),
             ],

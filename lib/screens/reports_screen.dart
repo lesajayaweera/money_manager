@@ -41,17 +41,17 @@ class _ReportsScreenState extends State<ReportsScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
           'Reports',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
       ),
@@ -63,7 +63,9 @@ class _ReportsScreenState extends State<ReportsScreen>
             child: Container(
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFEEECFD),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkSurface2
+                    : const Color(0xFFEEECFD),
                 borderRadius: BorderRadius.circular(22),
               ),
               child: TabBar(
@@ -74,12 +76,12 @@ class _ReportsScreenState extends State<ReportsScreen>
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: Colors.white,
-                unselectedLabelColor: AppColors.textSecondary,
+                unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 dividerColor: Colors.transparent,
-                labelStyle: GoogleFonts.inter(
+                labelStyle: GoogleFonts.poppins(
                     fontSize: 14, fontWeight: FontWeight.w600),
                 unselectedLabelStyle:
-                    GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+                    GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
                 tabs: const [
                   Tab(text: 'Overview'),
                   Tab(text: 'Categories'),
@@ -183,10 +185,10 @@ class _OverviewTabState extends State<_OverviewTab> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           child: child!,
@@ -254,10 +256,10 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Report Period',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -303,10 +305,10 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Income vs Expense (${_getPeriodLabel()})',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -327,10 +329,10 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Category-wise Expenses',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -340,7 +342,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No expenses in this period',
-                        style: GoogleFonts.inter(color: AppColors.textSecondary),
+                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
                       ),
                     ),
                   )
@@ -365,10 +367,10 @@ class _OverviewTabState extends State<_OverviewTab> {
               children: [
                 Text(
                   'Category-wise Income',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -378,7 +380,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No income in this period',
-                        style: GoogleFonts.inter(color: AppColors.textSecondary),
+                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
                       ),
                     ),
                   )
@@ -418,15 +420,19 @@ class _PeriodChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : const Color(0xFFF0F0F0),
+          color: isSelected
+              ? AppColors.primary
+              : Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkSurface2
+                  : const Color(0xFFF0F0F0),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
           ),
         ),
       ),
@@ -477,10 +483,10 @@ class _SimpleBarChart extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _yLabel(y3),
-                  _yLabel(y2),
-                  _yLabel(y1),
-                  _yLabel(0),
+                  _yLabel(context, y3),
+                  _yLabel(context, y2),
+                  _yLabel(context, y1),
+                  _yLabel(context, 0),
                 ],
               ),
             ),
@@ -502,7 +508,7 @@ class _SimpleBarChart extends StatelessWidget {
                         child: Text(
                           CurrencyFormatter.format(income,
                               symbol: currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: AppColors.income,
@@ -517,7 +523,7 @@ class _SimpleBarChart extends StatelessWidget {
                         child: Text(
                           CurrencyFormatter.format(expenses,
                               symbol: currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: AppColors.expense,
@@ -564,9 +570,9 @@ class _SimpleBarChart extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'Income',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ),
@@ -576,9 +582,9 @@ class _SimpleBarChart extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'Expenses',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ),
@@ -593,7 +599,7 @@ class _SimpleBarChart extends StatelessWidget {
     );
   }
 
-  Widget _yLabel(double value) {
+  Widget _yLabel(BuildContext context, double value) {
     String label;
     if (value >= 1000) {
       label = '${(value / 1000).round()}K';
@@ -602,7 +608,7 @@ class _SimpleBarChart extends StatelessWidget {
     }
     return Text(
       label,
-      style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary),
+      style: GoogleFonts.poppins(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
     );
   }
 }
@@ -724,10 +730,10 @@ class _PieSection extends StatelessWidget {
                         children: [
                           Text(
                             entries[touchedIndex].key,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                             textAlign: TextAlign.center,
                             maxLines: 1,
@@ -737,7 +743,7 @@ class _PieSection extends StatelessWidget {
                           Text(
                             CurrencyFormatter.format(entries[touchedIndex].value,
                                 symbol: currencySymbol),
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: isExpense ? AppColors.expense : AppColors.income,
@@ -777,18 +783,18 @@ class _PieSection extends StatelessWidget {
                         Expanded(
                           child: Text(
                             name,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 12,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                           ),
                         ),
                         Text(
                           '${pct.toStringAsFixed(0)}%',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ],
@@ -800,23 +806,23 @@ class _PieSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0)),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               isExpense ? 'Total Expenses' : 'Total Income',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
               ),
             ),
             Text(
               CurrencyFormatter.format(total,
                   symbol: currencySymbol),
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: isExpense ? AppColors.expense : AppColors.income,
@@ -853,7 +859,7 @@ class _CategoriesTab extends StatelessWidget {
         if (data.isEmpty) {
           return Center(
             child: Text('No expense data for this month',
-                style: GoogleFonts.inter(color: AppColors.textSecondary)),
+                style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
           );
         }
         final total = data.values.fold(0.0, (s, v) => s + v);
@@ -863,7 +869,7 @@ class _CategoriesTab extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
           itemCount: entries.length,
           separatorBuilder: (_, __) =>
-              const Divider(height: 1, color: Color(0xFFF5F5F5)),
+              Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF5F5F5)),
           itemBuilder: (ctx, i) {
             final name = entries[i].key;
             final val = entries[i].value;
@@ -871,7 +877,7 @@ class _CategoriesTab extends StatelessWidget {
             final cat = CategoryModel.findByName(name);
 
             return Container(
-              color: Colors.white,
+              color: Colors.transparent,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 child: Row(
@@ -880,7 +886,7 @@ class _CategoriesTab extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: cat?.color ?? AppColors.catOther,
+                        color: cat?.color ?? Colors.white ?? AppColors.catOther,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -896,10 +902,10 @@ class _CategoriesTab extends StatelessWidget {
                         children: [
                           Text(
                             name,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -907,9 +913,9 @@ class _CategoriesTab extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: val / total,
-                              backgroundColor: const Color(0xFFF0F0F0),
+                              backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F0),
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  cat?.color ?? AppColors.catOther),
+                                  cat?.color ?? Colors.white ?? AppColors.catOther),
                               minHeight: 4,
                             ),
                           ),
@@ -923,7 +929,7 @@ class _CategoriesTab extends StatelessWidget {
                         Text(
                           CurrencyFormatter.format(val,
                               symbol: settings.currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.expense,
@@ -931,9 +937,9 @@ class _CategoriesTab extends StatelessWidget {
                         ),
                         Text(
                           '${pct.toStringAsFixed(1)}%',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 11,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ],
@@ -959,14 +965,21 @@ class _DailyTab extends StatelessWidget {
     final provider = context.watch<TransactionProvider>();
     final settings = context.watch<SettingsProvider>();
 
-    // Get last 7 days
-    final now = DateTime.now();
-    final days = List.generate(7, (i) {
-      final d = now.subtract(Duration(days: 6 - i));
-      return DateTime(d.year, d.month, d.day);
-    });
-
     final txs = provider.allTransactions;
+    final now = DateTime.now();
+    
+    // Get all unique days
+    final Set<DateTime> uniqueDays = {DateTime(now.year, now.month, now.day)};
+    for (final t in txs) {
+      uniqueDays.add(DateTime(t.date.year, t.date.month, t.date.day));
+    }
+    final days = uniqueDays.toList()..sort((a, b) => b.compareTo(a));
+
+    final Map<String, List<DateTime>> groupedDays = {};
+    for (final day in days) {
+      final monthYear = DateFormat('MMMM yyyy').format(day);
+      groupedDays.putIfAbsent(monthYear, () => []).add(day);
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
@@ -974,102 +987,124 @@ class _DailyTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Daily Spending (Last 7 Days)',
-            style: GoogleFonts.inter(
+            'Daily Spending (All Time)',
+            style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 16),
-          _SectionCard(
-            child: Column(
-              children: days.map((day) {
-                final dayTxs = txs.where((t) {
-                  final d = DateTime(t.date.year, t.date.month, t.date.day);
-                  return d == day;
-                }).toList();
-                final spent = dayTxs
-                    .where((t) => t.isExpense)
-                    .fold(0.0, (s, t) => s + t.amount);
-                final earned = dayTxs
-                    .where((t) => t.isIncome)
-                    .fold(0.0, (s, t) => s + t.amount);
-                final isToday = day == DateTime(now.year, now.month, now.day);
+          ...groupedDays.entries.map((entry) {
+            final monthYear = entry.key;
+            final monthDays = entry.value;
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 36,
-                        child: Column(
-                          children: [
-                            Text(
-                              DateFormat('EEE').format(day),
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                color: isToday
-                                    ? AppColors.primary
-                                    : AppColors.textSecondary,
-                                fontWeight: isToday
-                                    ? FontWeight.w700
-                                    : FontWeight.w400,
-                              ),
-                            ),
-                            Text(
-                              DateFormat('d').format(day),
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isToday
-                                    ? AppColors.primary
-                                    : AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (earned > 0)
-                              Text(
-                                '+${CurrencyFormatter.format(earned, symbol: settings.currencySymbol)}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: AppColors.income,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            if (spent > 0)
-                              Text(
-                                '-${CurrencyFormatter.format(spent, symbol: settings.currencySymbol)}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: AppColors.expense,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            if (spent == 0 && earned == 0)
-                              Text(
-                                'No activity',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: AppColors.textHint,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text(
+                    monthYear,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                ),
+                _SectionCard(
+                  child: Column(
+                    children: monthDays.map((day) {
+                      final dayTxs = txs.where((t) {
+                        final d = DateTime(t.date.year, t.date.month, t.date.day);
+                        return d == day;
+                      }).toList();
+                      final spent = dayTxs
+                          .where((t) => t.isExpense)
+                          .fold(0.0, (s, t) => s + t.amount);
+                      final earned = dayTxs
+                          .where((t) => t.isIncome)
+                          .fold(0.0, (s, t) => s + t.amount);
+                      final isToday = day == DateTime(now.year, now.month, now.day);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 36,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    DateFormat('EEE').format(day),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: isToday
+                                          ? AppColors.primary
+                                          : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                                      fontWeight: isToday
+                                          ? FontWeight.w700
+                                          : FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('d').format(day),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: isToday
+                                          ? AppColors.primary
+                                          : Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (earned > 0)
+                                    Text(
+                                      '+${CurrencyFormatter.format(earned, symbol: settings.currencySymbol)}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: AppColors.income,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  if (spent > 0)
+                                    Text(
+                                      '-${CurrencyFormatter.format(spent, symbol: settings.currencySymbol)}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: AppColors.expense,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  if (spent == 0 && earned == 0)
+                                    Text(
+                                      'No activity',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -1088,11 +1123,13 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

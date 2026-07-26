@@ -122,22 +122,22 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
         double.tryParse(_balanceController.text.trim()) ?? 10000.0;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded,
-              color: AppColors.textPrimary, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded,
+              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           _isEditMode ? 'Edit Wallet' : 'Add Wallet',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -148,20 +148,20 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
           children: [
             // ── Wallet Name ────────────────────────────────────────────
-            _SectionLabel(label: 'Wallet Name'),
+            const _SectionLabel(label: 'Wallet Name'),
             const SizedBox(height: 8),
             _InputCard(
               child: TextFormField(
                 controller: _nameController,
-                style: GoogleFonts.inter(
-                    fontSize: 15, color: AppColors.textPrimary),
+                style: GoogleFonts.poppins(
+                    fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                 decoration: InputDecoration(
                   hintText: 'e.g., Emergency Fund',
-                  hintStyle: GoogleFonts.inter(
-                      fontSize: 15, color: AppColors.textHint),
-                  prefixIcon: const Icon(
+                  hintStyle: GoogleFonts.poppins(
+                      fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+                  prefixIcon: Icon(
                     Icons.account_balance_wallet_outlined,
-                    color: AppColors.textHint,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                     size: 20,
                   ),
                   border: InputBorder.none,
@@ -174,7 +174,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
             const SizedBox(height: 22),
 
             // ── Wallet Type ────────────────────────────────────────────
-            _SectionLabel(label: 'Wallet Type'),
+            const _SectionLabel(label: 'Wallet Type'),
             const SizedBox(height: 10),
             _WalletTypeSelector(
               selected: _selectedType,
@@ -183,7 +183,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
             const SizedBox(height: 22),
 
             // ── Opening Balance ────────────────────────────────────────
-            _SectionLabel(label: 'Opening Balance (Rs.)'),
+            const _SectionLabel(label: 'Opening Balance (Rs.)'),
             const SizedBox(height: 8),
             _InputCard(
               child: Row(
@@ -192,17 +192,17 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                     padding: const EdgeInsets.only(left: 16, right: 10),
                     child: Text(
                       'Rs.',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                       ),
                     ),
                   ),
                   Container(
                     width: 1,
                     height: 24,
-                    color: AppColors.textHint.withOpacity(0.3),
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white.withOpacity(0.3),
                   ),
                   Expanded(
                     child: TextFormField(
@@ -214,12 +214,12 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                             RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(
-                          fontSize: 15, color: AppColors.textPrimary),
+                      style: GoogleFonts.poppins(
+                          fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                       decoration: InputDecoration(
                         hintText: 'e.g., 0.00',
-                        hintStyle: GoogleFonts.inter(
-                            fontSize: 15, color: AppColors.textHint),
+                        hintStyle: GoogleFonts.poppins(
+                            fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 14),
@@ -238,7 +238,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _SectionLabel(label: 'Icon'),
+                      const _SectionLabel(label: 'Icon'),
                       const SizedBox(height: 8),
                       _IconDropdown(
                         icon: _selectedIcon,
@@ -257,7 +257,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _SectionLabel(label: 'Color'),
+                      const _SectionLabel(label: 'Color'),
                       const SizedBox(height: 8),
                       _ColorDropdown(
                         selected: _selectedColor,
@@ -272,7 +272,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
             const SizedBox(height: 22),
 
             // ── Note ───────────────────────────────────────────────────
-            _SectionLabel(label: 'Note (Optional)'),
+            const _SectionLabel(label: 'Note (Optional)'),
             const SizedBox(height: 8),
             _InputCard(
               child: Stack(
@@ -282,16 +282,16 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                     maxLength: 100,
                     maxLines: 3,
                     onChanged: (_) => setState(() {}),
-                    style: GoogleFonts.inter(
-                        fontSize: 14, color: AppColors.textPrimary),
+                    style: GoogleFonts.poppins(
+                        fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Add a note about this wallet...',
-                      hintStyle: GoogleFonts.inter(
-                          fontSize: 14, color: AppColors.textHint),
-                      prefixIcon: const Padding(
+                      hintStyle: GoogleFonts.poppins(
+                          fontSize: 14, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+                      prefixIcon: Padding(
                         padding: EdgeInsets.only(bottom: 40),
                         child: Icon(Icons.description_outlined,
-                            color: AppColors.textHint, size: 20),
+                            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
                       ),
                       border: InputBorder.none,
                       counterText: '',
@@ -303,9 +303,9 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                     bottom: 8,
                     child: Text(
                       '${_noteController.text.length}/100',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 11,
-                        color: AppColors.textHint,
+                        color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
                       ),
                     ),
                   ),
@@ -315,12 +315,12 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
             const SizedBox(height: 22),
 
             // ── Preview ────────────────────────────────────────────────
-            _SectionLabel(label: 'Preview'),
+            const _SectionLabel(label: 'Preview'),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -356,19 +356,19 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                           _nameController.text.trim().isEmpty
                               ? 'Example Wallet'
                               : _nameController.text.trim(),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           CurrencyFormatter.format(previewBalance,
                               symbol: settings.currencySymbol),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ],
@@ -396,7 +396,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                         const SizedBox(width: 5),
                         Text(
                           _selectedStatus.displayName,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: _selectedStatus.color,
@@ -415,7 +415,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
               padding: const EdgeInsets.symmetric(
                   horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -433,18 +433,18 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                       children: [
                         Text(
                           'Include in Total Balance',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           'This wallet balance will be added to your total balance.',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           ),
                         ),
                       ],
@@ -453,7 +453,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                   Switch(
                     value: _includeInTotal,
                     onChanged: (v) => setState(() => _includeInTotal = v),
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                   ),
                 ],
               ),
@@ -465,7 +465,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).scaffoldBackgroundColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -488,7 +488,7 @@ class _AddEditWalletScreenState extends State<AddEditWalletScreen> {
                 : const Icon(Icons.save_rounded, size: 20),
             label: Text(
               _isEditMode ? 'Update Wallet' : 'Save Wallet',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                   fontSize: 16, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
@@ -516,10 +516,10 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
     );
   }
@@ -535,7 +535,7 @@ class _InputCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -563,7 +563,7 @@ class _WalletTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final types = WalletType.values;
+    const types = WalletType.values;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -579,8 +579,10 @@ class _WalletTypeSelector extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primarySurface
-                      : AppColors.surface,
+                      ? (Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.darkPrimarySurface
+                          : AppColors.primarySurface)
+                      : Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isSelected
@@ -616,14 +618,14 @@ class _WalletTypeSelector extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       type.displayName,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 10,
                         fontWeight: isSelected
                             ? FontWeight.w700
                             : FontWeight.w500,
                         color: isSelected
                             ? AppColors.primary
-                            : AppColors.textSecondary,
+                            : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
@@ -675,7 +677,7 @@ class _IconDropdown extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -700,15 +702,15 @@ class _IconDropdown extends StatelessWidget {
             Expanded(
               child: Text(
                 'Wallet Icon',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textHint, size: 20),
+            Icon(Icons.keyboard_arrow_down_rounded,
+                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
           ],
         ),
       ),
@@ -721,8 +723,8 @@ class _IconDropdown extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -740,10 +742,10 @@ class _IconDropdown extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Choose Icon',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               const SizedBox(height: 16),
@@ -762,8 +764,10 @@ class _IconDropdown extends StatelessWidget {
                       height: 52,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primarySurface
-                            : const Color(0xFFF5F6FA),
+                            ? (Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.darkPrimarySurface
+                                : AppColors.primarySurface)
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
@@ -775,7 +779,7 @@ class _IconDropdown extends StatelessWidget {
                       child: Icon(ic,
                           color: isSelected
                               ? AppColors.primary
-                              : AppColors.textSecondary,
+                              : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                           size: 24),
                     ),
                   );
@@ -809,7 +813,7 @@ class _ColorDropdown extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -833,14 +837,14 @@ class _ColorDropdown extends StatelessWidget {
             Expanded(
               child: Text(
                 WalletColors.nameForColor(selected),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                 ),
               ),
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textHint, size: 20),
+            Icon(Icons.keyboard_arrow_down_rounded,
+                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
           ],
         ),
       ),
@@ -853,8 +857,8 @@ class _ColorDropdown extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -872,10 +876,10 @@ class _ColorDropdown extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Choose Color',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                 ),
               ),
               const SizedBox(height: 16),
@@ -899,7 +903,7 @@ class _ColorDropdown extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: isSelected
                                 ? Border.all(
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                                     width: 3,
                                   )
                                 : null,
@@ -919,9 +923,9 @@ class _ColorDropdown extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           wc.name,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 10,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                             fontWeight: isSelected
                                 ? FontWeight.w700
                                 : FontWeight.w400,

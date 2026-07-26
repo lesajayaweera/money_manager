@@ -73,7 +73,7 @@ class MainScaffoldState extends State<MainScaffold> {
   Widget _buildBottomNav() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.07),
@@ -115,21 +115,21 @@ class MainScaffoldState extends State<MainScaffold> {
                           key: ValueKey(isActive),
                           color: isActive
                               ? AppColors.primary
-                              : AppColors.textHint,
+                              : Theme.of(context).textTheme.bodySmall?.color,
                           size: 22,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         item.label,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 10,
                           fontWeight: isActive
                               ? FontWeight.w600
                               : FontWeight.w400,
                           color: isActive
                               ? AppColors.primary
-                              : AppColors.textHint,
+                              : Theme.of(context).textTheme.bodySmall?.color,
                         ),
                       ),
                     ],

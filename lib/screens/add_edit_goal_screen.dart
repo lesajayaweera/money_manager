@@ -121,9 +121,9 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: GoogleFonts.inter(fontSize: 14)),
+        content: Text(msg, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.expense,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
       ),
@@ -133,21 +133,21 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           _isEditing ? 'Edit Goal' : 'Add Goal',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -160,7 +160,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Goal Name
-              _FormLabel('Goal Name'),
+              const _FormLabel('Goal Name'),
               const SizedBox(height: 8),
               _TextInput(
                 controller: _nameController,
@@ -171,7 +171,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               const SizedBox(height: 20),
 
               // Target Amount
-              _FormLabel('Target Amount (Rs.)'),
+              const _FormLabel('Target Amount (Rs.)'),
               const SizedBox(height: 8),
               _NumberInput(
                 controller: _targetController,
@@ -180,7 +180,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               const SizedBox(height: 20),
 
               // Saved Amount
-              _FormLabel('Saved Amount (Rs.)'),
+              const _FormLabel('Saved Amount (Rs.)'),
               const SizedBox(height: 8),
               _NumberInput(
                 controller: _savedController,
@@ -190,13 +190,13 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               const SizedBox(height: 20),
 
               // Target Date
-              _FormLabel('Target Date'),
+              const _FormLabel('Target Date'),
               const SizedBox(height: 8),
               _DateField(date: _targetDate, onTap: _pickDate),
               const SizedBox(height: 20),
 
               // Icon / Category
-              _FormLabel('Icon / Category'),
+              const _FormLabel('Icon / Category'),
               const SizedBox(height: 8),
               _CategoryDropdown(
                 selected: _selectedCategory,
@@ -205,7 +205,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               const SizedBox(height: 20),
 
               // Account Type (Wallet)
-              _FormLabel('Account Type'),
+              const _FormLabel('Account Type'),
               const SizedBox(height: 8),
               _WalletDropdown(
                 selected: _selectedWalletName,
@@ -214,7 +214,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               const SizedBox(height: 20),
 
               // Note
-              _FormLabel('Note (Optional)'),
+              const _FormLabel('Note (Optional)'),
               const SizedBox(height: 8),
               _NoteInput(
                 controller: _noteController,
@@ -249,7 +249,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                         )
                       : Text(
                           _isEditing ? 'Update Goal' : 'Save Goal',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -275,20 +275,20 @@ class _FormLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: AppColors.textPrimary,
+        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
       ),
     );
   }
 }
 
-InputDecoration _inputDecoration(String hint) => InputDecoration(
+InputDecoration _inputDecoration(BuildContext context, String hint) => InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.inter(color: AppColors.textHint, fontSize: 15),
+      hintStyle: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
       filled: true,
-      fillColor: AppColors.surface,
+      fillColor: Theme.of(context).colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
@@ -324,8 +324,8 @@ class _TextInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
-      decoration: _inputDecoration(hint),
+      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      decoration: _inputDecoration(context, hint),
       validator: validator,
     );
   }
@@ -345,8 +345,8 @@ class _NumberInput extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
-      decoration: _inputDecoration(hint),
+      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      decoration: _inputDecoration(context, hint),
       validator: required
           ? (v) => (v == null || v.trim().isEmpty) ? 'Enter an amount' : null
           : null,
@@ -365,8 +365,8 @@ class _NoteInput extends StatelessWidget {
     return TextFormField(
       controller: controller,
       maxLines: 4,
-      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
-      decoration: _inputDecoration(hint),
+      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      decoration: _inputDecoration(context, hint),
     );
   }
 }
@@ -384,19 +384,19 @@ class _DateField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: const Color(0xFFE0E0E0)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_month_outlined,
-                color: AppColors.textSecondary, size: 20),
+            Icon(Icons.calendar_month_outlined,
+                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 20),
             const SizedBox(width: 12),
             Text(
               DateFormat('d MMM yyyy').format(date),
               style:
-                  GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
+                  GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
             ),
           ],
         ),
@@ -415,7 +415,7 @@ class _CategoryDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -424,9 +424,9 @@ class _CategoryDropdown extends StatelessWidget {
           value: selected,
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary),
-          dropdownColor: AppColors.surface,
+          icon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (_) => GoalCategory.all
               .map((c) => _CatRow(cat: c, isSelected: true))
               .toList(),
@@ -462,10 +462,10 @@ class _CatRow extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           cat.name,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.poppins(
             fontSize: 15,
             fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-            color: AppColors.textPrimary,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
       ],
@@ -491,7 +491,7 @@ class _WalletDropdown extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
@@ -501,20 +501,20 @@ class _WalletDropdown extends StatelessWidget {
           isExpanded: true,
           hint: Text(
             'Select wallet (optional)',
-            style: GoogleFonts.inter(
-                color: AppColors.textHint, fontSize: 15),
+            style: GoogleFonts.poppins(
+                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary),
-          dropdownColor: AppColors.surface,
+          icon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          dropdownColor: Theme.of(context).colorScheme.surface,
           items: [
             DropdownMenuItem<String>(
               value: null,
               child: Text(
                 'None',
-                style: GoogleFonts.inter(
-                    fontSize: 15, color: AppColors.textSecondary),
+                style: GoogleFonts.poppins(
+                    fontSize: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
               ),
             ),
             ...wallets.map((w) => DropdownMenuItem<String>(
@@ -537,9 +537,9 @@ class _WalletDropdown extends StatelessWidget {
                       const SizedBox(width: 12),
                       Text(
                         w.name,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 15,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                         ),
                       ),
                     ],
