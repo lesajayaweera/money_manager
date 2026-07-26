@@ -94,7 +94,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
             backgroundColor: AppColors.income,
           ),
         );
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) _showError(e.toString());

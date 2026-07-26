@@ -84,12 +84,20 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
     }
   }
 
-  void _openTransfer() {
-    Navigator.of(context).push(
+  Future<void> _openTransfer() async {
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => TransferMoneyScreen(fromWallet: _wallet),
       ),
     );
+    if (result == true && mounted) {
+      // Refresh wallet and stats
+      final updated = context.read<WalletProvider>().findById(_wallet.id!);
+      if (updated != null) {
+        setState(() => _wallet = updated);
+      }
+      _loadStats();
+    }
   }
 
   @override
