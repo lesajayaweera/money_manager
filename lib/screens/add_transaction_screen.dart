@@ -190,6 +190,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         .map((w) => _PayMethod(w.name, w.icon, w.color))
         .toList();
 
+    final suggestions = context.read<TransactionProvider>().allTransactions
+        .map((t) => t.note)
+        .where((n) => n != null && n.trim().isNotEmpty)
+        .map((n) => n!.trim())
+        .toSet()
+        .toList();
+
     // Ensure selected is valid
     if (payMethods.isEmpty) {
       _selectedPaymentMethod = '';
@@ -280,6 +287,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(height: 8),
               _NoteField(
                 controller: _noteController,
+                suggestions: suggestions,
                 hint: isExpense
                     ? 'e.g. Lunch at restaurant'
                     : 'e.g. May salary',
@@ -631,38 +639,107 @@ class _DatePickerField extends StatelessWidget {
   }
 }
 
-class _NoteField extends StatelessWidget {
+class _NoteField extends StatefulWidget {
   final TextEditingController controller;
   final String hint;
-  const _NoteField({required this.controller, required this.hint});
+  final List<String> suggestions;
+  const _NoteField({required this.controller, required this.hint, required this.suggestions});
+
+  @override
+  State<_NoteField> createState() => _NoteFieldState();
+}
+
+class _NoteFieldState extends State<_NoteField> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      maxLines: 4,
-      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.poppins(
-            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
-        filled: true,
-        fillColor: Theme.of(context).colorScheme.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide:
-              const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
+    return LayoutBuilder(
+      builder: (context, constraints) => RawAutocomplete<String>(
+        textEditingController: widget.controller,
+        focusNode: _focusNode,
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          if (textEditingValue.text.isEmpty) {
+            return const Iterable<String>.empty();
+          }
+          return widget.suggestions.where((String option) {
+            return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+          });
+        },
+        fieldViewBuilder: (BuildContext context, TextEditingController textEditingController,
+            FocusNode focusNode, VoidCallback onFieldSubmitted) {
+          return TextFormField(
+            controller: textEditingController,
+            focusNode: focusNode,
+            maxLines: 4,
+            minLines: 1,
+            style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              hintStyle: GoogleFonts.poppins(
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surface,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide:
+                    const BorderSide(color: AppColors.primary, width: 1.5),
+              ),
+            ),
+          );
+        },
+        optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4.0,
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).colorScheme.surface,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 200, maxWidth: constraints.maxWidth),
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final String option = options.elementAt(index);
+                    return InkWell(
+                      onTap: () {
+                        onSelected(option);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(option, style: GoogleFonts.poppins(color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
