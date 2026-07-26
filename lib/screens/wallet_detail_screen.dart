@@ -288,7 +288,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   child: _StatMiniCard(
                     icon: Icons.wallet_rounded,
                     iconColor: AppColors.income,
-                    iconBgColor: AppColors.incomeLight,
+                    iconBgColor: AppColors.income.withValues(alpha: 0.15),
                     label: 'This Month Income',
                     value: CurrencyFormatter.format(_monthIncome,
                         symbol: settings.currencySymbol),
@@ -299,7 +299,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   child: _StatMiniCard(
                     icon: Icons.receipt_long_rounded,
                     iconColor: AppColors.expense,
-                    iconBgColor: AppColors.expenseLight,
+                    iconBgColor: AppColors.expense.withValues(alpha: 0.15),
                     label: 'This Month Expenses',
                     value: CurrencyFormatter.format(_monthExpenses,
                         symbol: settings.currencySymbol),
@@ -310,7 +310,7 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   child: _StatMiniCard(
                     icon: Icons.swap_horiz_rounded,
                     iconColor: AppColors.primary,
-                    iconBgColor: AppColors.primarySurface,
+                    iconBgColor: AppColors.primary.withValues(alpha: 0.15),
                     label: 'Transfers',
                     value: CurrencyFormatter.format(_transfers,
                         symbol: settings.currencySymbol),
@@ -561,7 +561,7 @@ class _TxTile extends StatelessWidget {
           ? Icons.account_balance_wallet_rounded
           : Icons.receipt_long_rounded;
       iconColor = isIncome ? AppColors.income : AppColors.expense;
-      iconBgColor = isIncome ? AppColors.incomeLight : AppColors.expenseLight;
+      iconBgColor = iconColor.withValues(alpha: 0.15);
     }
 
     return Padding(

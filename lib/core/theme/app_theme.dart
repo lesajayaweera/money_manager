@@ -214,7 +214,7 @@ class AppTheme {
         outline: AppColors.darkDivider,
       ),
       scaffoldBackgroundColor: AppColors.darkBackground,
-      textTheme: GoogleFonts.interTextTheme().copyWith(
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,
           fontWeight: FontWeight.w800,

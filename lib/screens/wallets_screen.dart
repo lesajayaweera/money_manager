@@ -442,8 +442,10 @@ class _EmptyWallets extends StatelessWidget {
           Container(
             width: 72,
             height: 72,
-            decoration: const BoxDecoration(
-              color: AppColors.primarySurface,
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkPrimarySurface
+                  : AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
             child: const Icon(

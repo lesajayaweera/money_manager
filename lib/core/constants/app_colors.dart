@@ -37,7 +37,7 @@ class AppColors {
   // Dark Text
   static const Color darkTextPrimary = Color(0xFFF0F0FF);
   static const Color darkTextSecondary = Color(0xFF9BA3B8);
-  static const Color darkTextHint = Color(0xFF555570);
+  static const Color darkTextHint = Color(0xFF7A7A9A);
 
   // Dark primary surface (tinted)
   static const Color darkPrimarySurface = Color(0xFF1E1A3A);

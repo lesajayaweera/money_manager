@@ -82,20 +82,7 @@ extension WalletTypeExtension on WalletType {
   }
 
   Color get defaultLightColor {
-    switch (this) {
-      case WalletType.cash:
-        return const Color(0xFFE6F9F5);
-      case WalletType.bankAccount:
-        return const Color(0xFFFDF0EC);
-      case WalletType.card:
-        return AppColors.primarySurface;
-      case WalletType.savings:
-        return const Color(0xFFE8F4FD);
-      case WalletType.business:
-        return AppColors.primarySurface;
-      case WalletType.kokoMintpay:
-        return const Color(0xFFFFF4E3);
-    }
+    return defaultColor.withValues(alpha: 0.15);
   }
 
   static WalletType fromDb(String value) {
@@ -157,14 +144,7 @@ extension WalletStatusExtension on WalletStatus {
   }
 
   Color get lightColor {
-    switch (this) {
-      case WalletStatus.available:
-        return const Color(0xFFE6F9F5);
-      case WalletStatus.saved:
-        return const Color(0xFFE8F4FD);
-      case WalletStatus.installment:
-        return const Color(0xFFFFF4E3);
-    }
+    return color.withValues(alpha: 0.15);
   }
 
   static WalletStatus fromDb(String value) {

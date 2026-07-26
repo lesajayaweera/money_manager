@@ -579,7 +579,9 @@ class _WalletTypeSelector extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primarySurface
+                      ? (Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.darkPrimarySurface
+                          : AppColors.primarySurface)
                       : Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
@@ -762,8 +764,10 @@ class _IconDropdown extends StatelessWidget {
                       height: 52,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primarySurface
-                            : const Color(0xFFF5F6FA),
+                            ? (Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.darkPrimarySurface
+                                : AppColors.primarySurface)
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
