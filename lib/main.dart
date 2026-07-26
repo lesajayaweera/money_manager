@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/settings_provider.dart';
@@ -18,17 +19,25 @@ void main() async {
   // Initialize database
   await DatabaseService.instance.initialize();
 
+  final prefs = await SharedPreferences.getInstance();
+  final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+  if (isFirstLaunch) {
+    await prefs.setBool('isFirstLaunch', false);
+  }
+
   // Force portrait orientation
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(const MoneyManagerApp());
+  runApp(MoneyManagerApp(isFirstLaunch: isFirstLaunch));
 }
 
 class MoneyManagerApp extends StatelessWidget {
-  const MoneyManagerApp({super.key});
+  final bool isFirstLaunch;
+
+  const MoneyManagerApp({super.key, required this.isFirstLaunch});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +73,7 @@ class MoneyManagerApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-            initialRoute: '/splash',
+            initialRoute: isFirstLaunch ? '/splash' : '/main',
             routes: {
               '/splash': (_) => const SplashScreen(),
               '/main': (_) => const MainScaffold(),
