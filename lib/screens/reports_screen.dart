@@ -965,14 +965,21 @@ class _DailyTab extends StatelessWidget {
     final provider = context.watch<TransactionProvider>();
     final settings = context.watch<SettingsProvider>();
 
-    // Get last 7 days
-    final now = DateTime.now();
-    final days = List.generate(7, (i) {
-      final d = now.subtract(Duration(days: 6 - i));
-      return DateTime(d.year, d.month, d.day);
-    });
-
     final txs = provider.allTransactions;
+    final now = DateTime.now();
+    
+    // Get all unique days
+    final Set<DateTime> uniqueDays = {DateTime(now.year, now.month, now.day)};
+    for (final t in txs) {
+      uniqueDays.add(DateTime(t.date.year, t.date.month, t.date.day));
+    }
+    final days = uniqueDays.toList()..sort((a, b) => b.compareTo(a));
+
+    final Map<String, List<DateTime>> groupedDays = {};
+    for (final day in days) {
+      final monthYear = DateFormat('MMMM yyyy').format(day);
+      groupedDays.putIfAbsent(monthYear, () => []).add(day);
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
@@ -980,7 +987,7 @@ class _DailyTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Daily Spending (Last 7 Days)',
+            'Daily Spending (All Time)',
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -988,94 +995,116 @@ class _DailyTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _SectionCard(
-            child: Column(
-              children: days.map((day) {
-                final dayTxs = txs.where((t) {
-                  final d = DateTime(t.date.year, t.date.month, t.date.day);
-                  return d == day;
-                }).toList();
-                final spent = dayTxs
-                    .where((t) => t.isExpense)
-                    .fold(0.0, (s, t) => s + t.amount);
-                final earned = dayTxs
-                    .where((t) => t.isIncome)
-                    .fold(0.0, (s, t) => s + t.amount);
-                final isToday = day == DateTime(now.year, now.month, now.day);
+          ...groupedDays.entries.map((entry) {
+            final monthYear = entry.key;
+            final monthDays = entry.value;
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 36,
-                        child: Column(
-                          children: [
-                            Text(
-                              DateFormat('EEE').format(day),
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                color: isToday
-                                    ? AppColors.primary
-                                    : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-                                fontWeight: isToday
-                                    ? FontWeight.w700
-                                    : FontWeight.w400,
-                              ),
-                            ),
-                            Text(
-                              DateFormat('d').format(day),
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isToday
-                                    ? AppColors.primary
-                                    : Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (earned > 0)
-                              Text(
-                                '+${CurrencyFormatter.format(earned, symbol: settings.currencySymbol)}',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: AppColors.income,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            if (spent > 0)
-                              Text(
-                                '-${CurrencyFormatter.format(spent, symbol: settings.currencySymbol)}',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: AppColors.expense,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            if (spent == 0 && earned == 0)
-                              Text(
-                                'No activity',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text(
+                    monthYear,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                ),
+                _SectionCard(
+                  child: Column(
+                    children: monthDays.map((day) {
+                      final dayTxs = txs.where((t) {
+                        final d = DateTime(t.date.year, t.date.month, t.date.day);
+                        return d == day;
+                      }).toList();
+                      final spent = dayTxs
+                          .where((t) => t.isExpense)
+                          .fold(0.0, (s, t) => s + t.amount);
+                      final earned = dayTxs
+                          .where((t) => t.isIncome)
+                          .fold(0.0, (s, t) => s + t.amount);
+                      final isToday = day == DateTime(now.year, now.month, now.day);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 36,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    DateFormat('EEE').format(day),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: isToday
+                                          ? AppColors.primary
+                                          : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                                      fontWeight: isToday
+                                          ? FontWeight.w700
+                                          : FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('d').format(day),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: isToday
+                                          ? AppColors.primary
+                                          : Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (earned > 0)
+                                    Text(
+                                      '+${CurrencyFormatter.format(earned, symbol: settings.currencySymbol)}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: AppColors.income,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  if (spent > 0)
+                                    Text(
+                                      '-${CurrencyFormatter.format(spent, symbol: settings.currencySymbol)}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: AppColors.expense,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  if (spent == 0 && earned == 0)
+                                    Text(
+                                      'No activity',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            );
+          }),
         ],
       ),
     );
