@@ -1,6 +1,6 @@
-# 💰 MoneyGro
+# 💰 MoneyGrow
 
-MoneyGro is a modern, open-source mobile expense tracker built to help users manage their personal finances with ease. It allows users to record income and expenses, organize transactions into categories, and gain insights into their spending habits through a clean and intuitive interface.
+MoneyGrow is a modern, open-source mobile expense tracker built to help users manage their personal finances with ease. It allows users to record income and expenses, organize transactions into categories, and gain insights into their spending habits through a clean and intuitive interface.
 
 > 🚧 This project is actively under development. Contributions, suggestions, and feedback are always welcome!
 
@@ -57,13 +57,13 @@ assets/screenshots/
 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/MoneyGro.git
+git clone https://github.com/your-username/MoneyGrow.git
 ```
 
 2. Navigate to the project
 
 ```bash
-cd MoneyGro
+cd MoneyGrow
 ```
 
 3. Install dependencies
