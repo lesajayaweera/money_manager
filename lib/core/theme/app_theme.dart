@@ -336,7 +336,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.darkDivider, width: 1),
+          borderSide: BorderSide(color: AppColors.darkDivider, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -356,7 +356,7 @@ class AppTheme {
           color: AppColors.darkTextSecondary,
         ),
       ),
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         color: AppColors.darkDivider,
         thickness: 1,
         space: 1,

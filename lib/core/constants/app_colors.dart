@@ -22,9 +22,7 @@ class AppColors {
 
   static Color get primaryDark {
     final hsl = HSLColor.fromColor(_seedColor);
-    return hsl
-        .withLightness((hsl.lightness - 0.12).clamp(0.0, 1.0))
-        .toColor();
+    return hsl.withLightness((hsl.lightness - 0.12).clamp(0.0, 1.0)).toColor();
   }
 
   static Color get primarySurface {
@@ -57,10 +55,37 @@ class AppColors {
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
   // ── Dark Mode Neutrals ───────────────────────────────────────────────────
-  static const Color darkBackground = Color(0xFF0F0F1A);
-  static const Color darkSurface = Color(0xFF1C1C2E);
-  static const Color darkSurface2 = Color(0xFF252538);
-  static const Color darkDivider = Color(0xFF2A2A3E);
+  static Color get darkBackground {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness(0.08)
+        .withSaturation((hsl.saturation * 0.45).clamp(0.0, 1.0))
+        .toColor();
+  }
+
+  static Color get darkSurface {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness(0.145)
+        .withSaturation((hsl.saturation * 0.35).clamp(0.0, 1.0))
+        .toColor();
+  }
+
+  static Color get darkSurface2 {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness(0.18)
+        .withSaturation((hsl.saturation * 0.3).clamp(0.0, 1.0))
+        .toColor();
+  }
+
+  static Color get darkDivider {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness(0.20)
+        .withSaturation((hsl.saturation * 0.28).clamp(0.0, 1.0))
+        .toColor();
+  }
 
   // Dark Text
   static const Color darkTextPrimary = Color(0xFFF0F0FF);
@@ -91,20 +116,20 @@ class AppColors {
 
   // Gradient (derived from seed)
   static LinearGradient get primaryGradient => LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primaryLight, primary],
-  );
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [primaryLight, primary],
+      );
 
   static LinearGradient get splashGradient => LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [primaryLight, primaryDark],
-  );
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [primaryLight, primaryDark],
+      );
 
   static LinearGradient get darkPrimaryGradient => LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primaryLight, primary],
-  );
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [primaryLight, primary],
+      );
 }
