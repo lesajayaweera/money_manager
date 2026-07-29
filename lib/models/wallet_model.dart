@@ -162,7 +162,7 @@ extension WalletStatusExtension on WalletStatus {
 // ─── Available Colors ──────────────────────────────────────────────────────────
 
 class WalletColors {
-  static const List<_WalletColor> all = [
+  static final List<_WalletColor> all = [
     _WalletColor(name: 'Green', color: Color(0xFF00B894)),
     _WalletColor(name: 'Orange', color: Color(0xFFE17055)),
     _WalletColor(name: 'Purple', color: AppColors.primary),

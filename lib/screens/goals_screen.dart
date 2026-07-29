@@ -45,7 +45,7 @@ class _GoalsScreenState extends State<GoalsScreen>
       body: Consumer<GoalProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading && provider.goals.isEmpty) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
@@ -444,11 +444,11 @@ class _EmptyGoals extends StatelessWidget {
           Container(
             width: 68,
             height: 68,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.flag_outlined,
+            child: Icon(Icons.flag_outlined,
                 size: 34, color: AppColors.primary),
           ),
           const SizedBox(height: 16),

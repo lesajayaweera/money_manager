@@ -76,7 +76,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       lastDate: DateTime.now(),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(
+          colorScheme: ColorScheme.light(
             primary: AppColors.primary,
             onPrimary: Colors.white,
           ),
@@ -395,7 +395,7 @@ class _AmountField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -464,10 +464,10 @@ class _CategoryDropdown extends StatelessWidget {
                     Container(
                       width: 34,
                       height: 34,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                           color: AppColors.primarySurface,
                           shape: BoxShape.circle),
-                      child: const Icon(Icons.settings_rounded,
+                      child: Icon(Icons.settings_rounded,
                           color: AppColors.primary, size: 17),
                     ),
                     const SizedBox(width: 12),
@@ -706,7 +706,7 @@ class _NoteFieldState extends State<_NoteField> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide:
-                    const BorderSide(color: AppColors.primary, width: 1.5),
+                    BorderSide(color: AppColors.primary, width: 1.5),
               ),
             ),
           );

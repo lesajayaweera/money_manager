@@ -38,7 +38,7 @@ class _WalletsScreenState extends State<WalletsScreen>
       body: Consumer<WalletProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading && provider.wallets.isEmpty) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
@@ -448,7 +448,7 @@ class _EmptyWallets extends StatelessWidget {
                   : AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.account_balance_wallet_outlined,
               size: 36,
               color: AppColors.primary,

@@ -60,7 +60,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     color: AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.edit_outlined,
+                  child: Icon(Icons.edit_outlined,
                       color: AppColors.primary, size: 18),
                 ),
                 title: Text('Edit Transaction',

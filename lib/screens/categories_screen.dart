@@ -446,11 +446,11 @@ class _EmptyState extends StatelessWidget {
           Container(
             width: 72,
             height: 72,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.category_outlined,
+            child: Icon(Icons.category_outlined,
                 color: AppColors.primary, size: 34),
           ),
           const SizedBox(height: 16),

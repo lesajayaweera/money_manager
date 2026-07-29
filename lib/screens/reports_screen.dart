@@ -851,7 +851,7 @@ class _CategoriesTab extends StatelessWidget {
           TransactionType.expense, now.year, now.month),
       builder: (ctx, snap) {
         if (!snap.hasData) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(color: AppColors.primary),
           );
         }

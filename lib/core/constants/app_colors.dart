@@ -1,11 +1,39 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Brand Colors
-  static const Color primary = Color(0xFF6C5CE7);
-  static const Color primaryLight = Color(0xFF8B80F0);
-  static const Color primaryDark = Color(0xFF5043C4);
-  static const Color primarySurface = Color(0xFFEEECFD);
+  // ── Dynamic seed color ────────────────────────────────────────────────────
+  static Color _seedColor = const Color(0xFF6C5CE7);
+
+  /// Call this to update the entire app's accent palette at runtime.
+  static void setSeedColor(Color color) {
+    _seedColor = color;
+  }
+
+  // ── Brand Colors (derived from seed) ──────────────────────────────────────
+  static Color get primary => _seedColor;
+
+  static Color get primaryLight {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness((hsl.lightness + 0.12).clamp(0.0, 1.0))
+        .withSaturation((hsl.saturation - 0.05).clamp(0.0, 1.0))
+        .toColor();
+  }
+
+  static Color get primaryDark {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness((hsl.lightness - 0.12).clamp(0.0, 1.0))
+        .toColor();
+  }
+
+  static Color get primarySurface {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness(0.95)
+        .withSaturation((hsl.saturation * 0.4).clamp(0.0, 1.0))
+        .toColor();
+  }
 
   // Semantic Colors
   static const Color income = Color(0xFF00B894);
@@ -20,7 +48,7 @@ class AppColors {
   // Light Neutrals
   static const Color background = Color(0xFFF5F6FA);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color cardShadow = Color(0x1A6C5CE7);
+  static Color get cardShadow => _seedColor.withValues(alpha: 0.1);
 
   // Light Text
   static const Color textPrimary = Color(0xFF1A1A2E);
@@ -40,7 +68,13 @@ class AppColors {
   static const Color darkTextHint = Color(0xFF7A7A9A);
 
   // Dark primary surface (tinted)
-  static const Color darkPrimarySurface = Color(0xFF1E1A3A);
+  static Color get darkPrimarySurface {
+    final hsl = HSLColor.fromColor(_seedColor);
+    return hsl
+        .withLightness(0.16)
+        .withSaturation((hsl.saturation * 0.5).clamp(0.0, 1.0))
+        .toColor();
+  }
 
   // Category Colors
   static const Color catFood = Color(0xFFE17055);
@@ -55,22 +89,22 @@ class AppColors {
   static const Color catSavings = Color(0xFF55EFC4);
   static const Color catOther = Color(0xFF636E72);
 
-  // Gradient
-  static const LinearGradient primaryGradient = LinearGradient(
+  // Gradient (derived from seed)
+  static LinearGradient get primaryGradient => LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF7C6FF7), Color(0xFF6C5CE7)],
+    colors: [primaryLight, primary],
   );
 
-  static const LinearGradient splashGradient = LinearGradient(
+  static LinearGradient get splashGradient => LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF7C6FF7), Color(0xFF5C4ED4)],
+    colors: [primaryLight, primaryDark],
   );
 
-  static const LinearGradient darkPrimaryGradient = LinearGradient(
+  static LinearGradient get darkPrimaryGradient => LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF8B80F0), Color(0xFF6C5CE7)],
+    colors: [primaryLight, primary],
   );
 }

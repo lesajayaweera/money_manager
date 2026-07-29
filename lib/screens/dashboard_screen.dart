@@ -55,7 +55,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       body: Consumer<TransactionProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading && provider.allTransactions.isEmpty) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }

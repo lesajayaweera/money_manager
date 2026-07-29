@@ -77,7 +77,7 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
       lastDate: DateTime(2040),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(
+          colorScheme: ColorScheme.light(
             primary: AppColors.primary,
             onPrimary: Colors.white,
           ),
@@ -579,7 +579,7 @@ InputDecoration _inputDecoration(BuildContext context, String hint) => InputDeco
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        borderSide: BorderSide(color: AppColors.primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),

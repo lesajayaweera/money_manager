@@ -71,6 +71,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                   value: settings.isDarkMode,
                   onChanged: (_) => settings.toggleDarkMode(),
                 ),
+                // Theme Color picker
+                _ThemeColorRow(
+                  currentColor: settings.themeColor,
+                  onTap: () => _showThemeColorSheet(context, settings),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -135,6 +140,126 @@ class _SettingsScreenState extends State<SettingsScreen>
 
   // ─── Dialogs ─────────────────────────────────────────────────────────────
 
+  // Preset theme colors
+  static const List<Map<String, dynamic>> _themeColors = [
+    {'color': Color(0xFF6C5CE7), 'name': 'Purple'},
+    {'color': Color(0xFF2196F3), 'name': 'Blue'},
+    {'color': Color(0xFF009688), 'name': 'Teal'},
+    {'color': Color(0xFF3F51B5), 'name': 'Indigo'},
+    {'color': Color(0xFFE91E63), 'name': 'Pink'},
+    {'color': Color(0xFFFF9800), 'name': 'Orange'},
+    {'color': Color(0xFFF44336), 'name': 'Red'},
+    {'color': Color(0xFF4CAF50), 'name': 'Green'},
+  ];
+
+  Future<void> _showThemeColorSheet(
+      BuildContext context, SettingsProvider settings) async {
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Theme Color',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Choose an accent color for the app',
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+            const SizedBox(height: 20),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1,
+              ),
+              itemCount: _themeColors.length,
+              itemBuilder: (context, index) {
+                final item = _themeColors[index];
+                final color = item['color'] as Color;
+                final name = item['name'] as String;
+                final isSelected = settings.themeColor.toARGB32() == color.toARGB32();
+
+                return GestureDetector(
+                  onTap: () async {
+                    await settings.setThemeColor(color);
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(
+                                  color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color ??
+                                      Colors.white,
+                                  width: 3,
+                                )
+                              : null,
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.4),
+                              blurRadius: isSelected ? 12 : 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: isSelected
+                            ? const Icon(Icons.check_rounded,
+                                color: Colors.white, size: 22)
+                            : null,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        name,
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                          color: isSelected
+                              ? color
+                              : Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _showCurrencySheet(
       BuildContext context, SettingsProvider settings) async {
     await showModalBottomSheet(
@@ -166,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         color: Theme.of(context).textTheme.bodyLarge?.color,
                       )),
                   trailing: settings.currencySymbol == c['symbol']
-                      ? const Icon(Icons.check_rounded, color: AppColors.primary)
+                      ? Icon(Icons.check_rounded, color: AppColors.primary)
                       : null,
                   onTap: () async {
                     await settings.setCurrencySymbol(c['symbol']!);
@@ -367,6 +492,83 @@ class _DarkModeRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Theme color picker row (shows a color swatch with the current color).
+class _ThemeColorRow extends StatelessWidget {
+  final Color currentColor;
+  final VoidCallback onTap;
+  const _ThemeColorRow({required this.currentColor, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? AppColors.textPrimary;
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
+    final textHint =
+        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textHint;
+
+    return Column(
+      children: [
+        Divider(height: 1, indent: 66, endIndent: 0, color: dividerColor),
+        InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // Icon
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: currentColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.palette_rounded,
+                    color: currentColor,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                // Label
+                Expanded(
+                  child: Text(
+                    'Theme Color',
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: textPrimary,
+                    ),
+                  ),
+                ),
+                // Color swatch preview
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: currentColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: currentColor.withValues(alpha: 0.4),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.chevron_right_rounded, color: textHint, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

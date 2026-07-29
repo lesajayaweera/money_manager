@@ -258,7 +258,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     color: AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.edit_outlined,
+                  child: Icon(Icons.edit_outlined,
                       color: AppColors.primary, size: 18),
                 ),
                 title: Text('Edit Entry',
@@ -355,7 +355,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
     // Avatar
     final initials =
         _entry.personName.isNotEmpty ? _entry.personName[0].toUpperCase() : '?';
-    const colors = [
+    final colors = [
       AppColors.primary,
       AppColors.income,
       AppColors.expense,
@@ -602,7 +602,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                             color: AppColors.primarySurface,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Icon(Icons.calendar_today_outlined,
+                          child: Icon(Icons.calendar_today_outlined,
                               size: 13, color: AppColors.primary),
                         ),
                         const SizedBox(width: 6),
@@ -631,7 +631,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                             color: AppColors.primarySurface,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Icon(Icons.calendar_today_outlined,
+                          child: Icon(Icons.calendar_today_outlined,
                               size: 13, color: AppColors.primary),
                         ),
                         const SizedBox(width: 6),
@@ -759,7 +759,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
+                      side: BorderSide(color: AppColors.primary),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),

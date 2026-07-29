@@ -138,7 +138,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(
+                    borderSide: BorderSide(
                         color: AppColors.primary, width: 1.5),
                   ),
                 ),
@@ -534,7 +534,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
+                      side: BorderSide(color: AppColors.primary),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -561,7 +561,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             ),
             const SizedBox(height: 12),
             if (_loadingSavings)
-              const Center(
+              Center(
                   child: CircularProgressIndicator(color: AppColors.primary))
             else if (_savings.isEmpty)
               Container(

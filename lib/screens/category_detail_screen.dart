@@ -323,7 +323,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.edit_rounded, color: AppColors.primary),
+              leading: Icon(Icons.edit_rounded, color: AppColors.primary),
               title: Text('Edit Category',
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               onTap: () {
@@ -333,7 +333,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             ),
             ListTile(
               leading:
-                  const Icon(Icons.palette_rounded, color: AppColors.primary),
+                  Icon(Icons.palette_rounded, color: AppColors.primary),
               title: Text('Customize Icon & Color',
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               onTap: () {
