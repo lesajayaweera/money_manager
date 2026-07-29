@@ -124,7 +124,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         border: Border.all(
                           color: selected
                               ? AppColors.primary
-                              : const Color(0xFFE0E0E0),
+                              : Theme.of(context).dividerColor,
                         ),
                       ),
                       child: Text(
@@ -325,7 +325,7 @@ class _TabButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color:
-                isSelected ? AppColors.primary : const Color(0xFFE0E0E0),
+                isSelected ? AppColors.primary : Theme.of(context).dividerColor,
           ),
         ),
         child: Text(
@@ -416,7 +416,7 @@ class _Tag extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDefault
             ? AppColors.income.withValues(alpha: 0.12)
-            : const Color(0xFFF0F0F5),
+            : Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F5),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -447,7 +447,7 @@ class _EmptyState extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: AppColors.primarySurface,
+              color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.category_outlined,

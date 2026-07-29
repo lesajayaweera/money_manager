@@ -445,7 +445,7 @@ class _EmptyGoals extends StatelessWidget {
             width: 68,
             height: 68,
             decoration: BoxDecoration(
-              color: AppColors.primarySurface,
+              color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.flag_outlined,

@@ -488,7 +488,7 @@ class _DarkModeRow extends StatelessWidget {
             activeTrackColor: AppColors.primary,
             inactiveThumbColor: Theme.of(context).textTheme.bodySmall?.color,
             inactiveTrackColor:
-                Theme.of(context).dividerTheme.color ?? const Color(0xFFE0E0E0),
+                Theme.of(context).dividerTheme.color ?? Theme.of(context).dividerColor,
           ),
         ],
       ),

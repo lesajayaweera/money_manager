@@ -58,7 +58,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE0E0E0),
+                    color: Theme.of(context).dividerColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -97,7 +97,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       horizontal: 16, vertical: 14),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                    borderSide: BorderSide(color: Theme.of(context).dividerColor),
                   ),
                 ),
               ),
@@ -125,7 +125,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE0E0E0)),
+                      border: Border.all(color: Theme.of(context).dividerColor),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
@@ -245,7 +245,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
+                  color: Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -255,7 +255,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
+                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.edit_outlined,
@@ -599,7 +599,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: AppColors.primarySurface,
+                            color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(Icons.calendar_today_outlined,
@@ -628,7 +628,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: AppColors.primarySurface,
+                            color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(Icons.calendar_today_outlined,
@@ -741,7 +741,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
-                      disabledBackgroundColor: AppColors.primarySurface,
+                      disabledBackgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                       disabledForegroundColor: AppColors.primary.withValues(alpha: 0.5),
                     ),
                   ),
