@@ -10,6 +10,7 @@ import '../models/transaction_model.dart';
 import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/wallet_provider.dart';
 import 'add_transaction_screen.dart';
 import 'goals_screen.dart';
 import 'lends_borrowed_screen.dart';
@@ -281,8 +282,8 @@ class _BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
-      builder: (context, settings, _) {
+    return Consumer2<SettingsProvider, WalletProvider>(
+      builder: (context, settings, walletProvider, _) {
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(24),
@@ -349,7 +350,7 @@ class _BalanceCard extends StatelessWidget {
                     child: settings.balanceVisible
                         ? Text(
                             CurrencyFormatter.format(
-                              summary.totalBalance,
+                              walletProvider.totalBalance,
                               symbol: settings.currencySymbol,
                             ),
                             key: const ValueKey('visible'),

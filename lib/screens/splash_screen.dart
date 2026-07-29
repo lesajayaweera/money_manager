@@ -1,9 +1,11 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants/preference_keys.dart';
+
 import '../core/constants/app_colors.dart';
+import '../core/constants/preference_keys.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -98,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _navigateToDashboard() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PreferenceKeys.hasShownInitialSplash, true);
-    
+
     if (!mounted) return;
     Navigator.of(context).pushReplacementNamed('/main');
   }
@@ -146,7 +148,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     children: [
                       Text(
-                        'Money Manager',
+                        'Moneygrow',
                         style: GoogleFonts.poppins(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
@@ -250,8 +252,8 @@ class _SparklePainter extends CustomPainter {
       } else {
         path.lineTo(outerX, outerY);
       }
-      path.lineTo(cx + ir * math.cos(innerAngle2),
-          cy + ir * math.sin(innerAngle2));
+      path.lineTo(
+          cx + ir * math.cos(innerAngle2), cy + ir * math.sin(innerAngle2));
     }
     path.close();
     canvas.drawPath(path, paint);
