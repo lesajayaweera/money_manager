@@ -9,6 +9,8 @@ import '../core/utils/currency_formatter.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/wallet_provider.dart';
+import '../models/wallet_model.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -129,6 +131,7 @@ class _OverviewTabState extends State<_OverviewTab> {
   ReportPeriod _selectedPeriod = ReportPeriod.monthly;
   DateTimeRange? _customDateRange;
   int _touchedIncomePieIndex = -1;
+  int _touchedWalletPieIndex = -1;
 
   List<TransactionModel> _getFilteredTransactions(List<TransactionModel> allTxs) {
     final now = DateTime.now();
@@ -231,6 +234,7 @@ class _OverviewTabState extends State<_OverviewTab> {
   Widget build(BuildContext context) {
     final provider = context.watch<TransactionProvider>();
     final settings = context.watch<SettingsProvider>();
+    final walletProvider = context.watch<WalletProvider>();
     
     final filteredTxs = _getFilteredTransactions(provider.allTransactions);
     
@@ -322,6 +326,34 @@ class _OverviewTabState extends State<_OverviewTab> {
           ),
           const SizedBox(height: 16),
 
+          // Spending Overview bar chart
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Spending Overview',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 200,
+                  child: _SpendingOverTimeChart(
+                    txs: filteredTxs,
+                    period: _selectedPeriod,
+                    customDateRange: _customDateRange,
+                    currencySymbol: settings.currencySymbol,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // Category-wise expenses pie chart
           _SectionCard(
             child: Column(
@@ -392,6 +424,42 @@ class _OverviewTabState extends State<_OverviewTab> {
                     currencySymbol: settings.currencySymbol,
                     total: totalIncome,
                     isExpense: false,
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Wallet-wise balance pie chart
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Wallet-wise Balance',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (walletProvider.wallets.isEmpty)
+                  SizedBox(
+                    height: 80,
+                    child: Center(
+                      child: Text(
+                        'No wallets found',
+                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                      ),
+                    ),
+                  )
+                else
+                  _WalletPieSection(
+                    wallets: walletProvider.wallets,
+                    touchedIndex: _touchedWalletPieIndex,
+                    onTouch: (i) => setState(() => _touchedWalletPieIndex = i),
+                    currencySymbol: settings.currencySymbol,
                   ),
               ],
             ),
@@ -648,6 +716,373 @@ class _Bar extends StatelessWidget {
   }
 }
 
+// ─── Spending Over Time Chart ──────────────────────────────────────────────────
+
+class _SpendingOverTimeChart extends StatelessWidget {
+  final List<TransactionModel> txs;
+  final ReportPeriod period;
+  final DateTimeRange? customDateRange;
+  final String currencySymbol;
+
+  const _SpendingOverTimeChart({
+    super.key,
+    required this.txs,
+    required this.period,
+    this.customDateRange,
+    required this.currencySymbol,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Group transactions
+    final Map<int, double> grouped = {};
+    int minKey = 0;
+    int maxKey = 0;
+
+    final now = DateTime.now();
+
+    if (period == ReportPeriod.daily) {
+      minKey = 0;
+      maxKey = 23;
+      for (var tx in txs) {
+        if (tx.isExpense) {
+          grouped[tx.date.hour] = (grouped[tx.date.hour] ?? 0) + tx.amount;
+        }
+      }
+    } else if (period == ReportPeriod.monthly) {
+      minKey = 1;
+      maxKey = DateUtils.getDaysInMonth(now.year, now.month);
+      for (var tx in txs) {
+        if (tx.isExpense) {
+          grouped[tx.date.day] = (grouped[tx.date.day] ?? 0) + tx.amount;
+        }
+      }
+    } else if (period == ReportPeriod.annually) {
+      minKey = 1;
+      maxKey = 12;
+      for (var tx in txs) {
+        if (tx.isExpense) {
+          grouped[tx.date.month] = (grouped[tx.date.month] ?? 0) + tx.amount;
+        }
+      }
+    } else if (period == ReportPeriod.custom) {
+      if (customDateRange != null) {
+        final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+        if (days <= 31) {
+          minKey = 0;
+          maxKey = days;
+          for (var tx in txs) {
+            if (tx.isExpense) {
+              final dayDiff = tx.date.difference(customDateRange!.start).inDays;
+              grouped[dayDiff] = (grouped[dayDiff] ?? 0) + tx.amount;
+            }
+          }
+        } else {
+          minKey = 0;
+          maxKey = (customDateRange!.end.year - customDateRange!.start.year) * 12 +
+              customDateRange!.end.month -
+              customDateRange!.start.month;
+          for (var tx in txs) {
+            if (tx.isExpense) {
+              final monthDiff = (tx.date.year - customDateRange!.start.year) * 12 +
+                  tx.date.month -
+                  customDateRange!.start.month;
+              grouped[monthDiff] = (grouped[monthDiff] ?? 0) + tx.amount;
+            }
+          }
+        }
+      }
+    }
+
+    double maxY = 0;
+    for (var val in grouped.values) {
+      if (val > maxY) maxY = val;
+    }
+    if (maxY == 0) maxY = 100;
+
+    double xInterval = 1;
+    if (maxKey - minKey > 15) {
+      xInterval = ((maxKey - minKey) / 5).ceilToDouble();
+    }
+
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: maxY * 1.2,
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            tooltipBgColor: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF333333)
+                : Colors.white,
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                CurrencyFormatter.format(rod.toY, symbol: currencySymbol),
+                GoogleFonts.poppins(
+                  color: AppColors.expense,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              );
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: xInterval,
+              getTitlesWidget: (value, meta) {
+                final intVal = value.toInt();
+
+                if (maxKey - minKey > 15) {
+                  if (intVal != minKey && intVal != maxKey && (intVal - minKey) % xInterval.toInt() != 0) {
+                    return const SizedBox.shrink();
+                  }
+                }
+
+                String text = '';
+                if (period == ReportPeriod.daily) {
+                  text = '$intVal:00';
+                } else if (period == ReportPeriod.monthly) {
+                  text = '$intVal';
+                } else if (period == ReportPeriod.annually) {
+                  const months = [
+                    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                  ];
+                  if (intVal >= 1 && intVal <= 12) {
+                    text = months[intVal - 1];
+                  }
+                } else if (period == ReportPeriod.custom && customDateRange != null) {
+                  final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+                  if (days <= 31) {
+                    final d = customDateRange!.start.add(Duration(days: intVal));
+                    text = '${d.day}/${d.month}';
+                  } else {
+                    final m = customDateRange!.start.month + intVal;
+                    final monthIndex = (m - 1) % 12;
+                    const months = [
+                      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                    ];
+                    text = months[monthIndex];
+                  }
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    text,
+                    style: GoogleFonts.poppins(
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              },
+              reservedSize: 28,
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              getTitlesWidget: (value, meta) {
+                if (value == maxY * 1.2 || value == 0) return const SizedBox.shrink();
+                String label;
+                if (value >= 1000) {
+                  label = '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K';
+                } else {
+                  label = value.toInt().toString();
+                }
+                return Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.right,
+                );
+              },
+            ),
+          ),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: maxY / 4 == 0 ? 1 : maxY / 4,
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            strokeWidth: 1,
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        barGroups: List.generate(maxKey - minKey + 1, (index) {
+          final key = minKey + index;
+          final val = grouped[key] ?? 0.0;
+          return BarChartGroupData(
+            x: key,
+            barRods: [
+              BarChartRodData(
+                toY: val,
+                color: AppColors.expense,
+                width: maxKey - minKey > 20 ? 4 : 12,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                backDrawRodData: BackgroundBarChartRodData(
+                  show: true,
+                  toY: maxY * 1.2,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ─── Wallet Pie Section ───────────────────────────────────────────────────────
+
+class _WalletPieSection extends StatelessWidget {
+  final List<WalletModel> wallets;
+  final int touchedIndex;
+  final ValueChanged<int> onTouch;
+  final String currencySymbol;
+
+  const _WalletPieSection({
+    super.key,
+    required this.wallets,
+    required this.touchedIndex,
+    required this.onTouch,
+    required this.currencySymbol,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final activeWallets = wallets.where((w) => w.includeInTotal).toList();
+    final total = activeWallets.fold(0.0, (s, w) => s + w.balance);
+
+    final sections = <PieChartSectionData>[];
+    for (int i = 0; i < activeWallets.length; i++) {
+      final isTouched = i == touchedIndex;
+      sections.add(PieChartSectionData(
+        value: activeWallets[i].balance < 0 ? 0 : activeWallets[i].balance,
+        title: '',
+        color: activeWallets[i].color,
+        radius: isTouched ? 85 : 80,
+      ));
+    }
+
+    return Column(
+      children: [
+        if (activeWallets.isNotEmpty) ...[
+          // Donut
+          SizedBox(
+            width: 180,
+            height: 180,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PieChart(
+                  PieChartData(
+                    sections: sections,
+                    centerSpaceRadius: 0,
+                    sectionsSpace: 2,
+                    pieTouchData: PieTouchData(
+                      touchCallback: (event, response) {
+                        if (response?.touchedSection != null) {
+                          onTouch(response!.touchedSection!.touchedSectionIndex);
+                        } else {
+                          onTouch(-1);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+        // Legend
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: activeWallets.asMap().entries.map((entry) {
+            final i = entry.key;
+            final wallet = entry.value;
+            final pct = total == 0 ? 0 : (wallet.balance < 0 ? 0 : wallet.balance) / total * 100;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                        color: wallet.color, shape: BoxShape.circle),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      wallet.name,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    CurrencyFormatter.format(wallet.balance, symbol: currencySymbol),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(${pct.toStringAsFixed(0)}%)',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0)),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Total Balance',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              ),
+            ),
+            Text(
+              CurrencyFormatter.format(total, symbol: currencySymbol),
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 // ─── Pie Section ──────────────────────────────────────────────────────────────
 
 class _PieSection extends StatelessWidget {
@@ -690,120 +1125,89 @@ class _PieSection extends StatelessWidget {
         value: entries[i].value,
         title: '',
         color: color,
-        radius: isTouched ? 28 : 22,
+        radius: isTouched ? 85 : 80,
       ));
     }
 
     return Column(
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Donut
-            SizedBox(
-              width: 140,
-              height: 140,
-              child: Stack(
-                alignment: Alignment.center,
+        // Donut
+        SizedBox(
+          width: 180,
+          height: 180,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PieChart(
+                PieChartData(
+                  sections: sections,
+                  centerSpaceRadius: 0,
+                  sectionsSpace: 2,
+                  pieTouchData: PieTouchData(
+                    touchCallback: (event, response) {
+                      if (response?.touchedSection != null) {
+                        onTouch(response!.touchedSection!.touchedSectionIndex);
+                      } else {
+                        onTouch(-1);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Legend
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: entries.asMap().entries.map((entry) {
+            final i = entry.key;
+            final name = entry.value.key;
+            final val = entry.value.value;
+            final pct = val / total * 100;
+            final color = _colors[i % _colors.length];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
                 children: [
-                  PieChart(
-                    PieChartData(
-                      sections: sections,
-                      centerSpaceRadius: 42,
-                      sectionsSpace: 2,
-                      pieTouchData: PieTouchData(
-                        touchCallback: (event, response) {
-                          if (response?.touchedSection != null) {
-                            onTouch(response!.touchedSection!.touchedSectionIndex);
-                          } else {
-                            onTouch(-1);
-                          }
-                        },
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                        color: color, shape: BoxShape.circle),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
                       ),
                     ),
                   ),
-                  if (touchedIndex >= 0 && touchedIndex < entries.length)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            entries[touchedIndex].key,
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            CurrencyFormatter.format(entries[touchedIndex].value,
-                                symbol: currencySymbol),
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: isExpense ? AppColors.expense : AppColors.income,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                  Text(
+                    CurrencyFormatter.format(val, symbol: currencySymbol),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(${pct.toStringAsFixed(0)}%)',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: 20),
-            // Legend
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: entries.asMap().entries.map((entry) {
-                  final i = entry.key;
-                  final name = entry.value.key;
-                  final val = entry.value.value;
-                  final pct = val / total * 100;
-                  final color = _colors[i % _colors.length];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                              color: color, shape: BoxShape.circle),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '${pct.toStringAsFixed(0)}%',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+            );
+          }).toList(),
         ),
         const SizedBox(height: 16),
         Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0)),
@@ -886,7 +1290,7 @@ class _CategoriesTab extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: cat?.color ?? Colors.white ?? AppColors.catOther,
+                        color: cat?.color ?? AppColors.catOther,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -915,7 +1319,7 @@ class _CategoriesTab extends StatelessWidget {
                               value: val / total,
                               backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F0),
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                  cat?.color ?? Colors.white ?? AppColors.catOther),
+                                  cat?.color ?? AppColors.catOther),
                               minHeight: 4,
                             ),
                           ),
