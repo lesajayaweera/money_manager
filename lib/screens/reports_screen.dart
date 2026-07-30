@@ -1,16 +1,21 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
 import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
+import '../models/budget_model.dart';
 import '../models/transaction_model.dart';
-import '../providers/transaction_provider.dart';
-import '../providers/settings_provider.dart';
-import '../providers/wallet_provider.dart';
 import '../models/wallet_model.dart';
+import '../providers/budget_provider.dart';
+import '../providers/settings_provider.dart';
+import '../providers/transaction_provider.dart';
+import '../providers/wallet_provider.dart';
+import 'create_budget_screen.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -30,7 +35,7 @@ class _ReportsScreenState extends State<ReportsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -53,7 +58,8 @@ class _ReportsScreenState extends State<ReportsScreen>
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
       ),
@@ -78,16 +84,19 @@ class _ReportsScreenState extends State<ReportsScreen>
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: Colors.white,
-                unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                unselectedLabelColor:
+                    Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.white,
                 dividerColor: Colors.transparent,
                 labelStyle: GoogleFonts.poppins(
                     fontSize: 14, fontWeight: FontWeight.w600),
-                unselectedLabelStyle:
-                    GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
+                unselectedLabelStyle: GoogleFonts.poppins(
+                    fontSize: 14, fontWeight: FontWeight.w500),
                 tabs: const [
                   Tab(text: 'Overview'),
                   Tab(text: 'Categories'),
                   Tab(text: 'Daily'),
+                  Tab(text: 'Budget'),
                 ],
               ),
             ),
@@ -103,6 +112,7 @@ class _ReportsScreenState extends State<ReportsScreen>
                 ),
                 const _CategoriesTab(),
                 const _DailyTab(),
+                const _BudgetTab(),
               ],
             ),
           ),
@@ -120,8 +130,7 @@ class _OverviewTab extends StatefulWidget {
   final int touchedIndex;
   final ValueChanged<int> onPieTouch;
 
-  const _OverviewTab(
-      {required this.touchedIndex, required this.onPieTouch});
+  const _OverviewTab({required this.touchedIndex, required this.onPieTouch});
 
   @override
   State<_OverviewTab> createState() => _OverviewTabState();
@@ -133,7 +142,8 @@ class _OverviewTabState extends State<_OverviewTab> {
   int _touchedIncomePieIndex = -1;
   int _touchedWalletPieIndex = -1;
 
-  List<TransactionModel> _getFilteredTransactions(List<TransactionModel> allTxs) {
+  List<TransactionModel> _getFilteredTransactions(
+      List<TransactionModel> allTxs) {
     final now = DateTime.now();
     DateTime start;
     DateTime end;
@@ -163,11 +173,14 @@ class _OverviewTabState extends State<_OverviewTab> {
     }
 
     return allTxs.where((t) {
-      return (t.date.isAfter(start.subtract(const Duration(milliseconds: 1))) || t.date.isAtSameMomentAs(start)) && t.date.isBefore(end);
+      return (t.date.isAfter(start.subtract(const Duration(milliseconds: 1))) ||
+              t.date.isAtSameMomentAs(start)) &&
+          t.date.isBefore(end);
     }).toList();
   }
 
-  Map<String, double> _getCategoryBreakdown(List<TransactionModel> txs, TransactionType type) {
+  Map<String, double> _getCategoryBreakdown(
+      List<TransactionModel> txs, TransactionType type) {
     final Map<String, double> breakdown = {};
     for (final tx in txs) {
       if (tx.type == type) {
@@ -191,7 +204,8 @@ class _OverviewTabState extends State<_OverviewTab> {
             colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              onSurface:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           child: child!,
@@ -203,7 +217,8 @@ class _OverviewTabState extends State<_OverviewTab> {
         _customDateRange = picked;
         _selectedPeriod = ReportPeriod.custom;
       });
-    } else if (_selectedPeriod == ReportPeriod.custom && _customDateRange == null) {
+    } else if (_selectedPeriod == ReportPeriod.custom &&
+        _customDateRange == null) {
       // Revert if cancelled and no range was selected
       setState(() {
         _selectedPeriod = ReportPeriod.monthly;
@@ -235,9 +250,9 @@ class _OverviewTabState extends State<_OverviewTab> {
     final provider = context.watch<TransactionProvider>();
     final settings = context.watch<SettingsProvider>();
     final walletProvider = context.watch<WalletProvider>();
-    
+
     final filteredTxs = _getFilteredTransactions(provider.allTransactions);
-    
+
     double totalIncome = 0;
     double totalExpense = 0;
     for (final tx in filteredTxs) {
@@ -245,8 +260,10 @@ class _OverviewTabState extends State<_OverviewTab> {
       if (tx.isExpense) totalExpense += tx.amount;
     }
 
-    final expenseBreakdown = _getCategoryBreakdown(filteredTxs, TransactionType.expense);
-    final incomeBreakdown = _getCategoryBreakdown(filteredTxs, TransactionType.income);
+    final expenseBreakdown =
+        _getCategoryBreakdown(filteredTxs, TransactionType.expense);
+    final incomeBreakdown =
+        _getCategoryBreakdown(filteredTxs, TransactionType.income);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
@@ -263,7 +280,8 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -274,19 +292,22 @@ class _OverviewTabState extends State<_OverviewTab> {
                       _PeriodChip(
                         label: 'Daily',
                         isSelected: _selectedPeriod == ReportPeriod.daily,
-                        onTap: () => setState(() => _selectedPeriod = ReportPeriod.daily),
+                        onTap: () => setState(
+                            () => _selectedPeriod = ReportPeriod.daily),
                       ),
                       const SizedBox(width: 8),
                       _PeriodChip(
                         label: 'Monthly',
                         isSelected: _selectedPeriod == ReportPeriod.monthly,
-                        onTap: () => setState(() => _selectedPeriod = ReportPeriod.monthly),
+                        onTap: () => setState(
+                            () => _selectedPeriod = ReportPeriod.monthly),
                       ),
                       const SizedBox(width: 8),
                       _PeriodChip(
                         label: 'Annually',
                         isSelected: _selectedPeriod == ReportPeriod.annually,
-                        onTap: () => setState(() => _selectedPeriod = ReportPeriod.annually),
+                        onTap: () => setState(
+                            () => _selectedPeriod = ReportPeriod.annually),
                       ),
                       const SizedBox(width: 8),
                       _PeriodChip(
@@ -312,7 +333,8 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -336,7 +358,8 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -364,7 +387,8 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -372,20 +396,39 @@ class _OverviewTabState extends State<_OverviewTab> {
                   'Income vs Expenses over time',
                   style: GoogleFonts.poppins(
                     fontSize: 11,
-                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                    color: Theme.of(context).textTheme.bodySmall?.color ??
+                        Colors.grey,
                   ),
                 ),
                 const SizedBox(height: 16),
                 // Legend
                 Row(
                   children: [
-                    Container(width: 12, height: 3, decoration: BoxDecoration(color: AppColors.income, borderRadius: BorderRadius.circular(2))),
+                    Container(
+                        width: 12,
+                        height: 3,
+                        decoration: BoxDecoration(
+                            color: AppColors.income,
+                            borderRadius: BorderRadius.circular(2))),
                     const SizedBox(width: 6),
-                    Text('Income', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.income, fontWeight: FontWeight.w500)),
+                    Text('Income',
+                        style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: AppColors.income,
+                            fontWeight: FontWeight.w500)),
                     const SizedBox(width: 16),
-                    Container(width: 12, height: 3, decoration: BoxDecoration(color: AppColors.expense, borderRadius: BorderRadius.circular(2))),
+                    Container(
+                        width: 12,
+                        height: 3,
+                        decoration: BoxDecoration(
+                            color: AppColors.expense,
+                            borderRadius: BorderRadius.circular(2))),
                     const SizedBox(width: 6),
-                    Text('Expenses', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.expense, fontWeight: FontWeight.w500)),
+                    Text('Expenses',
+                        style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: AppColors.expense,
+                            fontWeight: FontWeight.w500)),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -413,7 +456,8 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -423,7 +467,10 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No expenses in this period',
-                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                        style: GoogleFonts.poppins(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white),
                       ),
                     ),
                   )
@@ -451,7 +498,8 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -461,7 +509,10 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No income in this period',
-                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                        style: GoogleFonts.poppins(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white),
                       ),
                     ),
                   )
@@ -489,7 +540,8 @@ class _OverviewTabState extends State<_OverviewTab> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -499,7 +551,10 @@ class _OverviewTabState extends State<_OverviewTab> {
                     child: Center(
                       child: Text(
                         'No wallets found',
-                        style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                        style: GoogleFonts.poppins(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white),
                       ),
                     ),
                   )
@@ -549,7 +604,9 @@ class _PeriodChip extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+            color: isSelected
+                ? Colors.white
+                : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
           ),
         ),
       ),
@@ -689,7 +746,9 @@ class _SimpleBarChart extends StatelessWidget {
                           'Income',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white,
                           ),
                         ),
                       ),
@@ -701,7 +760,9 @@ class _SimpleBarChart extends StatelessWidget {
                           'Expenses',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
-                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white,
                           ),
                         ),
                       ),
@@ -725,7 +786,9 @@ class _SimpleBarChart extends StatelessWidget {
     }
     return Text(
       label,
-      style: GoogleFonts.poppins(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+      style: GoogleFonts.poppins(
+          fontSize: 10,
+          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
     );
   }
 }
@@ -816,7 +879,8 @@ class _SpendingOverTimeChart extends StatelessWidget {
       }
     } else if (period == ReportPeriod.custom) {
       if (customDateRange != null) {
-        final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+        final days =
+            customDateRange!.end.difference(customDateRange!.start).inDays;
         if (days <= 31) {
           minKey = 0;
           maxKey = days;
@@ -828,14 +892,16 @@ class _SpendingOverTimeChart extends StatelessWidget {
           }
         } else {
           minKey = 0;
-          maxKey = (customDateRange!.end.year - customDateRange!.start.year) * 12 +
-              customDateRange!.end.month -
-              customDateRange!.start.month;
+          maxKey =
+              (customDateRange!.end.year - customDateRange!.start.year) * 12 +
+                  customDateRange!.end.month -
+                  customDateRange!.start.month;
           for (var tx in txs) {
             if (tx.isExpense) {
-              final monthDiff = (tx.date.year - customDateRange!.start.year) * 12 +
-                  tx.date.month -
-                  customDateRange!.start.month;
+              final monthDiff =
+                  (tx.date.year - customDateRange!.start.year) * 12 +
+                      tx.date.month -
+                      customDateRange!.start.month;
               grouped[monthDiff] = (grouped[monthDiff] ?? 0) + tx.amount;
             }
           }
@@ -885,7 +951,9 @@ class _SpendingOverTimeChart extends StatelessWidget {
                 final intVal = value.toInt();
 
                 if (maxKey - minKey > 15) {
-                  if (intVal != minKey && intVal != maxKey && (intVal - minKey) % xInterval.toInt() != 0) {
+                  if (intVal != minKey &&
+                      intVal != maxKey &&
+                      (intVal - minKey) % xInterval.toInt() != 0) {
                     return const SizedBox.shrink();
                   }
                 }
@@ -897,21 +965,47 @@ class _SpendingOverTimeChart extends StatelessWidget {
                   text = '$intVal';
                 } else if (period == ReportPeriod.annually) {
                   const months = [
-                    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                    'Jan',
+                    'Feb',
+                    'Mar',
+                    'Apr',
+                    'May',
+                    'Jun',
+                    'Jul',
+                    'Aug',
+                    'Sep',
+                    'Oct',
+                    'Nov',
+                    'Dec'
                   ];
                   if (intVal >= 1 && intVal <= 12) {
                     text = months[intVal - 1];
                   }
-                } else if (period == ReportPeriod.custom && customDateRange != null) {
-                  final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+                } else if (period == ReportPeriod.custom &&
+                    customDateRange != null) {
+                  final days = customDateRange!.end
+                      .difference(customDateRange!.start)
+                      .inDays;
                   if (days <= 31) {
-                    final d = customDateRange!.start.add(Duration(days: intVal));
+                    final d =
+                        customDateRange!.start.add(Duration(days: intVal));
                     text = '${d.day}/${d.month}';
                   } else {
                     final m = customDateRange!.start.month + intVal;
                     final monthIndex = (m - 1) % 12;
                     const months = [
-                      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                      'Jan',
+                      'Feb',
+                      'Mar',
+                      'Apr',
+                      'May',
+                      'Jun',
+                      'Jul',
+                      'Aug',
+                      'Sep',
+                      'Oct',
+                      'Nov',
+                      'Dec'
                     ];
                     text = months[monthIndex];
                   }
@@ -921,7 +1015,8 @@ class _SpendingOverTimeChart extends StatelessWidget {
                   child: Text(
                     text,
                     style: GoogleFonts.poppins(
-                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodySmall?.color ??
+                          Colors.white,
                       fontSize: 10,
                     ),
                   ),
@@ -935,17 +1030,20 @@ class _SpendingOverTimeChart extends StatelessWidget {
               showTitles: true,
               reservedSize: 40,
               getTitlesWidget: (value, meta) {
-                if (value == maxY * 1.2 || value == 0) return const SizedBox.shrink();
+                if (value == maxY * 1.2 || value == 0)
+                  return const SizedBox.shrink();
                 String label;
                 if (value >= 1000) {
-                  label = '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K';
+                  label =
+                      '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K';
                 } else {
                   label = value.toInt().toString();
                 }
                 return Text(
                   label,
                   style: GoogleFonts.poppins(
-                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.bodySmall?.color ??
+                        Colors.white,
                     fontSize: 10,
                   ),
                   textAlign: TextAlign.right,
@@ -953,8 +1051,10 @@ class _SpendingOverTimeChart extends StatelessWidget {
               },
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         gridData: FlGridData(
           show: true,
@@ -976,7 +1076,8 @@ class _SpendingOverTimeChart extends StatelessWidget {
                 toY: val,
                 color: AppColors.expense,
                 width: maxKey - minKey > 20 ? 4 : 12,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(4)),
                 backDrawRodData: BackgroundBarChartRodData(
                   show: true,
                   toY: maxY * 1.2,
@@ -1021,9 +1122,11 @@ class _CashFlowChart extends StatelessWidget {
       maxKey = 23;
       for (var tx in txs) {
         if (tx.isExpense) {
-          expenseGrouped[tx.date.hour] = (expenseGrouped[tx.date.hour] ?? 0) + tx.amount;
+          expenseGrouped[tx.date.hour] =
+              (expenseGrouped[tx.date.hour] ?? 0) + tx.amount;
         } else {
-          incomeGrouped[tx.date.hour] = (incomeGrouped[tx.date.hour] ?? 0) + tx.amount;
+          incomeGrouped[tx.date.hour] =
+              (incomeGrouped[tx.date.hour] ?? 0) + tx.amount;
         }
       }
     } else if (period == ReportPeriod.monthly) {
@@ -1031,9 +1134,11 @@ class _CashFlowChart extends StatelessWidget {
       maxKey = DateUtils.getDaysInMonth(now.year, now.month);
       for (var tx in txs) {
         if (tx.isExpense) {
-          expenseGrouped[tx.date.day] = (expenseGrouped[tx.date.day] ?? 0) + tx.amount;
+          expenseGrouped[tx.date.day] =
+              (expenseGrouped[tx.date.day] ?? 0) + tx.amount;
         } else {
-          incomeGrouped[tx.date.day] = (incomeGrouped[tx.date.day] ?? 0) + tx.amount;
+          incomeGrouped[tx.date.day] =
+              (incomeGrouped[tx.date.day] ?? 0) + tx.amount;
         }
       }
     } else if (period == ReportPeriod.annually) {
@@ -1041,35 +1146,44 @@ class _CashFlowChart extends StatelessWidget {
       maxKey = 12;
       for (var tx in txs) {
         if (tx.isExpense) {
-          expenseGrouped[tx.date.month] = (expenseGrouped[tx.date.month] ?? 0) + tx.amount;
+          expenseGrouped[tx.date.month] =
+              (expenseGrouped[tx.date.month] ?? 0) + tx.amount;
         } else {
-          incomeGrouped[tx.date.month] = (incomeGrouped[tx.date.month] ?? 0) + tx.amount;
+          incomeGrouped[tx.date.month] =
+              (incomeGrouped[tx.date.month] ?? 0) + tx.amount;
         }
       }
     } else if (period == ReportPeriod.custom && customDateRange != null) {
-      final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+      final days =
+          customDateRange!.end.difference(customDateRange!.start).inDays;
       if (days <= 31) {
         minKey = 0;
         maxKey = days;
         for (var tx in txs) {
           final dayDiff = tx.date.difference(customDateRange!.start).inDays;
           if (tx.isExpense) {
-            expenseGrouped[dayDiff] = (expenseGrouped[dayDiff] ?? 0) + tx.amount;
+            expenseGrouped[dayDiff] =
+                (expenseGrouped[dayDiff] ?? 0) + tx.amount;
           } else {
             incomeGrouped[dayDiff] = (incomeGrouped[dayDiff] ?? 0) + tx.amount;
           }
         }
       } else {
         minKey = 0;
-        maxKey = (customDateRange!.end.year - customDateRange!.start.year) * 12 +
-            customDateRange!.end.month - customDateRange!.start.month;
+        maxKey =
+            (customDateRange!.end.year - customDateRange!.start.year) * 12 +
+                customDateRange!.end.month -
+                customDateRange!.start.month;
         for (var tx in txs) {
           final monthDiff = (tx.date.year - customDateRange!.start.year) * 12 +
-              tx.date.month - customDateRange!.start.month;
+              tx.date.month -
+              customDateRange!.start.month;
           if (tx.isExpense) {
-            expenseGrouped[monthDiff] = (expenseGrouped[monthDiff] ?? 0) + tx.amount;
+            expenseGrouped[monthDiff] =
+                (expenseGrouped[monthDiff] ?? 0) + tx.amount;
           } else {
-            incomeGrouped[monthDiff] = (incomeGrouped[monthDiff] ?? 0) + tx.amount;
+            incomeGrouped[monthDiff] =
+                (incomeGrouped[monthDiff] ?? 0) + tx.amount;
           }
         }
       }
@@ -1131,7 +1245,9 @@ class _CashFlowChart extends StatelessWidget {
               getTitlesWidget: (value, meta) {
                 final intVal = value.toInt();
                 if (maxKey - minKey > 15) {
-                  if (intVal != minKey && intVal != maxKey && (intVal - minKey) % xInterval.toInt() != 0) {
+                  if (intVal != minKey &&
+                      intVal != maxKey &&
+                      (intVal - minKey) % xInterval.toInt() != 0) {
                     return const SizedBox.shrink();
                   }
                 }
@@ -1141,16 +1257,46 @@ class _CashFlowChart extends StatelessWidget {
                 } else if (period == ReportPeriod.monthly) {
                   text = '$intVal';
                 } else if (period == ReportPeriod.annually) {
-                  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  const months = [
+                    'Jan',
+                    'Feb',
+                    'Mar',
+                    'Apr',
+                    'May',
+                    'Jun',
+                    'Jul',
+                    'Aug',
+                    'Sep',
+                    'Oct',
+                    'Nov',
+                    'Dec'
+                  ];
                   if (intVal >= 1 && intVal <= 12) text = months[intVal - 1];
-                } else if (period == ReportPeriod.custom && customDateRange != null) {
-                  final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+                } else if (period == ReportPeriod.custom &&
+                    customDateRange != null) {
+                  final days = customDateRange!.end
+                      .difference(customDateRange!.start)
+                      .inDays;
                   if (days <= 31) {
-                    final d = customDateRange!.start.add(Duration(days: intVal));
+                    final d =
+                        customDateRange!.start.add(Duration(days: intVal));
                     text = '${d.day}/${d.month}';
                   } else {
                     final m = customDateRange!.start.month + intVal;
-                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const months = [
+                      'Jan',
+                      'Feb',
+                      'Mar',
+                      'Apr',
+                      'May',
+                      'Jun',
+                      'Jul',
+                      'Aug',
+                      'Sep',
+                      'Oct',
+                      'Nov',
+                      'Dec'
+                    ];
                     text = months[(m - 1) % 12];
                   }
                 }
@@ -1159,7 +1305,8 @@ class _CashFlowChart extends StatelessWidget {
                   child: Text(
                     text,
                     style: GoogleFonts.poppins(
-                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                      color: Theme.of(context).textTheme.bodySmall?.color ??
+                          Colors.grey,
                       fontSize: 10,
                     ),
                   ),
@@ -1172,14 +1319,16 @@ class _CashFlowChart extends StatelessWidget {
               showTitles: true,
               reservedSize: 44,
               getTitlesWidget: (value, meta) {
-                if (value == maxY * 1.25 || value == 0) return const SizedBox.shrink();
+                if (value == maxY * 1.25 || value == 0)
+                  return const SizedBox.shrink();
                 final label = value >= 1000
                     ? '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K'
                     : value.toInt().toString();
                 return Text(
                   label,
                   style: GoogleFonts.poppins(
-                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                    color: Theme.of(context).textTheme.bodySmall?.color ??
+                        Colors.grey,
                     fontSize: 10,
                   ),
                   textAlign: TextAlign.right,
@@ -1187,8 +1336,10 @@ class _CashFlowChart extends StatelessWidget {
               },
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         gridData: FlGridData(
           show: true,
@@ -1315,7 +1466,8 @@ class _WalletPieSection extends StatelessWidget {
                     pieTouchData: PieTouchData(
                       touchCallback: (event, response) {
                         if (response?.touchedSection != null) {
-                          onTouch(response!.touchedSection!.touchedSectionIndex);
+                          onTouch(
+                              response!.touchedSection!.touchedSectionIndex);
                         } else {
                           onTouch(-1);
                         }
@@ -1335,7 +1487,9 @@ class _WalletPieSection extends StatelessWidget {
             final i = entry.key;
             final wallet = entry.value;
             final color = _walletColors[i % _walletColors.length];
-            final pct = total == 0 ? 0 : (wallet.balance < 0 ? 0 : wallet.balance) / total * 100;
+            final pct = total == 0
+                ? 0
+                : (wallet.balance < 0 ? 0 : wallet.balance) / total * 100;
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
@@ -1343,25 +1497,34 @@ class _WalletPieSection extends StatelessWidget {
                   Container(
                     width: 12,
                     height: 12,
-                    decoration: BoxDecoration(
-                        color: color, shape: BoxShape.circle),
+                    decoration:
+                        BoxDecoration(color: color, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       wallet.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                        color: Theme.of(context).textTheme.titleLarge?.color ??
+                            Colors.white,
                       ),
                     ),
                   ),
-                  Text(
-                    CurrencyFormatter.format(wallet.balance, symbol: currencySymbol),
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                  Flexible(
+                    child: Text(
+                      CurrencyFormatter.format(wallet.balance,
+                          symbol: currencySymbol),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ??
+                            Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1370,7 +1533,8 @@ class _WalletPieSection extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
                     ),
                   ),
                 ],
@@ -1379,25 +1543,39 @@ class _WalletPieSection extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 16),
-        Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0)),
+        Divider(
+            height: 1,
+            color: Theme.of(context).dividerTheme.color ??
+                const Color(0xFFF0F0F0)),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Total Balance',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            Expanded(
+              child: Text(
+                'Total Balance',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
+                ),
               ),
             ),
-            Text(
-              CurrencyFormatter.format(total, symbol: currencySymbol),
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                CurrencyFormatter.format(total, symbol: currencySymbol),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ],
@@ -1500,25 +1678,33 @@ class _PieSection extends StatelessWidget {
                   Container(
                     width: 12,
                     height: 12,
-                    decoration: BoxDecoration(
-                        color: color, shape: BoxShape.circle),
+                    decoration:
+                        BoxDecoration(color: color, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                        color: Theme.of(context).textTheme.titleLarge?.color ??
+                            Colors.white,
                       ),
                     ),
                   ),
-                  Text(
-                    CurrencyFormatter.format(val, symbol: currencySymbol),
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                  Flexible(
+                    child: Text(
+                      CurrencyFormatter.format(val, symbol: currencySymbol),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ??
+                            Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1527,7 +1713,8 @@ class _PieSection extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
                     ),
                   ),
                 ],
@@ -1536,26 +1723,39 @@ class _PieSection extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 16),
-        Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0)),
+        Divider(
+            height: 1,
+            color: Theme.of(context).dividerTheme.color ??
+                const Color(0xFFF0F0F0)),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              isExpense ? 'Total Expenses' : 'Total Income',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            Expanded(
+              child: Text(
+                isExpense ? 'Total Expenses' : 'Total Income',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
+                ),
               ),
             ),
-            Text(
-              CurrencyFormatter.format(total,
-                  symbol: currencySymbol),
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isExpense ? AppColors.expense : AppColors.income,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                CurrencyFormatter.format(total, symbol: currencySymbol),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: isExpense ? AppColors.expense : AppColors.income,
+                ),
               ),
             ),
           ],
@@ -1589,7 +1789,9 @@ class _CategoriesTab extends StatelessWidget {
         if (data.isEmpty) {
           return Center(
             child: Text('No expense data for this month',
-                style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
+                style: GoogleFonts.poppins(
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.white)),
           );
         }
         final total = data.values.fold(0.0, (s, v) => s + v);
@@ -1598,8 +1800,10 @@ class _CategoriesTab extends StatelessWidget {
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
           itemCount: entries.length,
-          separatorBuilder: (_, __) =>
-              Divider(height: 1, color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF5F5F5)),
+          separatorBuilder: (_, __) => Divider(
+              height: 1,
+              color: Theme.of(context).dividerTheme.color ??
+                  const Color(0xFFF5F5F5)),
           itemBuilder: (ctx, i) {
             final name = entries[i].key;
             final val = entries[i].value;
@@ -1635,7 +1839,11 @@ class _CategoriesTab extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.color ??
+                                  Colors.white,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -1643,7 +1851,10 @@ class _CategoriesTab extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: val / total,
-                              backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F0),
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppColors.darkSurface2
+                                  : const Color(0xFFF0F0F0),
                               valueColor: AlwaysStoppedAnimation<Color>(
                                   cat?.color ?? AppColors.catOther),
                               minHeight: 4,
@@ -1669,7 +1880,9 @@ class _CategoriesTab extends StatelessWidget {
                           '${pct.toStringAsFixed(1)}%',
                           style: GoogleFonts.poppins(
                             fontSize: 11,
-                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white,
                           ),
                         ),
                       ],
@@ -1697,7 +1910,7 @@ class _DailyTab extends StatelessWidget {
 
     final txs = provider.allTransactions;
     final now = DateTime.now();
-    
+
     // Get all unique days
     final Set<DateTime> uniqueDays = {DateTime(now.year, now.month, now.day)};
     for (final t in txs) {
@@ -1721,7 +1934,8 @@ class _DailyTab extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 16),
@@ -1739,7 +1953,8 @@ class _DailyTab extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
                     ),
                   ),
                 ),
@@ -1747,7 +1962,8 @@ class _DailyTab extends StatelessWidget {
                   child: Column(
                     children: monthDays.map((day) {
                       final dayTxs = txs.where((t) {
-                        final d = DateTime(t.date.year, t.date.month, t.date.day);
+                        final d =
+                            DateTime(t.date.year, t.date.month, t.date.day);
                         return d == day;
                       }).toList();
                       final spent = dayTxs
@@ -1756,7 +1972,8 @@ class _DailyTab extends StatelessWidget {
                       final earned = dayTxs
                           .where((t) => t.isIncome)
                           .fold(0.0, (s, t) => s + t.amount);
-                      final isToday = day == DateTime(now.year, now.month, now.day);
+                      final isToday =
+                          day == DateTime(now.year, now.month, now.day);
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1772,7 +1989,11 @@ class _DailyTab extends StatelessWidget {
                                       fontSize: 11,
                                       color: isToday
                                           ? AppColors.primary
-                                          : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                                          : Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.color ??
+                                              Colors.white,
                                       fontWeight: isToday
                                           ? FontWeight.w700
                                           : FontWeight.w400,
@@ -1785,7 +2006,11 @@ class _DailyTab extends StatelessWidget {
                                       fontWeight: FontWeight.w600,
                                       color: isToday
                                           ? AppColors.primary
-                                          : Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                                          : Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.color ??
+                                              Colors.white,
                                     ),
                                   ),
                                 ],
@@ -1819,7 +2044,11 @@ class _DailyTab extends StatelessWidget {
                                       'No activity',
                                       style: GoogleFonts.poppins(
                                         fontSize: 12,
-                                        color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                                        color: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.color ??
+                                            Colors.white,
                                       ),
                                     ),
                                 ],
@@ -1866,6 +2095,437 @@ class _SectionCard extends StatelessWidget {
         ],
       ),
       child: child,
+    );
+  }
+}
+
+// ─── Budget Tab ───────────────────────────────────────────────────────────────
+
+class _BudgetTab extends StatelessWidget {
+  const _BudgetTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final budgetProvider = context.watch<BudgetProvider>();
+    final settings = context.watch<SettingsProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.white;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
+    final budget = budgetProvider.currentBudget;
+    final symbol = settings.currencySymbol;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+      child: budget == null
+          ? _NoBudgetView(
+              isDark: isDark, textPrimary: textPrimary, textSub: textSub)
+          : _HasBudgetView(
+              budget: budget,
+              symbol: symbol,
+              isDark: isDark,
+              textPrimary: textPrimary,
+              textSub: textSub,
+              surfaceColor: surfaceColor,
+              dividerColor: dividerColor,
+            ),
+    );
+  }
+}
+
+// ─── No Budget empty state ────────────────────────────────────────────────────
+
+class _NoBudgetView extends StatelessWidget {
+  final bool isDark;
+  final Color textPrimary;
+  final Color textSub;
+
+  const _NoBudgetView({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textSub,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 90,
+            height: 90,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.account_balance_wallet_rounded,
+              color: AppColors.primary,
+              size: 42,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No Budget Set',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "You haven't created a budget yet.\nSet one to track your spending.",
+            style: GoogleFonts.poppins(fontSize: 14, color: textSub),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => const CreateBudgetScreen(),
+                ),
+              );
+              if (result == true && context.mounted) {
+                context.read<BudgetProvider>().loadBudgets();
+              }
+            },
+            icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+            label: Text(
+              'Create Budget',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+              elevation: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Has Budget view ──────────────────────────────────────────────────────────
+
+class _HasBudgetView extends StatelessWidget {
+  final BudgetModel budget;
+  final String symbol;
+  final bool isDark;
+  final Color textPrimary;
+  final Color textSub;
+  final Color surfaceColor;
+  final Color dividerColor;
+
+  const _HasBudgetView({
+    required this.budget,
+    required this.symbol,
+    required this.isDark,
+    required this.textPrimary,
+    required this.textSub,
+    required this.surfaceColor,
+    required this.dividerColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final totalAllocated = budget.totalAllocated;
+    final overallPct = budget.totalAmount == 0
+        ? 0.0
+        : (totalAllocated / budget.totalAmount).clamp(0.0, 1.0);
+
+    return ListView(
+      children: [
+        // ── Summary card ──────────────────────────────────────────────────
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.35),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Monthly Budget',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.white.withOpacity(0.85),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'From ${DateFormat('dd MMM yyyy').format(budget.startDate)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.75),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                CurrencyFormatter.format(budget.totalAmount, symbol: symbol),
+                style: GoogleFonts.poppins(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 14),
+              // Progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: overallPct,
+                  minHeight: 8,
+                  backgroundColor: Colors.white.withOpacity(0.25),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    overallPct >= 1.0 ? AppColors.expense : Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Allocated: ${CurrencyFormatter.format(totalAllocated, symbol: symbol)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.85),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${(overallPct * 100).toStringAsFixed(0)}%',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // ── Category breakdown ─────────────────────────────────────────────
+        Text(
+          'Category Breakdown',
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: textPrimary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: budget.categories
+                .asMap()
+                .entries
+                .where((e) => e.value.allocatedAmount > 0)
+                .map((entry) {
+              final i = entry.key;
+              final cat = entry.value;
+              final meta = BudgetCategoryMeta.findByName(cat.categoryName);
+              final icon = meta?.icon ?? Icons.more_horiz_rounded;
+              final color = meta?.color ?? AppColors.primary;
+              final pct = budget.totalAmount == 0
+                  ? 0.0
+                  : (cat.allocatedAmount / budget.totalAmount).clamp(0.0, 1.0);
+              final visibleCats = budget.categories
+                  .where((c) => c.allocatedAmount > 0)
+                  .toList();
+              final isLast = i == visibleCats.length - 1;
+
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(icon, color: color, size: 18),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      cat.categoryName,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    CurrencyFormatter.format(
+                                        cat.allocatedAmount,
+                                        symbol: symbol),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  SizedBox(
+                                    width: 40,
+                                    child: Text(
+                                      '${(pct * 100).toStringAsFixed(1)}%',
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 12, color: textSub),
+                                      textAlign: TextAlign.end,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(3),
+                                child: LinearProgressIndicator(
+                                  value: pct,
+                                  minHeight: 5,
+                                  backgroundColor: color.withOpacity(0.12),
+                                  valueColor:
+                                      AlwaysStoppedAnimation<Color>(color),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!isLast)
+                    Divider(
+                        height: 1,
+                        indent: 68,
+                        endIndent: 0,
+                        color: dividerColor),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // ── Edit / New Budget buttons ──────────────────────────────────────
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: Text(
+                  'Edit Budget',
+                  style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => CreateBudgetScreen(existing: budget),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    context.read<BudgetProvider>().loadBudgets();
+                  }
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  side: BorderSide(color: AppColors.primary),
+                  foregroundColor: AppColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add_rounded,
+                    color: Colors.white, size: 18),
+                label: Text(
+                  'New Budget',
+                  style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Colors.white),
+                ),
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => const CreateBudgetScreen(),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    context.read<BudgetProvider>().loadBudgets();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

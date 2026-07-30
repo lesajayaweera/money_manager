@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
+import '../models/transaction_model.dart';
+import '../providers/budget_provider.dart';
 import '../providers/goal_provider.dart';
 import '../providers/lend_borrow_provider.dart';
 import '../providers/settings_provider.dart';
@@ -352,6 +354,8 @@ class _SettingsScreenState extends State<SettingsScreen>
       await context.read<GoalProvider>().clearAllData();
       if (!context.mounted) return;
       await context.read<WalletProvider>().clearAllData();
+      if (!context.mounted) return;
+      await context.read<BudgetProvider>().clearAllData();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -368,12 +372,260 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   void _showAbout(BuildContext context) {
-    showAboutDialog(
+    showDialog(
       context: context,
-      applicationName: 'Money Manager',
-      applicationVersion: '1.0.0',
-      applicationLegalese: '© 2024 Money Manager. All rights reserved.',
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // App Icon / Logo area
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: Colors.white,
+                  size: 36,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Moneygrow',
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Version 1.0.0',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Manage your money smartly and easily.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Divider(
+                height: 1,
+                color: Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0),
+              ),
+              const SizedBox(height: 16),
+              // Seed Data Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    await _seedDemoData(context);
+                  },
+                  icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
+                  label: Text(
+                    'Seed Demo Data',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    'Close',
+                    style: GoogleFonts.poppins(
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '© 2024 Moneygrow. All rights reserved.',
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
+
+  Future<void> _seedDemoData(BuildContext context) async {
+    final provider = context.read<TransactionProvider>();
+    final now = DateTime.now();
+
+    // Helper to build a date relative to today
+    DateTime d(int monthsBack, int day) {
+      final m = now.month - monthsBack;
+      final y = now.year + (m <= 0 ? -1 : 0);
+      final month = m <= 0 ? 12 + m : m;
+      final clamped = day.clamp(1, DateUtils.getDaysInMonth(y, month));
+      return DateTime(y, month, clamped, 9, 0);
+    }
+
+    final seedTransactions = <TransactionModel>[
+      // ── This month ──────────────────────────────────────────────────────
+      TransactionModel(title: 'Monthly Salary', amount: 85000, type: TransactionType.income, category: 'Salary', date: d(0, 1), walletName: 'Bank'),
+      TransactionModel(title: 'Freelance Project', amount: 18000, type: TransactionType.income, category: 'Freelance', date: d(0, 5), walletName: 'Bank'),
+      TransactionModel(title: 'Grocery Shopping', amount: 3200, type: TransactionType.expense, category: 'Food', date: d(0, 3), walletName: 'Cash'),
+      TransactionModel(title: 'Electricity Bill', amount: 2800, type: TransactionType.expense, category: 'Bills', date: d(0, 4), walletName: 'Bank'),
+      TransactionModel(title: 'Petrol', amount: 1500, type: TransactionType.expense, category: 'Transport', date: d(0, 6), walletName: 'Cash'),
+      TransactionModel(title: 'Lunch at Restaurant', amount: 850, type: TransactionType.expense, category: 'Food', date: d(0, 7), walletName: 'Cash'),
+      TransactionModel(title: 'New Sneakers', amount: 4500, type: TransactionType.expense, category: 'Shopping', date: d(0, 9), walletName: 'Bank'),
+      TransactionModel(title: 'Mobile Bill', amount: 1200, type: TransactionType.expense, category: 'Bills', date: d(0, 10), walletName: 'Bank'),
+      TransactionModel(title: 'Gym Membership', amount: 1800, type: TransactionType.expense, category: 'Health', date: d(0, 11), walletName: 'Bank'),
+      TransactionModel(title: 'Netflix', amount: 700, type: TransactionType.expense, category: 'Entertainment', date: d(0, 12), walletName: 'Bank'),
+      TransactionModel(title: 'Coffee & Snacks', amount: 320, type: TransactionType.expense, category: 'Food', date: d(0, 13), walletName: 'Cash'),
+      TransactionModel(title: 'Online Course', amount: 2500, type: TransactionType.expense, category: 'Education', date: d(0, 14), walletName: 'Bank'),
+      TransactionModel(title: 'Uber Rides', amount: 680, type: TransactionType.expense, category: 'Transport', date: d(0, 15), walletName: 'Cash'),
+      TransactionModel(title: 'Gift — Birthday', amount: 2000, type: TransactionType.income, category: 'Gift', date: d(0, 16), walletName: 'Cash'),
+      TransactionModel(title: 'Medical Checkup', amount: 1100, type: TransactionType.expense, category: 'Health', date: d(0, 17), walletName: 'Bank'),
+      TransactionModel(title: 'Dinner Out', amount: 1400, type: TransactionType.expense, category: 'Food', date: d(0, 19), walletName: 'Cash'),
+      TransactionModel(title: 'Laptop Accessories', amount: 3200, type: TransactionType.expense, category: 'Shopping', date: d(0, 20), walletName: 'Bank'),
+      TransactionModel(title: 'Internet Bill', amount: 1500, type: TransactionType.expense, category: 'Bills', date: d(0, 21), walletName: 'Bank'),
+      TransactionModel(title: 'Savings Deposit', amount: 10000, type: TransactionType.income, category: 'Savings', date: d(0, 22), walletName: 'Bank'),
+      TransactionModel(title: 'Movie Tickets', amount: 900, type: TransactionType.expense, category: 'Entertainment', date: d(0, 23), walletName: 'Cash'),
+
+      // ── Last month ──────────────────────────────────────────────────────
+      TransactionModel(title: 'Monthly Salary', amount: 85000, type: TransactionType.income, category: 'Salary', date: d(1, 1), walletName: 'Bank'),
+      TransactionModel(title: 'Freelance — Logo Design', amount: 8500, type: TransactionType.income, category: 'Freelance', date: d(1, 8), walletName: 'Bank'),
+      TransactionModel(title: 'Supermarket Run', amount: 4100, type: TransactionType.expense, category: 'Food', date: d(1, 3), walletName: 'Cash'),
+      TransactionModel(title: 'Water Bill', amount: 450, type: TransactionType.expense, category: 'Bills', date: d(1, 5), walletName: 'Bank'),
+      TransactionModel(title: 'Bus Pass', amount: 1200, type: TransactionType.expense, category: 'Transport', date: d(1, 6), walletName: 'Cash'),
+      TransactionModel(title: 'Pharmacy', amount: 760, type: TransactionType.expense, category: 'Health', date: d(1, 7), walletName: 'Cash'),
+      TransactionModel(title: 'Spotify Premium', amount: 550, type: TransactionType.expense, category: 'Entertainment', date: d(1, 9), walletName: 'Bank'),
+      TransactionModel(title: 'Clothing Purchase', amount: 5500, type: TransactionType.expense, category: 'Shopping', date: d(1, 11), walletName: 'Bank'),
+      TransactionModel(title: 'Lunch — Office', amount: 620, type: TransactionType.expense, category: 'Food', date: d(1, 13), walletName: 'Cash'),
+      TransactionModel(title: 'Book Purchase', amount: 980, type: TransactionType.expense, category: 'Education', date: d(1, 15), walletName: 'Cash'),
+      TransactionModel(title: 'House Rent', amount: 25000, type: TransactionType.expense, category: 'Bills', date: d(1, 2), walletName: 'Bank'),
+      TransactionModel(title: 'Investment Return', amount: 5200, type: TransactionType.income, category: 'Investment', date: d(1, 18), walletName: 'Bank'),
+      TransactionModel(title: 'Petrol Fill-up', amount: 2200, type: TransactionType.expense, category: 'Transport', date: d(1, 20), walletName: 'Cash'),
+      TransactionModel(title: 'Takeaway Dinner', amount: 1050, type: TransactionType.expense, category: 'Food', date: d(1, 22), walletName: 'Cash'),
+      TransactionModel(title: 'Apple Music', amount: 350, type: TransactionType.expense, category: 'Entertainment', date: d(1, 24), walletName: 'Bank'),
+      TransactionModel(title: 'Weekend Trip', amount: 8000, type: TransactionType.expense, category: 'Entertainment', date: d(1, 26), walletName: 'Bank'),
+      TransactionModel(title: 'Dental Visit', amount: 2200, type: TransactionType.expense, category: 'Health', date: d(1, 28), walletName: 'Bank'),
+      TransactionModel(title: 'Snacks & Coffee', amount: 410, type: TransactionType.expense, category: 'Food', date: d(1, 29), walletName: 'Cash'),
+
+      // ── Two months ago ──────────────────────────────────────────────────
+      TransactionModel(title: 'Monthly Salary', amount: 80000, type: TransactionType.income, category: 'Salary', date: d(2, 1), walletName: 'Bank'),
+      TransactionModel(title: 'Side Project Payment', amount: 12000, type: TransactionType.income, category: 'Freelance', date: d(2, 10), walletName: 'Bank'),
+      TransactionModel(title: 'Grocery — Bulk Buy', amount: 5500, type: TransactionType.expense, category: 'Food', date: d(2, 4), walletName: 'Cash'),
+      TransactionModel(title: 'House Rent', amount: 25000, type: TransactionType.expense, category: 'Bills', date: d(2, 2), walletName: 'Bank'),
+      TransactionModel(title: 'Electricity Bill', amount: 3100, type: TransactionType.expense, category: 'Bills', date: d(2, 5), walletName: 'Bank'),
+      TransactionModel(title: 'Eye Doctor', amount: 1500, type: TransactionType.expense, category: 'Health', date: d(2, 7), walletName: 'Bank'),
+      TransactionModel(title: 'Cab Rides', amount: 890, type: TransactionType.expense, category: 'Transport', date: d(2, 9), walletName: 'Cash'),
+      TransactionModel(title: 'Udemy Course', amount: 1800, type: TransactionType.expense, category: 'Education', date: d(2, 12), walletName: 'Bank'),
+      TransactionModel(title: 'New Headphones', amount: 6500, type: TransactionType.expense, category: 'Shopping', date: d(2, 14), walletName: 'Bank'),
+      TransactionModel(title: 'Restaurant — Date Night', amount: 3200, type: TransactionType.expense, category: 'Food', date: d(2, 16), walletName: 'Cash'),
+      TransactionModel(title: 'Mobile Bill', amount: 1200, type: TransactionType.expense, category: 'Bills', date: d(2, 18), walletName: 'Bank'),
+      TransactionModel(title: 'Gaming Purchase', amount: 2800, type: TransactionType.expense, category: 'Entertainment', date: d(2, 20), walletName: 'Bank'),
+      TransactionModel(title: 'Gift Received', amount: 3000, type: TransactionType.income, category: 'Gift', date: d(2, 21), walletName: 'Cash'),
+      TransactionModel(title: 'Petrol', amount: 1800, type: TransactionType.expense, category: 'Transport', date: d(2, 23), walletName: 'Cash'),
+      TransactionModel(title: 'Savings Deposit', amount: 8000, type: TransactionType.income, category: 'Savings', date: d(2, 25), walletName: 'Bank'),
+      TransactionModel(title: 'Stationery', amount: 480, type: TransactionType.expense, category: 'Shopping', date: d(2, 27), walletName: 'Cash'),
+    ];
+
+    // Show loading indicator
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+            ),
+            const SizedBox(width: 14),
+            Text('Seeding demo data…', style: GoogleFonts.poppins(fontSize: 14)),
+          ],
+        ),
+        duration: const Duration(seconds: 10),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+
+    try {
+      for (final tx in seedTransactions) {
+        await provider.addTransaction(tx);
+      }
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Text(
+                '${seedTransactions.length} demo transactions added!',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.income,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error seeding data: $e', style: GoogleFonts.poppins(fontSize: 14)),
+          backgroundColor: AppColors.expense,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   void _showComingSoon(BuildContext context) {

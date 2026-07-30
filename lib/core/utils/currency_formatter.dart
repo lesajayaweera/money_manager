@@ -2,18 +2,25 @@ import 'package:intl/intl.dart';
 
 class CurrencyFormatter {
   static final NumberFormat _compactFormatter = NumberFormat.compact();
-  static final NumberFormat _fullFormatter = NumberFormat('#,##,###');
+  static final NumberFormat _fullFormatter = NumberFormat('#,##,##0');
+  static final NumberFormat _decimalFormatter = NumberFormat('#,##,##0.00');
 
-  /// Format as "Rs. 45,000"
+  /// Format as "Rs. 45,000" or "Rs. 450.50" for small numbers with decimals
   static String format(double amount, {String symbol = 'Rs.'}) {
-    final formatted = _fullFormatter.format(amount.abs());
+    final absAmount = amount.abs();
+    final formatted = (absAmount < 1000 && absAmount != absAmount.truncateToDouble())
+        ? _decimalFormatter.format(absAmount)
+        : _fullFormatter.format(absAmount);
     return '$symbol $formatted';
   }
 
   /// Format with sign: "+Rs. 50,000" or "-Rs. 500"
   static String formatWithSign(double amount, {String symbol = 'Rs.'}) {
     final prefix = amount >= 0 ? '+' : '-';
-    final formatted = _fullFormatter.format(amount.abs());
+    final absAmount = amount.abs();
+    final formatted = (absAmount < 1000 && absAmount != absAmount.truncateToDouble())
+        ? _decimalFormatter.format(absAmount)
+        : _fullFormatter.format(absAmount);
     return '$prefix$symbol $formatted';
   }
 
