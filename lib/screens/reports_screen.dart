@@ -354,6 +354,55 @@ class _OverviewTabState extends State<_OverviewTab> {
           ),
           const SizedBox(height: 16),
 
+          // Cash Flow line chart
+          _SectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cash Flow',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Income vs Expenses over time',
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Legend
+                Row(
+                  children: [
+                    Container(width: 12, height: 3, decoration: BoxDecoration(color: AppColors.income, borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(width: 6),
+                    Text('Income', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.income, fontWeight: FontWeight.w500)),
+                    const SizedBox(width: 16),
+                    Container(width: 12, height: 3, decoration: BoxDecoration(color: AppColors.expense, borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(width: 6),
+                    Text('Expenses', style: GoogleFonts.poppins(fontSize: 11, color: AppColors.expense, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 200,
+                  child: _CashFlowChart(
+                    txs: filteredTxs,
+                    period: _selectedPeriod,
+                    customDateRange: _customDateRange,
+                    currencySymbol: settings.currencySymbol,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // Category-wise expenses pie chart
           _SectionCard(
             child: Column(
@@ -942,6 +991,266 @@ class _SpendingOverTimeChart extends StatelessWidget {
   }
 }
 
+// ─── Cash Flow Line Chart ────────────────────────────────────────────────────
+
+class _CashFlowChart extends StatelessWidget {
+  final List<TransactionModel> txs;
+  final ReportPeriod period;
+  final DateTimeRange? customDateRange;
+  final String currencySymbol;
+
+  const _CashFlowChart({
+    super.key,
+    required this.txs,
+    required this.period,
+    this.customDateRange,
+    required this.currencySymbol,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final Map<int, double> incomeGrouped = {};
+    final Map<int, double> expenseGrouped = {};
+    int minKey = 0;
+    int maxKey = 0;
+
+    final now = DateTime.now();
+
+    if (period == ReportPeriod.daily) {
+      minKey = 0;
+      maxKey = 23;
+      for (var tx in txs) {
+        if (tx.isExpense) {
+          expenseGrouped[tx.date.hour] = (expenseGrouped[tx.date.hour] ?? 0) + tx.amount;
+        } else {
+          incomeGrouped[tx.date.hour] = (incomeGrouped[tx.date.hour] ?? 0) + tx.amount;
+        }
+      }
+    } else if (period == ReportPeriod.monthly) {
+      minKey = 1;
+      maxKey = DateUtils.getDaysInMonth(now.year, now.month);
+      for (var tx in txs) {
+        if (tx.isExpense) {
+          expenseGrouped[tx.date.day] = (expenseGrouped[tx.date.day] ?? 0) + tx.amount;
+        } else {
+          incomeGrouped[tx.date.day] = (incomeGrouped[tx.date.day] ?? 0) + tx.amount;
+        }
+      }
+    } else if (period == ReportPeriod.annually) {
+      minKey = 1;
+      maxKey = 12;
+      for (var tx in txs) {
+        if (tx.isExpense) {
+          expenseGrouped[tx.date.month] = (expenseGrouped[tx.date.month] ?? 0) + tx.amount;
+        } else {
+          incomeGrouped[tx.date.month] = (incomeGrouped[tx.date.month] ?? 0) + tx.amount;
+        }
+      }
+    } else if (period == ReportPeriod.custom && customDateRange != null) {
+      final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+      if (days <= 31) {
+        minKey = 0;
+        maxKey = days;
+        for (var tx in txs) {
+          final dayDiff = tx.date.difference(customDateRange!.start).inDays;
+          if (tx.isExpense) {
+            expenseGrouped[dayDiff] = (expenseGrouped[dayDiff] ?? 0) + tx.amount;
+          } else {
+            incomeGrouped[dayDiff] = (incomeGrouped[dayDiff] ?? 0) + tx.amount;
+          }
+        }
+      } else {
+        minKey = 0;
+        maxKey = (customDateRange!.end.year - customDateRange!.start.year) * 12 +
+            customDateRange!.end.month - customDateRange!.start.month;
+        for (var tx in txs) {
+          final monthDiff = (tx.date.year - customDateRange!.start.year) * 12 +
+              tx.date.month - customDateRange!.start.month;
+          if (tx.isExpense) {
+            expenseGrouped[monthDiff] = (expenseGrouped[monthDiff] ?? 0) + tx.amount;
+          } else {
+            incomeGrouped[monthDiff] = (incomeGrouped[monthDiff] ?? 0) + tx.amount;
+          }
+        }
+      }
+    }
+
+    // Build spots
+    final incomeSpots = <FlSpot>[];
+    final expenseSpots = <FlSpot>[];
+    for (int i = minKey; i <= maxKey; i++) {
+      incomeSpots.add(FlSpot(i.toDouble(), incomeGrouped[i] ?? 0));
+      expenseSpots.add(FlSpot(i.toDouble(), expenseGrouped[i] ?? 0));
+    }
+
+    double maxY = 0;
+    for (var s in [...incomeSpots, ...expenseSpots]) {
+      if (s.y > maxY) maxY = s.y;
+    }
+    if (maxY == 0) maxY = 100;
+
+    double xInterval = 1;
+    if (maxKey - minKey > 15) {
+      xInterval = ((maxKey - minKey) / 5).ceilToDouble();
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return LineChart(
+      LineChartData(
+        minY: 0,
+        maxY: maxY * 1.25,
+        minX: minKey.toDouble(),
+        maxX: maxKey.toDouble(),
+        clipData: const FlClipData.all(),
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            tooltipBgColor: isDark ? const Color(0xFF333355) : Colors.white,
+            getTooltipItems: (spots) {
+              return spots.map((s) {
+                final isIncome = s.barIndex == 0;
+                return LineTooltipItem(
+                  '${isIncome ? "In" : "Out"}: ${CurrencyFormatter.format(s.y, symbol: currencySymbol)}',
+                  GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isIncome ? AppColors.income : AppColors.expense,
+                  ),
+                );
+              }).toList();
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: xInterval,
+              reservedSize: 28,
+              getTitlesWidget: (value, meta) {
+                final intVal = value.toInt();
+                if (maxKey - minKey > 15) {
+                  if (intVal != minKey && intVal != maxKey && (intVal - minKey) % xInterval.toInt() != 0) {
+                    return const SizedBox.shrink();
+                  }
+                }
+                String text = '';
+                if (period == ReportPeriod.daily) {
+                  text = '$intVal:00';
+                } else if (period == ReportPeriod.monthly) {
+                  text = '$intVal';
+                } else if (period == ReportPeriod.annually) {
+                  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  if (intVal >= 1 && intVal <= 12) text = months[intVal - 1];
+                } else if (period == ReportPeriod.custom && customDateRange != null) {
+                  final days = customDateRange!.end.difference(customDateRange!.start).inDays;
+                  if (days <= 31) {
+                    final d = customDateRange!.start.add(Duration(days: intVal));
+                    text = '${d.day}/${d.month}';
+                  } else {
+                    final m = customDateRange!.start.month + intVal;
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    text = months[(m - 1) % 12];
+                  }
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    text,
+                    style: GoogleFonts.poppins(
+                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 44,
+              getTitlesWidget: (value, meta) {
+                if (value == maxY * 1.25 || value == 0) return const SizedBox.shrink();
+                final label = value >= 1000
+                    ? '${(value / 1000).toStringAsFixed(value % 1000 == 0 ? 0 : 1)}K'
+                    : value.toInt().toString();
+                return Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.right,
+                );
+              },
+            ),
+          ),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: maxY / 4 == 0 ? 1 : maxY / 4,
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            strokeWidth: 1,
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          // Income line
+          LineChartBarData(
+            spots: incomeSpots,
+            isCurved: true,
+            curveSmoothness: 0.35,
+            color: AppColors.income,
+            barWidth: 2.5,
+            isStrokeCapRound: true,
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                radius: spot.y > 0 ? 3 : 0,
+                color: AppColors.income,
+                strokeWidth: 1.5,
+                strokeColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+              ),
+            ),
+            belowBarData: BarAreaData(
+              show: true,
+              color: AppColors.income.withValues(alpha: 0.08),
+            ),
+          ),
+          // Expense line
+          LineChartBarData(
+            spots: expenseSpots,
+            isCurved: true,
+            curveSmoothness: 0.35,
+            color: AppColors.expense,
+            barWidth: 2.5,
+            isStrokeCapRound: true,
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                radius: spot.y > 0 ? 3 : 0,
+                color: AppColors.expense,
+                strokeWidth: 1.5,
+                strokeColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+              ),
+            ),
+            belowBarData: BarAreaData(
+              show: true,
+              color: AppColors.expense.withValues(alpha: 0.08),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Wallet Pie Section ───────────────────────────────────────────────────────
 
 class _WalletPieSection extends StatelessWidget {
@@ -958,6 +1267,19 @@ class _WalletPieSection extends StatelessWidget {
     required this.currencySymbol,
   });
 
+  static const List<Color> _walletColors = [
+    Color(0xFF0984E3), // Blue
+    Color(0xFF00B894), // Green
+    Color(0xFF6C5CE7), // Indigo
+    Color(0xFFFDAA3D), // Orange
+    Color(0xFFE84393), // Pink
+    Color(0xFF00CEC9), // Teal
+    Color(0xFFFF7675), // Red
+    Color(0xFFFDCB6E), // Yellow
+    Color(0xFFE17055), // Burnt Orange
+    Color(0xFFA29BFE), // Light Purple
+  ];
+
   @override
   Widget build(BuildContext context) {
     final activeWallets = wallets.where((w) => w.includeInTotal).toList();
@@ -966,10 +1288,11 @@ class _WalletPieSection extends StatelessWidget {
     final sections = <PieChartSectionData>[];
     for (int i = 0; i < activeWallets.length; i++) {
       final isTouched = i == touchedIndex;
+      final color = _walletColors[i % _walletColors.length];
       sections.add(PieChartSectionData(
         value: activeWallets[i].balance < 0 ? 0 : activeWallets[i].balance,
         title: '',
-        color: activeWallets[i].color,
+        color: color,
         radius: isTouched ? 85 : 80,
       ));
     }
@@ -1011,6 +1334,7 @@ class _WalletPieSection extends StatelessWidget {
           children: activeWallets.asMap().entries.map((entry) {
             final i = entry.key;
             final wallet = entry.value;
+            final color = _walletColors[i % _walletColors.length];
             final pct = total == 0 ? 0 : (wallet.balance < 0 ? 0 : wallet.balance) / total * 100;
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -1020,7 +1344,7 @@ class _WalletPieSection extends StatelessWidget {
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
-                        color: wallet.color, shape: BoxShape.circle),
+                        color: color, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1103,14 +1427,16 @@ class _PieSection extends StatelessWidget {
   });
 
   static const List<Color> _colors = [
-    AppColors.catFood,
-    AppColors.catTransport,
-    AppColors.catBills,
-    AppColors.catShopping,
-    AppColors.catOther,
-    AppColors.catHealth,
-    AppColors.catFreelance,
-    AppColors.catEntertainment,
+    Color(0xFF6C5CE7), // Indigo
+    Color(0xFF00B894), // Green
+    Color(0xFFFDAA3D), // Yellow/Orange
+    Color(0xFF0984E3), // Blue
+    Color(0xFFE84393), // Pink
+    Color(0xFF00CEC9), // Teal
+    Color(0xFFFF7675), // Light Red
+    Color(0xFFFDCB6E), // Light Yellow
+    Color(0xFFE17055), // Burnt Orange
+    Color(0xFFA29BFE), // Light Purple
   ];
 
   @override
