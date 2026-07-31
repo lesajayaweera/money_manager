@@ -12,6 +12,7 @@ import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
 import 'add_transaction_screen.dart';
+import 'create_budget_screen.dart';
 import 'goals_screen.dart';
 import 'lends_borrowed_screen.dart';
 
@@ -203,6 +204,27 @@ class _DashboardScreenState extends State<DashboardScreen>
                           MaterialPageRoute(
                             builder: (_) =>
                                 const LendsBorrowedScreen(initialIndex: 0),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _QuickNavTile(
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: 'Create Budget',
+                      color: AppColors.spending,
+                      lightColor: AppColors.spendingLight,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const CreateBudgetScreen(),
                           ),
                         );
                       },

@@ -522,11 +522,52 @@ class DatabaseService {
     final db = await database;
     final start = DateTime(year, month, 1).toIso8601String();
     final end = DateTime(year, month + 1, 1).toIso8601String();
+    // Exclude lend/borrow-linked transactions and Lent/Borrowed categories
     final result = await db.rawQuery(
-      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName WHERE type = 'expense' AND date >= ? AND date < ?",
+      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed')",
       [start, end],
     );
     return (result.first['total'] as num).toDouble();
+  }
+
+  /// Returns total real spending for the budget period.
+  /// Excludes: income, lend/borrow-linked expenses, Lent & Borrowed categories.
+  Future<double> getBudgetSpending(int year, int month) async {
+    final db = await database;
+    final start = DateTime(year, month, 1).toIso8601String();
+    final end = DateTime(year, month + 1, 1).toIso8601String();
+    final result = await db.rawQuery(
+      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed')",
+      [start, end],
+    );
+    return (result.first['total'] as num).toDouble();
+  }
+
+  /// Returns per-category real spending for the budget period.
+  /// Same exclusion rules as [getBudgetSpending].
+  Future<Map<String, double>> getBudgetCategorySpending(
+      int year, int month) async {
+    final db = await database;
+    final start = DateTime(year, month, 1).toIso8601String();
+    final end = DateTime(year, month + 1, 1).toIso8601String();
+    final results = await db.rawQuery(
+      "SELECT category, COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed') "
+      "GROUP BY category",
+      [start, end],
+    );
+    return {
+      for (final row in results)
+        row['category'] as String: (row['total'] as num).toDouble()
+    };
   }
 
   Future<double> getTodaySpending() async {
@@ -534,8 +575,12 @@ class DatabaseService {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day).toIso8601String();
     final end = DateTime(now.year, now.month, now.day + 1).toIso8601String();
+    // Exclude lend/borrow-linked transactions and Lent/Borrowed categories
     final result = await db.rawQuery(
-      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName WHERE type = 'expense' AND date >= ? AND date < ?",
+      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed')",
       [start, end],
     );
     return (result.first['total'] as num).toDouble();

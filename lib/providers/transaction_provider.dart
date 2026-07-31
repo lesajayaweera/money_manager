@@ -119,16 +119,25 @@ class TransactionProvider extends ChangeNotifier {
       _db.getMonthlyIncome(now.year, now.month),
       _db.getMonthlyExpenses(now.year, now.month),
       _db.getTodaySpending(),
+      _db.getBudgetSpending(now.year, now.month),
     ]);
+
+    // Load the active budget's spending limit for the remaining-budget stat.
+    final activeBudget = await _db.getLatestBudget();
+    final budgetLimit = activeBudget?.totalAmount ?? 0.0;
+    final spentAmount = results[4];
+    final remaining = budgetLimit == 0 ? 0.0 : (budgetLimit - spentAmount).clamp(0.0, budgetLimit);
+
     _summary = DashboardSummary(
       totalBalance: results[0],
       monthlyIncome: results[1],
       monthlyExpenses: results[2],
-      remainingBudget: results[1] - results[2],
+      remainingBudget: remaining,
       todaySpending: results[3],
     );
     notifyListeners();
   }
+
 
   Future<void> addTransaction(TransactionModel tx) async {
     try {

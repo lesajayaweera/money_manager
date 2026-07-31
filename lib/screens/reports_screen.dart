@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -2126,6 +2126,8 @@ class _BudgetTab extends StatelessWidget {
               isDark: isDark, textPrimary: textPrimary, textSub: textSub)
           : _HasBudgetView(
               budget: budget,
+              spentAmount: budgetProvider.spentAmount,
+              categorySpending: budgetProvider.categorySpending,
               symbol: symbol,
               isDark: isDark,
               textPrimary: textPrimary,
@@ -2223,6 +2225,10 @@ class _NoBudgetView extends StatelessWidget {
 
 class _HasBudgetView extends StatelessWidget {
   final BudgetModel budget;
+  /// Actual money spent this budget month (real expenses only).
+  final double spentAmount;
+  /// Per-category actual spending (real expenses, same exclusion rules).
+  final Map<String, double> categorySpending;
   final String symbol;
   final bool isDark;
   final Color textPrimary;
@@ -2232,6 +2238,8 @@ class _HasBudgetView extends StatelessWidget {
 
   const _HasBudgetView({
     required this.budget,
+    required this.spentAmount,
+    required this.categorySpending,
     required this.symbol,
     required this.isDark,
     required this.textPrimary,
@@ -2242,10 +2250,17 @@ class _HasBudgetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalAllocated = budget.totalAllocated;
+    // Overall progress: actual spending / total spending limit
     final overallPct = budget.totalAmount == 0
         ? 0.0
-        : (totalAllocated / budget.totalAmount).clamp(0.0, 1.0);
+        : (spentAmount / budget.totalAmount).clamp(0.0, 1.0);
+    final isOverBudget = spentAmount > budget.totalAmount;
+    final remaining = (budget.totalAmount - spentAmount).clamp(0.0, double.infinity);
+
+    // Categories that have a spending limit set
+    final limitedCats = budget.categories
+        .where((c) => c.allocatedAmount > 0)
+        .toList();
 
     return ListView(
       children: [
@@ -2253,11 +2268,21 @@ class _HasBudgetView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
+            gradient: isOverBudget
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.expense.withOpacity(0.85),
+                      AppColors.expense,
+                    ],
+                  )
+                : AppColors.primaryGradient,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.35),
+                color: (isOverBudget ? AppColors.expense : AppColors.primary)
+                    .withOpacity(0.35),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -2270,7 +2295,7 @@ class _HasBudgetView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Monthly Budget',
+                      'Monthly Spending Limit',
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: Colors.white.withOpacity(0.85),
@@ -2305,7 +2330,7 @@ class _HasBudgetView extends StatelessWidget {
                   minHeight: 8,
                   backgroundColor: Colors.white.withOpacity(0.25),
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    overallPct >= 1.0 ? AppColors.expense : Colors.white,
+                    isOverBudget ? Colors.white : Colors.white,
                   ),
                 ),
               ),
@@ -2314,13 +2339,24 @@ class _HasBudgetView extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Allocated: ${CurrencyFormatter.format(totalAllocated, symbol: symbol)}',
+                      isOverBudget
+                          ? 'Over by: ${CurrencyFormatter.format(spentAmount - budget.totalAmount, symbol: symbol)}'
+                          : 'Remaining: ${CurrencyFormatter.format(remaining, symbol: symbol)}',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withOpacity(0.9),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
+                  Text(
+                    'Spent: ${CurrencyFormatter.format(spentAmount, symbol: symbol)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.85),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Text(
                     '${(overallPct * 100).toStringAsFixed(0)}%',
                     style: GoogleFonts.poppins(
@@ -2336,131 +2372,134 @@ class _HasBudgetView extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // ── Category breakdown ─────────────────────────────────────────────
-        Text(
-          'Category Breakdown',
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: textPrimary,
+        // ── Category breakdown (only categories with a limit set) ──────────
+        if (limitedCats.isNotEmpty) ...[
+          Text(
+            'Category Limits',
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: surfaceColor,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: budget.categories
-                .asMap()
-                .entries
-                .where((e) => e.value.allocatedAmount > 0)
-                .map((entry) {
-              final i = entry.key;
-              final cat = entry.value;
-              final meta = BudgetCategoryMeta.findByName(cat.categoryName);
-              final icon = meta?.icon ?? Icons.more_horiz_rounded;
-              final color = meta?.color ?? AppColors.primary;
-              final pct = budget.totalAmount == 0
-                  ? 0.0
-                  : (cat.allocatedAmount / budget.totalAmount).clamp(0.0, 1.0);
-              final visibleCats = budget.categories
-                  .where((c) => c.allocatedAmount > 0)
-                  .toList();
-              final isLast = i == visibleCats.length - 1;
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: limitedCats.asMap().entries.map((entry) {
+                final i = entry.key;
+                final cat = entry.value;
+                final meta = BudgetCategoryMeta.findByName(cat.categoryName);
+                final icon = meta?.icon ?? Icons.more_horiz_rounded;
+                final color = meta?.color ?? AppColors.primary;
+                // Actual spending for this category
+                final catSpent = categorySpending[cat.categoryName] ?? 0.0;
+                final isOver = catSpent > cat.allocatedAmount;
+                final barColor = isOver ? AppColors.expense : color;
+                final pct = cat.allocatedAmount == 0
+                    ? 0.0
+                    : (catSpent / cat.allocatedAmount).clamp(0.0, 1.0);
+                final isLast = i == limitedCats.length - 1;
 
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: color.withOpacity(0.12),
-                            shape: BoxShape.circle,
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: barColor.withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(icon, color: barColor, size: 18),
                           ),
-                          child: Icon(icon, color: color, size: 18),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      cat.categoryName,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        cat.categoryName,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    // Spent / Limit
+                                    Text(
+                                      '${CurrencyFormatter.format(catSpent, symbol: symbol)} / ${CurrencyFormatter.format(cat.allocatedAmount, symbol: symbol)}',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 13,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w600,
-                                        color: textPrimary,
+                                        color: isOver
+                                            ? AppColors.expense
+                                            : textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(3),
+                                  child: LinearProgressIndicator(
+                                    value: pct,
+                                    minHeight: 5,
+                                    backgroundColor:
+                                        barColor.withOpacity(0.12),
+                                    valueColor:
+                                        AlwaysStoppedAnimation<Color>(barColor),
+                                  ),
+                                ),
+                                if (isOver)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      'Over by ${CurrencyFormatter.format(catSpent - cat.allocatedAmount, symbol: symbol)}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 11,
+                                        color: AppColors.expense,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
-                                  Text(
-                                    CurrencyFormatter.format(
-                                        cat.allocatedAmount,
-                                        symbol: symbol),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  SizedBox(
-                                    width: 40,
-                                    child: Text(
-                                      '${(pct * 100).toStringAsFixed(1)}%',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 12, color: textSub),
-                                      textAlign: TextAlign.end,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(3),
-                                child: LinearProgressIndicator(
-                                  value: pct,
-                                  minHeight: 5,
-                                  backgroundColor: color.withOpacity(0.12),
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(color),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  if (!isLast)
-                    Divider(
-                        height: 1,
-                        indent: 68,
-                        endIndent: 0,
-                        color: dividerColor),
-                ],
-              );
-            }).toList(),
+                    if (!isLast)
+                      Divider(
+                          height: 1,
+                          indent: 68,
+                          endIndent: 0,
+                          color: dividerColor),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
+        ],
 
         // ── Edit / New Budget buttons ──────────────────────────────────────
         Row(
