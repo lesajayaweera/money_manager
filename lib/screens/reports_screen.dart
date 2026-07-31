@@ -15,6 +15,7 @@ import '../providers/budget_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
+import 'budget_category_detail_screen.dart';
 import 'create_budget_screen.dart';
 
 class ReportsScreen extends StatefulWidget {
@@ -2279,7 +2280,6 @@ class _HasBudgetView extends StatelessWidget {
     final overallPct = budget.totalAmount == 0
         ? 0.0
         : (spentAmount / budget.totalAmount).clamp(0.0, 1.0);
-    final isOverBudget = spentAmount > budget.totalAmount;
     final remaining =
         (budget.totalAmount - spentAmount).clamp(0.0, double.infinity);
 
@@ -2447,8 +2447,22 @@ class _HasBudgetView extends StatelessWidget {
 
                   return Padding(
                     padding: EdgeInsets.only(bottom: isLast ? 0 : 24),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BudgetCategoryDetailScreen(
+                              budget: budget,
+                              category: cat,
+                              spentAmount: catSpent,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           width: 48,
@@ -2530,8 +2544,9 @@ class _HasBudgetView extends StatelessWidget {
                         ),
                       ],
                     ),
-                  );
-                }).toList(),
+                  ),
+                );
+                }),
               ],
             ),
           ),
