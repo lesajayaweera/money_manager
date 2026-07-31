@@ -553,91 +553,40 @@ class _Step2 extends StatelessWidget {
                     color: surfaceColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: _totalAllocated > totalBudget
-                          ? AppColors.expense
-                          : pct >= 100
-                              ? AppColors.income
-                              : dividerColor,
-                      width: pct > 0 ? 1.5 : 1,
+                      color: pct >= 100
+                          ? AppColors.income
+                          : dividerColor,
+                      width: pct >= 100 ? 1.5 : 1,
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _totalAllocated > totalBudget
-                                  ? 'Over Budget!'
-                                  : 'Total Allocated',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: _totalAllocated > totalBudget
-                                    ? AppColors.expense
-                                    : textPrimary,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            CurrencyFormatter.format(_totalAllocated, symbol: currencySymbol),
-                            style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: _totalAllocated > totalBudget
-                                  ? AppColors.expense
-                                  : AppColors.income,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            '${pct.toStringAsFixed(0)}%',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: _totalAllocated > totalBudget
-                                  ? AppColors.expense
-                                  : pct >= 100
-                                      ? AppColors.income
-                                      : textSub,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      // Progress bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: totalBudget == 0 ? 0 : (_totalAllocated / totalBudget).clamp(0.0, 1.0),
-                          minHeight: 6,
-                          backgroundColor: dividerColor,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _totalAllocated > totalBudget
-                                ? AppColors.expense
-                                : pct >= 100
-                                    ? AppColors.income
-                                    : AppColors.primary,
+                      Expanded(
+                        child: Text(
+                          'Total Budget',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: textPrimary,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Budget: ${CurrencyFormatter.format(totalBudget, symbol: currencySymbol)}',
-                            style: GoogleFonts.poppins(fontSize: 11, color: textSub),
-                          ),
-                          Text(
-                            'Remaining: ${CurrencyFormatter.format((totalBudget - _totalAllocated).clamp(0, double.infinity), symbol: currencySymbol)}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              color: _totalAllocated > totalBudget ? AppColors.expense : textSub,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        CurrencyFormatter.format(totalBudget, symbol: currencySymbol),
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.income,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        '${pct.toStringAsFixed(0)}%',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: pct >= 100 ? AppColors.income : textSub,
+                        ),
                       ),
                     ],
                   ),

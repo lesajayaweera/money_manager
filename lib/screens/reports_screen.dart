@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -92,11 +92,38 @@ class _ReportsScreenState extends State<ReportsScreen>
                     fontSize: 14, fontWeight: FontWeight.w600),
                 unselectedLabelStyle: GoogleFonts.poppins(
                     fontSize: 14, fontWeight: FontWeight.w500),
-                tabs: const [
-                  Tab(text: 'Overview'),
-                  Tab(text: 'Categories'),
-                  Tab(text: 'Daily'),
-                  Tab(text: 'Budget'),
+                tabs: [
+                  const Tab(text: 'Overview'),
+                  const Tab(text: 'Categories'),
+                  const Tab(text: 'Daily'),
+                  Tab(
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Text('Budget'),
+                        Positioned(
+                          top: -12,
+                          right: -24,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'New',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -2119,23 +2146,20 @@ class _BudgetTab extends StatelessWidget {
     final budget = budgetProvider.currentBudget;
     final symbol = settings.currencySymbol;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-      child: budget == null
-          ? _NoBudgetView(
-              isDark: isDark, textPrimary: textPrimary, textSub: textSub)
-          : _HasBudgetView(
-              budget: budget,
-              spentAmount: budgetProvider.spentAmount,
-              categorySpending: budgetProvider.categorySpending,
-              symbol: symbol,
-              isDark: isDark,
-              textPrimary: textPrimary,
-              textSub: textSub,
-              surfaceColor: surfaceColor,
-              dividerColor: dividerColor,
-            ),
-    );
+    return budget == null
+        ? _NoBudgetView(
+            isDark: isDark, textPrimary: textPrimary, textSub: textSub)
+        : _HasBudgetView(
+            budget: budget,
+            spentAmount: budgetProvider.spentAmount,
+            categorySpending: budgetProvider.categorySpending,
+            symbol: symbol,
+            isDark: isDark,
+            textPrimary: textPrimary,
+            textSub: textSub,
+            surfaceColor: surfaceColor,
+            dividerColor: dividerColor,
+          );
   }
 }
 
@@ -2154,70 +2178,74 @@ class _NoBudgetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.account_balance_wallet_rounded,
-              color: AppColors.primary,
-              size: 42,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'No Budget Set',
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "You haven't created a budget yet.\nSet one to track your spending.",
-            style: GoogleFonts.poppins(fontSize: 14, color: textSub),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => const CreateBudgetScreen(),
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-              );
-              if (result == true && context.mounted) {
-                context.read<BudgetProvider>().loadBudgets();
-              }
-            },
-            icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-            label: Text(
-              'Create Budget',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-                color: Colors.white,
+                child: Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: AppColors.primary,
+                  size: 42,
+                ),
               ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
-              elevation: 0,
-            ),
+              const SizedBox(height: 20),
+              Text(
+                'No Budget Set',
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "You haven't created a budget yet.\nSet one to track your spending.",
+                style: GoogleFonts.poppins(fontSize: 14, color: textSub),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => const CreateBudgetScreen(),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    context.read<BudgetProvider>().loadBudgets();
+                  }
+                },
+                icon: const Icon(Icons.add_rounded,
+                    color: Colors.white, size: 20),
+                label: Text(
+                  'Create Budget',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }
 
@@ -2225,9 +2253,7 @@ class _NoBudgetView extends StatelessWidget {
 
 class _HasBudgetView extends StatelessWidget {
   final BudgetModel budget;
-  /// Actual money spent this budget month (real expenses only).
   final double spentAmount;
-  /// Per-category actual spending (real expenses, same exclusion rules).
   final Map<String, double> categorySpending;
   final String symbol;
   final bool isDark;
@@ -2250,119 +2276,127 @@ class _HasBudgetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Overall progress: actual spending / total spending limit
     final overallPct = budget.totalAmount == 0
         ? 0.0
         : (spentAmount / budget.totalAmount).clamp(0.0, 1.0);
     final isOverBudget = spentAmount > budget.totalAmount;
-    final remaining = (budget.totalAmount - spentAmount).clamp(0.0, double.infinity);
+    final remaining =
+        (budget.totalAmount - spentAmount).clamp(0.0, double.infinity);
 
-    // Categories that have a spending limit set
-    final limitedCats = budget.categories
-        .where((c) => c.allocatedAmount > 0)
-        .toList();
+    final limitedCats =
+        budget.categories.where((c) => c.allocatedAmount > 0).toList();
+
+    final monthYear = DateFormat('MMMM yyyy').format(budget.startDate);
 
     return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
       children: [
-        // ── Summary card ──────────────────────────────────────────────────
+        // ── Budget Summary Card ──────────────────────────────────────────
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: isOverBudget
-                ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.expense.withOpacity(0.85),
-                      AppColors.expense,
-                    ],
-                  )
-                : AppColors.primaryGradient,
+            color: surfaceColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: (isOverBudget ? AppColors.expense : AppColors.primary)
-                    .withOpacity(0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
+            border: Border.all(color: dividerColor.withOpacity(0.5)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Monthly Spending Limit',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.white.withOpacity(0.85),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'From ${DateFormat('dd MMM yyyy').format(budget.startDate)}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.75),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
               Text(
-                CurrencyFormatter.format(budget.totalAmount, symbol: symbol),
+                'Budget Summary ($monthYear)',
                 style: GoogleFonts.poppins(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: -0.5,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
                 ),
               ),
-              const SizedBox(height: 14),
-              // Progress bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: overallPct,
-                  minHeight: 8,
-                  backgroundColor: Colors.white.withOpacity(0.25),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    isOverBudget ? Colors.white : Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 24),
               Row(
                 children: [
+                  // Circular Progress
+                  SizedBox(
+                    width: 130,
+                    height: 130,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Transform.rotate(
+                          angle: math.pi * 1.5, // Start from top
+                          child: CircularProgressIndicator(
+                            value: overallPct,
+                            strokeWidth: 12,
+                            backgroundColor: isDark
+                                ? Colors.grey[800]
+                                : const Color(0xFFF0F4F8),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors
+                                  .expense, // The coral/orange color from the image
+                            ),
+                            strokeCap: StrokeCap.round,
+                          ),
+                        ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${(overallPct * 100).toInt()}%',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w700,
+                                  color: textPrimary,
+                                  height: 1.1,
+                                ),
+                              ),
+                              Text(
+                                'of budget used',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: textPrimary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 32),
+                  // Details
                   Expanded(
-                    child: Text(
-                      isOverBudget
-                          ? 'Over by: ${CurrencyFormatter.format(spentAmount - budget.totalAmount, symbol: symbol)}'
-                          : 'Remaining: ${CurrencyFormatter.format(remaining, symbol: symbol)}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'Spent: ${CurrencyFormatter.format(spentAmount, symbol: symbol)}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.85),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${(overallPct * 100).toStringAsFixed(0)}%',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SummaryRow(
+                          label: 'Monthly Budget',
+                          amount: CurrencyFormatter.format(budget.totalAmount,
+                              symbol: symbol),
+                          amountColor: textPrimary,
+                        ),
+                        const SizedBox(height: 16),
+                        _SummaryRow(
+                          label: 'Total Spent',
+                          amount: CurrencyFormatter.format(spentAmount,
+                              symbol: symbol),
+                          amountColor: AppColors.expense,
+                        ),
+                        const SizedBox(height: 16),
+                        _SummaryRow(
+                          label: 'Budget Left',
+                          amount: CurrencyFormatter.format(remaining,
+                              symbol: symbol),
+                          amountColor: AppColors.income,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -2372,197 +2406,232 @@ class _HasBudgetView extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // ── Category breakdown (only categories with a limit set) ──────────
+        // ── Budget by Category Card ──────────────────────────────────────
         if (limitedCats.isNotEmpty) ...[
-          Text(
-            'Category Limits',
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
           Container(
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: surfaceColor,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
+              border: Border.all(color: dividerColor.withOpacity(0.5)),
             ),
             child: Column(
-              children: limitedCats.asMap().entries.map((entry) {
-                final i = entry.key;
-                final cat = entry.value;
-                final meta = BudgetCategoryMeta.findByName(cat.categoryName);
-                final icon = meta?.icon ?? Icons.more_horiz_rounded;
-                final color = meta?.color ?? AppColors.primary;
-                // Actual spending for this category
-                final catSpent = categorySpending[cat.categoryName] ?? 0.0;
-                final isOver = catSpent > cat.allocatedAmount;
-                final barColor = isOver ? AppColors.expense : color;
-                final pct = cat.allocatedAmount == 0
-                    ? 0.0
-                    : (catSpent / cat.allocatedAmount).clamp(0.0, 1.0);
-                final isLast = i == limitedCats.length - 1;
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Budget by Category',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ...limitedCats.asMap().entries.map((entry) {
+                  final cat = entry.value;
+                  final isLast = entry.key == limitedCats.length - 1;
+                  final meta = BudgetCategoryMeta.findByName(cat.categoryName);
+                  final icon = meta?.icon ?? Icons.more_horiz_rounded;
+                  final color = meta?.color ?? AppColors.primary;
+                  final catSpent = categorySpending[cat.categoryName] ?? 0.0;
+                  final pct = cat.allocatedAmount == 0
+                      ? 0.0
+                      : (catSpent / cat.allocatedAmount).clamp(0.0, 1.0);
 
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: barColor.withOpacity(0.12),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(icon, color: barColor, size: 18),
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: isLast ? 0 : 24),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        cat.categoryName,
+                          child: Icon(icon, color: Colors.white, size: 24),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    cat.categoryName,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: textPrimary,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '${(pct * 100).toInt()}%',
                                         style: GoogleFonts.poppins(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
                                           color: textPrimary,
                                         ),
                                       ),
-                                    ),
-                                    // Spent / Limit
-                                    Text(
-                                      '${CurrencyFormatter.format(catSpent, symbol: symbol)} / ${CurrencyFormatter.format(cat.allocatedAmount, symbol: symbol)}',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: isOver
-                                            ? AppColors.expense
-                                            : textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(3),
-                                  child: LinearProgressIndicator(
-                                    value: pct,
-                                    minHeight: 5,
-                                    backgroundColor:
-                                        barColor.withOpacity(0.12),
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(barColor),
+                                      const SizedBox(width: 8),
+                                      Icon(Icons.chevron_right_rounded,
+                                          color: textSub, size: 18),
+                                    ],
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${CurrencyFormatter.format(catSpent, symbol: symbol)} / ${CurrencyFormatter.format(cat.allocatedAmount, symbol: symbol)}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: textSub,
                                 ),
-                                if (isOver)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      'Over by ${CurrencyFormatter.format(catSpent - cat.allocatedAmount, symbol: symbol)}',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        color: AppColors.expense,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                              ),
+                              const SizedBox(height: 8),
+                              Stack(
+                                children: [
+                                  Container(
+                                    height: 4,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: dividerColor,
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
-                              ],
-                            ),
+                                  FractionallySizedBox(
+                                    widthFactor: pct,
+                                    child: Container(
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        color: color,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    if (!isLast)
-                      Divider(
-                          height: 1,
-                          indent: 68,
-                          endIndent: 0,
-                          color: dividerColor),
-                  ],
-                );
-              }).toList(),
+                  );
+                }).toList(),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
         ],
 
-        // ── Edit / New Budget buttons ──────────────────────────────────────
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                label: Text(
-                  'Edit Budget',
-                  style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600, fontSize: 14),
+        // ── View Budget Insights Card ──────────────────────────────────────
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: dividerColor.withOpacity(0.5)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.spending.withOpacity(0.15)
+                      : AppColors.spendingLight,
+                  shape: BoxShape.circle,
                 ),
-                onPressed: () async {
-                  final result = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (_) => CreateBudgetScreen(existing: budget),
+                child: const Icon(Icons.lightbulb_outline_rounded,
+                    color: AppColors.spending, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'View Budget Insights',
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary,
+                      ),
                     ),
-                  );
-                  if (result == true && context.mounted) {
-                    context.read<BudgetProvider>().loadBudgets();
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
-                  side: BorderSide(color: AppColors.primary),
-                  foregroundColor: AppColors.primary,
+                    const SizedBox(height: 2),
+                    Text(
+                      'See analysis and recommendations',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: textSub,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.add_rounded,
-                    color: Colors.white, size: 18),
-                label: Text(
-                  'New Budget',
-                  style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: Colors.white),
-                ),
-                onPressed: () async {
-                  final result = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (_) => const CreateBudgetScreen(),
-                    ),
-                  );
-                  if (result == true && context.mounted) {
-                    context.read<BudgetProvider>().loadBudgets();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
-                  elevation: 0,
-                ),
-              ),
-            ),
-          ],
+              Icon(Icons.chevron_right_rounded, color: textSub, size: 20),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String amount;
+  final Color amountColor;
+
+  const _SummaryRow({
+    required this.label,
+    required this.amount,
+    required this.amountColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          amount,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: amountColor,
+          ),
         ),
       ],
     );
