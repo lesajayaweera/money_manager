@@ -214,6 +214,11 @@ class TransactionProvider extends ChangeNotifier {
     return _db.getLast6MonthsSummary();
   }
 
+  /// Re-runs only the summary query (balance, income, expenses, budget).
+  /// Call this after any budget mutation to keep the Dashboard in sync
+  /// without reloading all transactions.
+  Future<void> refreshSummary() => _loadSummary();
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

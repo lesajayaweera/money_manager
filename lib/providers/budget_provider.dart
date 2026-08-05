@@ -44,7 +44,8 @@ class BudgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Loads actual spending figures for the current budget's month.
+  /// Loads actual spending figures for the current calendar month (not the
+  /// budget's startDate month), so the running totals are always up to date.
   Future<void> _loadSpending() async {
     final budget = _currentBudget;
     if (budget == null) {
@@ -52,8 +53,9 @@ class BudgetProvider extends ChangeNotifier {
       _categorySpending = {};
       return;
     }
-    final year = budget.startDate.year;
-    final month = budget.startDate.month;
+    final now = DateTime.now();
+    final year = now.year;
+    final month = now.month;
     _spentAmount = await _db.getBudgetSpending(year, month);
     _categorySpending = await _db.getBudgetCategorySpending(year, month);
   }

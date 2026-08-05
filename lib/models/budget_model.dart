@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
+import 'category_model.dart';
 
 // ─── Budget Category Allocation ───────────────────────────────────────────────
 
@@ -140,5 +141,20 @@ class BudgetCategoryMeta {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Resolve display metadata for [name] from the defaults list first, then
+  /// fall back to an [AppCategory] lookup so custom categories work too.
+  static BudgetCategoryMeta fromAppCategory(AppCategory cat) {
+    // Check if a hard-coded default exists for this name.
+    final hardcoded = findByName(cat.name);
+    if (hardcoded != null) return hardcoded;
+    // Build from the AppCategory definition.
+    return BudgetCategoryMeta(
+      name: cat.name,
+      icon: cat.icon,
+      color: cat.color,
+      lightColor: cat.color.withValues(alpha: 0.12),
+    );
   }
 }

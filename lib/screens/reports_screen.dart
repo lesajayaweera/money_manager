@@ -9,9 +9,11 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../models/budget_model.dart';
+import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../models/wallet_model.dart';
 import '../providers/budget_provider.dart';
+import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
@@ -2129,8 +2131,22 @@ class _SectionCard extends StatelessWidget {
 
 // ─── Budget Tab ───────────────────────────────────────────────────────────────
 
-class _BudgetTab extends StatelessWidget {
+class _BudgetTab extends StatefulWidget {
   const _BudgetTab();
+
+  @override
+  State<_BudgetTab> createState() => _BudgetTabState();
+}
+
+class _BudgetTabState extends State<_BudgetTab> {
+  @override
+  void initState() {
+    super.initState();
+    // Ensure budget data is loaded when the tab is first opened (Bug 6 fix).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BudgetProvider>().loadBudgets();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2146,6 +2162,10 @@ class _BudgetTab extends StatelessWidget {
         Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
     final budget = budgetProvider.currentBudget;
     final symbol = settings.currencySymbol;
+
+    if (budgetProvider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return budget == null
         ? _NoBudgetView(
@@ -2437,7 +2457,13 @@ class _HasBudgetView extends StatelessWidget {
                 ...limitedCats.asMap().entries.map((entry) {
                   final cat = entry.value;
                   final isLast = entry.key == limitedCats.length - 1;
-                  final meta = BudgetCategoryMeta.findByName(cat.categoryName);
+                  // Resolve icon/color supporting custom categories (Bug 4 fix).
+                  final appCat = context
+                      .watch<CategoryProvider>()
+                      .findByName(cat.categoryName, CategoryType.expense);
+                  final meta = appCat != null
+                      ? BudgetCategoryMeta.fromAppCategory(appCat)
+                      : BudgetCategoryMeta.findByName(cat.categoryName);
                   final icon = meta?.icon ?? Icons.more_horiz_rounded;
                   final color = meta?.color ?? AppColors.primary;
                   final catSpent = categorySpending[cat.categoryName] ?? 0.0;

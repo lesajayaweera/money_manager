@@ -827,7 +827,7 @@ class DatabaseService {
   Future<BudgetModel?> getLatestBudget() async {
     final db = await database;
     final budgetRows = await db.query('budgets',
-        orderBy: 'created_at DESC', limit: 1);
+        orderBy: 'start_date DESC', limit: 1);
     if (budgetRows.isEmpty) return null;
     final row = budgetRows.first;
     final id = row['id'] as int;

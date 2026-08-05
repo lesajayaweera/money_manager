@@ -8,6 +8,7 @@ import '../core/utils/currency_formatter.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
+import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'transaction_history_screen.dart';
@@ -37,7 +38,14 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
     final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
     final symbol = context.watch<SettingsProvider>().currencySymbol;
 
-    final meta = BudgetCategoryMeta.findByName(category.categoryName);
+    // Resolve icon/color: try CategoryProvider first (supports custom categories),
+    // then fall back to the hardcoded BudgetCategoryMeta defaults (Bug 4 fix).
+    final categoryProvider = context.watch<CategoryProvider>();
+    final appCat = categoryProvider.findByName(
+        category.categoryName, CategoryType.expense);
+    final meta = appCat != null
+        ? BudgetCategoryMeta.fromAppCategory(appCat)
+        : BudgetCategoryMeta.findByName(category.categoryName);
     final icon = meta?.icon ?? Icons.more_horiz_rounded;
     final color = meta?.color ?? AppColors.primary;
     final monthYear = DateFormat('MMMM yyyy').format(budget.startDate);
@@ -52,7 +60,8 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
     // Get transactions for this category in this month
     final allTx = context.watch<TransactionProvider>().allTransactions;
     final categoryTx = allTx.where((t) {
-      return t.category == category.categoryName &&
+      return t.type == TransactionType.expense &&
+          t.category == category.categoryName &&
           t.date.year == budget.startDate.year &&
           t.date.month == budget.startDate.month;
     }).toList()
@@ -196,7 +205,7 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
                     _AmountItem(
                       label: 'Budget',
                       amount: category.allocatedAmount,
-                      amountColor: AppColors.expense,
+                      amountColor: AppColors.primary,
                       symbol: symbol,
                       textSub: textSub,
                     ),
@@ -439,11 +448,16 @@ class _TransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meta = BudgetCategoryMeta.findByName(transaction.category);
+    final categoryProvider = context.watch<CategoryProvider>();
+    final appCat = categoryProvider.findByName(
+        transaction.category, CategoryType.expense);
+    final meta = appCat != null
+        ? BudgetCategoryMeta.fromAppCategory(appCat)
+        : BudgetCategoryMeta.findByName(transaction.category);
     final icon = meta?.icon ?? Icons.more_horiz_rounded;
     final color = meta?.color ?? AppColors.primary;
     final isExpense = transaction.type == TransactionType.expense;
-    
+
     return Row(
       children: [
         Container(

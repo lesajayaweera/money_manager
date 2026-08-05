@@ -7,8 +7,11 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../models/budget_model.dart';
+import '../models/category_model.dart';
 import '../providers/budget_provider.dart';
+import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/transaction_provider.dart';
 
 class CreateBudgetScreen extends StatefulWidget {
   /// If non-null, we're editing an existing budget.
@@ -30,24 +33,33 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   // Step 2 state: category name -> allocated amount
   late Map<String, double> _allocations;
 
+  /// Whether _allocations has been seeded yet (done once in
+  /// didChangeDependencies so we have access to CategoryProvider).
+  bool _allocationsInitialized = false;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_allocationsInitialized) return;
+    _allocationsInitialized = true;
+
+    // Use all expense categories from CategoryProvider (Bug 4 fix).
+    final allExpense =
+        context.read<CategoryProvider>().expenseCategories;
     final existing = widget.existing;
     if (existing != null) {
       _amountController.text = existing.totalAmount.toStringAsFixed(0);
       _startDate = existing.startDate;
-      _allocations = {
-        for (final c in BudgetCategoryMeta.defaults) c.name: 0,
-      };
+      // Seed with 0 for every expense category, then overlay saved values.
+      _allocations = {for (final c in allExpense) c.name: 0.0};
       for (final cat in existing.categories) {
         _allocations[cat.categoryName] = cat.allocatedAmount;
       }
     } else {
-      _allocations = {
-        for (final c in BudgetCategoryMeta.defaults) c.name: 0,
-      };
+      _allocations = {for (final c in allExpense) c.name: 0.0};
     }
+    // setState is safe here because the widget hasn't been painted yet.
+    setState(() {});
   }
 
   @override
@@ -100,6 +112,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       } else {
         await provider.saveBudget(budget);
       }
+      if (!mounted) return;
+      // Keep Dashboard's "Remaining Budget" card in sync (Bug 1 fix).
+      await context.read<TransactionProvider>().refreshSummary();
       if (!mounted) return;
       Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -465,82 +480,124 @@ class _Step2 extends StatelessWidget {
                     ],
                   ),
                   child: Column(
-                    children: BudgetCategoryMeta.defaults.asMap().entries.map((entry) {
-                      final i = entry.key;
-                      final meta = entry.value;
-                      final isLast = i == BudgetCategoryMeta.defaults.length - 1;
-                      final amount = allocations[meta.name] ?? 0;
-                      final catPct = totalBudget == 0
-                          ? 0.0
-                          : (amount / totalBudget * 100);
+                    children: () {
+                      // Build display from the allocations map keys, which
+                      // are seeded from CategoryProvider (Bug 4 fix).
+                      final categoryProvider =
+                          context.watch<CategoryProvider>();
+                      final entries = allocations.entries.toList();
+                      return entries.asMap().entries.map((mapEntry) {
+                        final i = mapEntry.key;
+                        final entry = mapEntry.value;
+                        final isLast = i == entries.length - 1;
+                        final amount = entry.value;
+                        final catPct = totalBudget == 0
+                            ? 0.0
+                            : (amount / totalBudget * 100);
 
-                      return Column(
-                        children: [
-                          InkWell(
-                            borderRadius: BorderRadius.only(
-                              topLeft: i == 0 ? const Radius.circular(16) : Radius.zero,
-                              topRight: i == 0 ? const Radius.circular(16) : Radius.zero,
-                              bottomLeft: isLast ? const Radius.circular(16) : Radius.zero,
-                              bottomRight: isLast ? const Radius.circular(16) : Radius.zero,
-                            ),
-                            onTap: () => _showAmountDialog(context, meta, amount),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                              child: Row(
-                                children: [
-                                  // Icon
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: meta.color.withOpacity(0.15),
-                                      shape: BoxShape.circle,
+                        // Resolve display info from CategoryProvider or
+                        // fall back to BudgetCategoryMeta defaults.
+                        final appCat = categoryProvider.findByName(
+                          entry.key,
+                          CategoryType.expense,
+                        );
+                        final meta = appCat != null
+                            ? BudgetCategoryMeta.fromAppCategory(appCat)
+                            : BudgetCategoryMeta.findByName(entry.key) ??
+                                BudgetCategoryMeta(
+                                  name: entry.key,
+                                  icon: Icons.more_horiz_rounded,
+                                  color: AppColors.primary,
+                                  lightColor: AppColors.primarySurface,
+                                );
+
+                        return Column(
+                          children: [
+                            InkWell(
+                              borderRadius: BorderRadius.only(
+                                topLeft: i == 0
+                                    ? const Radius.circular(16)
+                                    : Radius.zero,
+                                topRight: i == 0
+                                    ? const Radius.circular(16)
+                                    : Radius.zero,
+                                bottomLeft: isLast
+                                    ? const Radius.circular(16)
+                                    : Radius.zero,
+                                bottomRight: isLast
+                                    ? const Radius.circular(16)
+                                    : Radius.zero,
+                              ),
+                              onTap: () =>
+                                  _showAmountDialog(context, meta, amount),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 14),
+                                child: Row(
+                                  children: [
+                                    // Icon
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: meta.color.withOpacity(0.15),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(meta.icon,
+                                          color: meta.color, size: 20),
                                     ),
-                                    child: Icon(meta.icon, color: meta.color, size: 20),
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Text(
-                                      meta.name,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: textPrimary,
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Text(
+                                        meta.name,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: textPrimary,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  // Amount
-                                  Text(
-                                    CurrencyFormatter.format(amount, symbol: currencySymbol),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: amount > 0 ? textPrimary : textSub,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  SizedBox(
-                                    width: 44,
-                                    child: Text(
-                                      '${catPct.toStringAsFixed(1)}%',
+                                    // Amount
+                                    Text(
+                                      CurrencyFormatter.format(amount,
+                                          symbol: currencySymbol),
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: textSub,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: amount > 0
+                                            ? textPrimary
+                                            : textSub,
                                       ),
-                                      textAlign: TextAlign.end,
                                     ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(Icons.chevron_right_rounded, color: textSub, size: 18),
-                                ],
+                                    const SizedBox(width: 8),
+                                    SizedBox(
+                                      width: 44,
+                                      child: Text(
+                                        '${catPct.toStringAsFixed(1)}%',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          color: textSub,
+                                        ),
+                                        textAlign: TextAlign.end,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(Icons.chevron_right_rounded,
+                                        color: textSub, size: 18),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          if (!isLast)
-                            Divider(height: 1, indent: 70, endIndent: 0, color: dividerColor),
-                        ],
-                      );
-                    }).toList(),
+                            if (!isLast)
+                              Divider(
+                                  height: 1,
+                                  indent: 70,
+                                  endIndent: 0,
+                                  color: dividerColor),
+                          ],
+                        );
+                      }).toList();
+                    }(),
                   ),
                 ),
 
