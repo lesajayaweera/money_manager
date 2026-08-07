@@ -12,6 +12,7 @@ import '../providers/budget_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
+import 'categories_screen.dart';
 
 class CreateBudgetScreen extends StatefulWidget {
   /// If non-null, we're editing an existing budget.
@@ -40,25 +41,37 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_allocationsInitialized) return;
-    _allocationsInitialized = true;
 
-    // Use all expense categories from CategoryProvider (Bug 4 fix).
+    // Use all expense categories from CategoryProvider.
     final allExpense =
-        context.read<CategoryProvider>().expenseCategories;
-    final existing = widget.existing;
-    if (existing != null) {
-      _amountController.text = existing.totalAmount.toStringAsFixed(0);
-      _startDate = existing.startDate;
-      // Seed with 0 for every expense category, then overlay saved values.
-      _allocations = {for (final c in allExpense) c.name: 0.0};
-      for (final cat in existing.categories) {
-        _allocations[cat.categoryName] = cat.allocatedAmount;
+        context.watch<CategoryProvider>().expenseCategories;
+
+    if (!_allocationsInitialized) {
+      _allocationsInitialized = true;
+      final existing = widget.existing;
+      if (existing != null) {
+        _amountController.text = existing.totalAmount.toStringAsFixed(0);
+        _startDate = existing.startDate;
+        // Seed with 0 for every expense category, then overlay saved values.
+        _allocations = {for (final c in allExpense) c.name: 0.0};
+        for (final cat in existing.categories) {
+          _allocations[cat.categoryName] = cat.allocatedAmount;
+        }
+      } else {
+        _allocations = {for (final c in allExpense) c.name: 0.0};
       }
     } else {
-      _allocations = {for (final c in allExpense) c.name: 0.0};
+      // Re-sync: add new categories with 0, remove deleted ones while
+      // preserving any amounts the user has already entered.
+      final currentNames = allExpense.map((c) => c.name).toSet();
+      // Remove categories that no longer exist.
+      _allocations.removeWhere((k, _) => !currentNames.contains(k));
+      // Add any newly created categories with a default of 0.
+      for (final c in allExpense) {
+        _allocations.putIfAbsent(c.name, () => 0.0);
+      }
     }
-    // setState is safe here because the widget hasn't been painted yet.
+    // setState is safe here.
     setState(() {});
   }
 
@@ -215,6 +228,17 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                         setState(() => _allocations[name] = val),
                     onBack: _back,
                     onContinue: _next,
+                    onManageCategories: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CategoriesScreen(
+                            initialType: CategoryType.expense,
+                          ),
+                        ),
+                      );
+                      // didChangeDependencies will re-sync via context.watch.
+                    },
                     currencySymbol: settings.currencySymbol,
                     isDark: isDark,
                   )
@@ -418,6 +442,7 @@ class _Step2 extends StatelessWidget {
   final void Function(String name, double val) onAllocationChanged;
   final VoidCallback onBack;
   final VoidCallback onContinue;
+  final VoidCallback onManageCategories;
   final String currencySymbol;
   final bool isDark;
 
@@ -428,6 +453,7 @@ class _Step2 extends StatelessWidget {
     required this.onAllocationChanged,
     required this.onBack,
     required this.onContinue,
+    required this.onManageCategories,
     required this.currencySymbol,
     required this.isDark,
   });
@@ -603,6 +629,62 @@ class _Step2 extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
+                // Manage Categories button
+                GestureDetector(
+                  onTap: onManageCategories,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.35)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(isDark ? 0.12 : 0.06),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.settings_rounded,
+                            color: AppColors.primary,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            'Manage Categories',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
                 // Total budget footer card
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -670,71 +752,181 @@ class _Step2 extends StatelessWidget {
     final textPrimary = Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
     final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
+    // Max this category can hold = total budget minus all OTHER categories' allocations.
+    final otherAllocated = _totalAllocated - current;
+    final available = (totalBudget - otherAllocated).clamp(0.0, double.infinity);
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        title: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: meta.color.withOpacity(0.15),
-                shape: BoxShape.circle,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final entered = double.tryParse(ctrl.text) ?? 0;
+          final isOver = entered > available;
+          final remaining = available - entered;
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: meta.color.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(meta.icon, color: meta.color, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    meta.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: textPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Available budget chip
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isOver
+                        ? AppColors.expense.withValues(alpha: 0.08)
+                        : AppColors.income.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isOver
+                          ? AppColors.expense.withValues(alpha: 0.3)
+                          : AppColors.income.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isOver
+                            ? Icons.warning_amber_rounded
+                            : Icons.account_balance_wallet_rounded,
+                        size: 14,
+                        color: isOver ? AppColors.expense : AppColors.income,
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          isOver
+                              ? 'Exceeds by ${CurrencyFormatter.format(entered - available, symbol: currencySymbol)}'
+                              : 'Available: ${CurrencyFormatter.format(remaining, symbol: currencySymbol)}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isOver ? AppColors.expense : AppColors.income,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Amount input
+                TextField(
+                  controller: ctrl,
+                  autofocus: true,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isOver ? AppColors.expense : textPrimary,
+                  ),
+                  onChanged: (_) => setDialogState(() {}),
+                  decoration: InputDecoration(
+                    hintText: '0',
+                    hintStyle: GoogleFonts.poppins(color: textSub),
+                    labelText: 'Allocated Amount',
+                    labelStyle: GoogleFonts.poppins(
+                      color: isOver ? AppColors.expense : textSub,
+                      fontSize: 13,
+                    ),
+                    errorText: isOver
+                        ? 'Amount exceeds total budget of ${CurrencyFormatter.format(totalBudget, symbol: currencySymbol)}'
+                        : null,
+                    errorStyle: GoogleFonts.poppins(fontSize: 11),
+                    errorMaxLines: 2,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: isOver
+                            ? AppColors.expense
+                            : Theme.of(context).dividerColor,
+                        width: isOver ? 1.5 : 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: isOver ? AppColors.expense : AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.expense, width: 2),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.expense, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Budget cap hint
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    'Max for this category: ${CurrencyFormatter.format(available, symbol: currencySymbol)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: textSub,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('Cancel', style: GoogleFonts.poppins(color: textSub)),
               ),
-              child: Icon(meta.icon, color: meta.color, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              meta.name,
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: textPrimary,
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isOver ? Colors.grey.shade400 : AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+                onPressed: isOver
+                    ? null
+                    : () {
+                        final val = double.tryParse(ctrl.text) ?? 0;
+                        onAllocationChanged(meta.name, val);
+                        Navigator.pop(ctx);
+                      },
+                child: Text('Set', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
               ),
-            ),
-          ],
-        ),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: false),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
-          decoration: InputDecoration(
-            hintText: '0',
-            hintStyle: GoogleFonts.poppins(color: textSub),
-            labelText: 'Allocated Amount',
-            labelStyle: GoogleFonts.poppins(color: textSub, fontSize: 13),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.poppins(color: textSub)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              elevation: 0,
-            ),
-            onPressed: () {
-              final val = double.tryParse(ctrl.text) ?? 0;
-              onAllocationChanged(meta.name, val);
-              Navigator.pop(ctx);
-            },
-            child: Text('Set', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
