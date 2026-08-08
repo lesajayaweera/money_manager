@@ -16,7 +16,7 @@ class GoalCategory {
     required this.lightColor,
   });
 
-  static const List<GoalCategory> all = [
+  static final List<GoalCategory> all = [
     GoalCategory(
       name: 'Emergency Fund',
       icon: Icons.shield_outlined,

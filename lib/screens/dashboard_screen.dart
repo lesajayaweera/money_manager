@@ -10,7 +10,9 @@ import '../models/transaction_model.dart';
 import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/wallet_provider.dart';
 import 'add_transaction_screen.dart';
+import 'create_budget_screen.dart';
 import 'goals_screen.dart';
 import 'lends_borrowed_screen.dart';
 
@@ -54,7 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       body: Consumer<TransactionProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading && provider.allTransactions.isEmpty) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
@@ -139,7 +141,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
+                  color: Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -160,7 +162,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       icon: Icons.flag_rounded,
                       label: 'Goals',
                       color: AppColors.primary,
-                      lightColor: AppColors.primarySurface,
+                      lightColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.of(context).push(
@@ -202,6 +204,27 @@ class _DashboardScreenState extends State<DashboardScreen>
                           MaterialPageRoute(
                             builder: (_) =>
                                 const LendsBorrowedScreen(initialIndex: 0),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _QuickNavTile(
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: 'Create Budget',
+                      color: AppColors.spending,
+                      lightColor: AppColors.spendingLight,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const CreateBudgetScreen(),
                           ),
                         );
                       },
@@ -281,8 +304,8 @@ class _BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
-      builder: (context, settings, _) {
+    return Consumer2<SettingsProvider, WalletProvider>(
+      builder: (context, settings, walletProvider, _) {
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(24),
@@ -349,7 +372,7 @@ class _BalanceCard extends StatelessWidget {
                     child: settings.balanceVisible
                         ? Text(
                             CurrencyFormatter.format(
-                              summary.totalBalance,
+                              walletProvider.totalBalance,
                               symbol: settings.currencySymbol,
                             ),
                             key: const ValueKey('visible'),

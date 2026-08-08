@@ -56,7 +56,7 @@ class _LendsBorrowedScreenState extends State<LendsBorrowedScreen>
       body: Consumer<LendBorrowProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading && provider.entries.isEmpty) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
@@ -528,7 +528,7 @@ class _EmptySection extends StatelessWidget {
                   : AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.swap_horiz_rounded,
+            child: Icon(Icons.swap_horiz_rounded,
                 size: 28, color: AppColors.primary),
           ),
           const SizedBox(height: 12),

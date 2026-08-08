@@ -20,8 +20,8 @@ class MainScaffoldState extends State<MainScaffold> {
   static final List<Widget> _screens = [
     const DashboardScreen(),
     const TransactionHistoryScreen(),
-    const WalletsScreen(),
     const ReportsScreen(),
+    const WalletsScreen(),
     const SettingsScreen(),
   ];
 
@@ -37,15 +37,16 @@ class MainScaffoldState extends State<MainScaffold> {
       label: 'Transactions',
     ),
     _NavItem(
-      icon: Icons.account_balance_wallet_outlined,
-      activeIcon: Icons.account_balance_wallet_rounded,
-      label: 'Wallets',
-    ),
-    _NavItem(
       icon: Icons.bar_chart_outlined,
       activeIcon: Icons.bar_chart_rounded,
       label: 'Reports',
     ),
+    _NavItem(
+      icon: Icons.account_balance_wallet_outlined,
+      activeIcon: Icons.account_balance_wallet_rounded,
+      label: 'Wallets',
+    ),
+    
     _NavItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings_rounded,

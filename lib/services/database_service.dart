@@ -5,13 +5,14 @@ import '../models/transaction_model.dart';
 import '../models/goal_model.dart';
 import '../models/lend_borrow_model.dart';
 import '../models/wallet_model.dart';
+import '../models/budget_model.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 10;
+  static const int _dbVersion = 11;
   static const String _tableName = 'transactions';
 
   Database? _db;
@@ -123,6 +124,25 @@ class DatabaseService {
         created_at TEXT NOT NULL,
         FOREIGN KEY (from_wallet_id) REFERENCES wallets(id) ON DELETE CASCADE,
         FOREIGN KEY (to_wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE budgets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        total_amount REAL NOT NULL,
+        start_date TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE budget_categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        budget_id INTEGER NOT NULL,
+        category_name TEXT NOT NULL,
+        allocated_amount REAL NOT NULL DEFAULT 0,
+        FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE
       )
     ''');
 
@@ -261,6 +281,27 @@ class DatabaseService {
           // Column already exists — ignore
         }
       }
+    }
+    if (oldVersion < 11) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS budgets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            total_amount REAL NOT NULL,
+            start_date TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS budget_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            budget_id INTEGER NOT NULL,
+            category_name TEXT NOT NULL,
+            allocated_amount REAL NOT NULL DEFAULT 0,
+            FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE
+          )
+        ''');
+      } catch (_) {}
     }
   }
 
@@ -481,11 +522,52 @@ class DatabaseService {
     final db = await database;
     final start = DateTime(year, month, 1).toIso8601String();
     final end = DateTime(year, month + 1, 1).toIso8601String();
+    // Exclude lend/borrow-linked transactions and Lent/Borrowed categories
     final result = await db.rawQuery(
-      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName WHERE type = 'expense' AND date >= ? AND date < ?",
+      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed')",
       [start, end],
     );
     return (result.first['total'] as num).toDouble();
+  }
+
+  /// Returns total real spending for the budget period.
+  /// Excludes: income, lend/borrow-linked expenses, Lent & Borrowed categories.
+  Future<double> getBudgetSpending(int year, int month) async {
+    final db = await database;
+    final start = DateTime(year, month, 1).toIso8601String();
+    final end = DateTime(year, month + 1, 1).toIso8601String();
+    final result = await db.rawQuery(
+      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed')",
+      [start, end],
+    );
+    return (result.first['total'] as num).toDouble();
+  }
+
+  /// Returns per-category real spending for the budget period.
+  /// Same exclusion rules as [getBudgetSpending].
+  Future<Map<String, double>> getBudgetCategorySpending(
+      int year, int month) async {
+    final db = await database;
+    final start = DateTime(year, month, 1).toIso8601String();
+    final end = DateTime(year, month + 1, 1).toIso8601String();
+    final results = await db.rawQuery(
+      "SELECT category, COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed') "
+      "GROUP BY category",
+      [start, end],
+    );
+    return {
+      for (final row in results)
+        row['category'] as String: (row['total'] as num).toDouble()
+    };
   }
 
   Future<double> getTodaySpending() async {
@@ -493,8 +575,12 @@ class DatabaseService {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day).toIso8601String();
     final end = DateTime(now.year, now.month, now.day + 1).toIso8601String();
+    // Exclude lend/borrow-linked transactions and Lent/Borrowed categories
     final result = await db.rawQuery(
-      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName WHERE type = 'expense' AND date >= ? AND date < ?",
+      "SELECT COALESCE(SUM(amount), 0) as total FROM $_tableName "
+      "WHERE type = 'expense' AND date >= ? AND date < ? "
+      "AND (lend_borrow_id IS NULL) "
+      "AND category NOT IN ('Lent', 'Borrowed')",
       [start, end],
     );
     return (result.first['total'] as num).toDouble();
@@ -675,5 +761,85 @@ class DatabaseService {
       [start, end],
     );
     return (result.first['total'] as num).toDouble();
+  }
+
+  // ─── Budgets CRUD ─────────────────────────────────────────────────────────────
+
+  Future<int> insertBudget(BudgetModel budget) async {
+    final db = await database;
+    final budgetId = await db.insert('budgets', budget.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    for (final cat in budget.categories) {
+      await db.insert(
+        'budget_categories',
+        BudgetCategoryAllocation(
+          budgetId: budgetId,
+          categoryName: cat.categoryName,
+          allocatedAmount: cat.allocatedAmount,
+        ).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    return budgetId;
+  }
+
+  Future<int> updateBudget(BudgetModel budget) async {
+    final db = await database;
+    await db.update('budgets', budget.toMap(),
+        where: 'id = ?', whereArgs: [budget.id]);
+    await db.delete('budget_categories',
+        where: 'budget_id = ?', whereArgs: [budget.id]);
+    for (final cat in budget.categories) {
+      await db.insert(
+        'budget_categories',
+        BudgetCategoryAllocation(
+          budgetId: budget.id!,
+          categoryName: cat.categoryName,
+          allocatedAmount: cat.allocatedAmount,
+        ).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    return budget.id!;
+  }
+
+  Future<void> deleteBudget(int id) async {
+    final db = await database;
+    await db.delete('budget_categories',
+        where: 'budget_id = ?', whereArgs: [id]);
+    await db.delete('budgets', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<BudgetModel>> getAllBudgets() async {
+    final db = await database;
+    final budgetRows = await db.query('budgets', orderBy: 'created_at DESC');
+    final List<BudgetModel> result = [];
+    for (final row in budgetRows) {
+      final id = row['id'] as int;
+      final catRows = await db.query('budget_categories',
+          where: 'budget_id = ?', whereArgs: [id]);
+      final cats = catRows.map(BudgetCategoryAllocation.fromMap).toList();
+      result.add(BudgetModel.fromMap(row, cats));
+    }
+    return result;
+  }
+
+  Future<BudgetModel?> getLatestBudget() async {
+    final db = await database;
+    final budgetRows = await db.query('budgets',
+        orderBy: 'start_date DESC', limit: 1);
+    if (budgetRows.isEmpty) return null;
+    final row = budgetRows.first;
+    final id = row['id'] as int;
+    final catRows = await db.query('budget_categories',
+        where: 'budget_id = ?', whereArgs: [id]);
+    final cats = catRows.map(BudgetCategoryAllocation.fromMap).toList();
+    return BudgetModel.fromMap(row, cats);
+  }
+
+  Future<void> clearAllBudgets() async {
+    final db = await database;
+    await db.delete('budget_categories');
+    await db.delete('budgets');
   }
 }

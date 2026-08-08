@@ -47,7 +47,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
+                  color: Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -57,10 +57,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
+                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.edit_outlined,
+                  child: Icon(Icons.edit_outlined,
                       color: AppColors.primary, size: 18),
                 ),
                 title: Text('Edit Transaction',

@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/constants/preference_keys.dart';
+import 'core/constants/app_colors.dart';
 import 'core/theme/app_theme.dart';
 import 'main_scaffold.dart';
+import 'providers/budget_provider.dart';
 import 'providers/category_provider.dart';
 import 'providers/goal_provider.dart';
 import 'providers/lend_borrow_provider.dart';
@@ -67,10 +69,16 @@ class MoneyManagerApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => WalletProvider()..loadWallets(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => BudgetProvider()..loadBudgets(),
+        ),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
           final isDark = settings.isDarkMode;
+
+          // Sync the dynamic palette before building themes
+          AppColors.setSeedColor(settings.themeColor);
 
           final overlayStyle = SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,

@@ -130,7 +130,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     width: 120,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? AppColors.darkPrimarySurface 
+                          : AppColors.primarySurface,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -356,16 +358,16 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide:
-              const BorderSide(color: AppColors.primary, width: 1.5),
+              BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -405,7 +407,7 @@ class _PickerField extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: child,
     );
@@ -422,7 +424,9 @@ class _TypeToggle extends StatelessWidget {
     return Container(
       height: 42,
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F5),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.darkSurface2
+            : Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F5),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(

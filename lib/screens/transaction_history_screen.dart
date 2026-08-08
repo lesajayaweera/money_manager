@@ -298,7 +298,7 @@ class _Chip extends StatelessWidget {
           border: Border.all(
             color: isActive
                 ? activeColor
-                : Theme.of(context).dividerTheme.color ?? const Color(0xFFE0E0E0),
+                : Theme.of(context).dividerTheme.color ?? Theme.of(context).dividerColor,
           ),
           boxShadow: isActive
               ? [

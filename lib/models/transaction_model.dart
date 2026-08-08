@@ -156,7 +156,7 @@ class CategoryModel {
       lightColor: Color(0xFFEEECFD),
       type: TransactionType.expense,
     ),
-    const CategoryModel(
+    CategoryModel(
       name: 'Goals',
       icon: Icons.flag_rounded,
       color: AppColors.primary,

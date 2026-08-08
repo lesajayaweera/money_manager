@@ -58,7 +58,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE0E0E0),
+                    color: Theme.of(context).dividerColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -97,7 +97,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       horizontal: 16, vertical: 14),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                    borderSide: BorderSide(color: Theme.of(context).dividerColor),
                   ),
                 ),
               ),
@@ -125,7 +125,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE0E0E0)),
+                      border: Border.all(color: Theme.of(context).dividerColor),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
@@ -245,7 +245,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
+                  color: Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -255,10 +255,10 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
+                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.edit_outlined,
+                  child: Icon(Icons.edit_outlined,
                       color: AppColors.primary, size: 18),
                 ),
                 title: Text('Edit Entry',
@@ -355,7 +355,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
     // Avatar
     final initials =
         _entry.personName.isNotEmpty ? _entry.personName[0].toUpperCase() : '?';
-    const colors = [
+    final colors = [
       AppColors.primary,
       AppColors.income,
       AppColors.expense,
@@ -599,10 +599,10 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: AppColors.primarySurface,
+                            color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Icon(Icons.calendar_today_outlined,
+                          child: Icon(Icons.calendar_today_outlined,
                               size: 13, color: AppColors.primary),
                         ),
                         const SizedBox(width: 6),
@@ -628,10 +628,10 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: AppColors.primarySurface,
+                            color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Icon(Icons.calendar_today_outlined,
+                          child: Icon(Icons.calendar_today_outlined,
                               size: 13, color: AppColors.primary),
                         ),
                         const SizedBox(width: 6),
@@ -741,7 +741,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
-                      disabledBackgroundColor: AppColors.primarySurface,
+                      disabledBackgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
                       disabledForegroundColor: AppColors.primary.withValues(alpha: 0.5),
                     ),
                   ),
@@ -759,7 +759,7 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
+                      side: BorderSide(color: AppColors.primary),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
