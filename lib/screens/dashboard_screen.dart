@@ -89,6 +89,14 @@ class _DashboardScreenState extends State<DashboardScreen>
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      leading: IconButton(
+        icon: Icon(
+          Icons.menu_rounded,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+          size: 26,
+        ),
+        onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+      ),
       title: Text(
         'Dashboard',
         style: GoogleFonts.poppins(
@@ -101,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         IconButton(
           icon: Stack(
             children: [
-              Icon(Icons.menu, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
+              Icon(Icons.widgets_outlined, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
               Positioned(
                 right: 0,
                 top: 0,

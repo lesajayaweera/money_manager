@@ -826,8 +826,11 @@ class DatabaseService {
 
   Future<BudgetModel?> getLatestBudget() async {
     final db = await database;
+    // BUG 4 FIX: order by id DESC (creation order), not start_date DESC.
+    // A budget with an older start_date (e.g. a historical entry) should not
+    // displace a more recently created budget.
     final budgetRows = await db.query('budgets',
-        orderBy: 'start_date DESC', limit: 1);
+        orderBy: 'id DESC', limit: 1);
     if (budgetRows.isEmpty) return null;
     final row = budgetRows.first;
     final id = row['id'] as int;

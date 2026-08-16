@@ -34,9 +34,9 @@ dev_dependencies:
 
 
 flutter_launcher_icons:
-  android: true
+  android: "ic_launcher"
   ios: true
-  image_path: "assets/main_app_icon.png"
-  adaptive_icon_foreground: "assets/piggy-bank.png"
-  adaptive_icon_background: "assets/background.png"
+  image_path: "assets/Icons/foreground.png"
+  adaptive_icon_background: "assets/Icons/background.png"
+  adaptive_icon_foreground: "assets/Icons/foreground.png"
 

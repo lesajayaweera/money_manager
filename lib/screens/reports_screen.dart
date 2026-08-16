@@ -17,6 +17,7 @@ import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../main_scaffold.dart';
 import 'budget_category_detail_screen.dart';
 import 'create_budget_screen.dart';
 
@@ -56,6 +57,14 @@ class _ReportsScreenState extends State<ReportsScreen>
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.menu_rounded,
+            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            size: 26,
+          ),
+          onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+        ),
         title: Text(
           'Reports',
           style: GoogleFonts.poppins(

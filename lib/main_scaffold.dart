@@ -6,6 +6,9 @@ import 'screens/transaction_history_screen.dart';
 import 'screens/wallets_screen.dart';
 import 'screens/reports_screen.dart';
 import 'screens/settings_screen.dart';
+import 'widgets/app_drawer.dart';
+
+final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
@@ -63,6 +66,8 @@ class MainScaffoldState extends State<MainScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: mainScaffoldKey,
+      drawer: const AppDrawer(),
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
