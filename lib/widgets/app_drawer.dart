@@ -4,6 +4,7 @@ import '../core/constants/app_colors.dart';
 import '../screens/categories_screen.dart';
 import '../screens/goals_screen.dart';
 import '../screens/lends_borrowed_screen.dart';
+import '../screens/settings_screen.dart';
 import '../main_scaffold.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -92,8 +93,7 @@ class AppDrawer extends StatelessWidget {
                   title: 'Settings',
                   onTap: () {
                     Navigator.pop(context);
-                    final state = mainScaffoldKey.currentState as MainScaffoldState?;
-                    state?.setTab(4); // Settings is tab 4
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
                   },
                 ),
               ],

@@ -10,8 +10,6 @@ import '../providers/lend_borrow_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
-import '../main_scaffold.dart';
-
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -51,11 +49,11 @@ class _SettingsScreenState extends State<SettingsScreen>
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.menu_rounded,
+            Icons.arrow_back_rounded,
             color: textPrimary,
             size: 26,
           ),
-          onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Settings',
