@@ -14,11 +14,15 @@ import 'categories_screen.dart';
 class AddTransactionScreen extends StatefulWidget {
   final TransactionType initialType;
   final TransactionModel? editTransaction;
+  final double? initialAmount;
+  final String? initialCategory;
 
   const AddTransactionScreen({
     super.key,
     required this.initialType,
     this.editTransaction,
+    this.initialAmount,
+    this.initialCategory,
   });
 
   @override
@@ -51,6 +55,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedDate = tx.date;
       _type = tx.type;
       _selectedPaymentMethod = tx.walletName;
+    } else {
+      if (widget.initialAmount != null && widget.initialAmount! > 0) {
+        final amt = widget.initialAmount!;
+        _amountController.text =
+            amt == amt.truncateToDouble() ? amt.toInt().toString() : amt.toStringAsFixed(2);
+      }
+      if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
+        _selectedCategory = widget.initialCategory;
+      }
     }
   }
 

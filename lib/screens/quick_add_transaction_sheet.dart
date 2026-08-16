@@ -33,10 +33,11 @@ class _QuickAddSheet extends StatefulWidget {
 class _QuickAddSheetState extends State<_QuickAddSheet> {
   int _step = 0; // 0=category, 1=amount
   AppCategory? _selectedCategory;
-  String _amountRaw = '0';
+  String _expression = ''; // what's shown on screen — can contain operators
   String _searchQuery = '';
   String _selectedWallet = '';
 
+  // ── lifecycle ─────────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
@@ -59,33 +60,113 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
         .toList();
   }
 
-  double get _amount => double.tryParse(_amountRaw) ?? 0;
+  // ── getters ───────────────────────────────────────────────────────────────
+  /// What is displayed in the amount box.
+  String get _displayExpression => _expression.isEmpty ? '0' : _expression;
 
+  /// Evaluated numeric value (0 if expression is incomplete/invalid).
+  double get _amount => _evaluate(_expression);
+
+  // ── expression evaluator ──────────────────────────────────────────────────
+  /// Evaluates a simple infix expression with +, -, ×, ÷ and parentheses.
+  double _evaluate(String expr) {
+    if (expr.isEmpty) return 0;
+    try {
+      return _parseExpr(_tokenize(expr));
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  List<String> _tokenize(String expr) {
+    final tokens = <String>[];
+    var cur = '';
+    for (final ch in expr.split('')) {
+      if ('0123456789.'.contains(ch)) {
+        cur += ch;
+      } else {
+        if (cur.isNotEmpty) { tokens.add(cur); cur = ''; }
+        if (ch.trim().isNotEmpty) tokens.add(ch);
+      }
+    }
+    if (cur.isNotEmpty) tokens.add(cur);
+    return tokens;
+  }
+
+  // Recursive-descent parser
+  double _parseExpr(List<String> tokens) {
+    final it = _TokenIterator(tokens);
+    return _parseAddSub(it);
+  }
+
+  double _parseAddSub(_TokenIterator it) {
+    var result = _parseMulDiv(it);
+    while (it.hasMore && (it.peek == '+' || it.peek == '-')) {
+      final op = it.consume();
+      final right = _parseMulDiv(it);
+      result = op == '+' ? result + right : result - right;
+    }
+    return result;
+  }
+
+  double _parseMulDiv(_TokenIterator it) {
+    var result = _parsePrimary(it);
+    while (it.hasMore && (it.peek == '×' || it.peek == '÷')) {
+      final op = it.consume();
+      final right = _parsePrimary(it);
+      result = op == '×' ? result * right : (right != 0 ? result / right : 0);
+    }
+    return result;
+  }
+
+  double _parsePrimary(_TokenIterator it) {
+    if (!it.hasMore) return 0;
+    if (it.peek == '(') {
+      it.consume(); // consume '('
+      final val = _parseAddSub(it);
+      if (it.hasMore && it.peek == ')') it.consume(); // consume ')'
+      return val;
+    }
+    if (it.peek == '-') {
+      it.consume();
+      return -_parsePrimary(it);
+    }
+    return double.tryParse(it.consume()) ?? 0;
+  }
+
+  // ── numpad key handler ────────────────────────────────────────────────────
   void _onKey(String key) {
     setState(() {
-      if (key == 'C') {
-        _amountRaw = '0';
-      } else if (key == '⌫') {
-        if (_amountRaw.length > 1) {
-          _amountRaw = _amountRaw.substring(0, _amountRaw.length - 1);
-        } else {
-          _amountRaw = '0';
-        }
-      } else if (key == '=' || key == '÷' || key == '×' || key == '-' || key == '+') {
-        // ignore operators for now
-      } else if (key == '.') {
-        if (!_amountRaw.contains('.')) _amountRaw += '.';
-      } else {
-        if (_amountRaw == '0') {
-          _amountRaw = key;
-        } else {
-          if (_amountRaw.contains('.')) {
-            final parts = _amountRaw.split('.');
-            if (parts[1].length < 2) _amountRaw += key;
-          } else {
-            _amountRaw += key;
+      switch (key) {
+        case 'C':
+          _expression = '';
+          break;
+        case '⌫':
+          if (_expression.isNotEmpty) {
+            _expression = _expression.substring(0, _expression.length - 1);
           }
-        }
+          break;
+        case '=':
+          final result = _amount;
+          if (result == result.truncateToDouble()) {
+            _expression = result.toInt().toString();
+          } else {
+            // cap to 2 decimal places
+            _expression = double.parse(result.toStringAsFixed(2)).toString();
+          }
+          break;
+        case '.':
+          // only add dot if the last number segment doesn't already have one
+          final lastNum = RegExp(r'[0-9.]+$').firstMatch(_expression)?.group(0) ?? '';
+          if (!lastNum.contains('.')) _expression += '.';
+          break;
+        default:
+          // digits and operators/brackets
+          if (_expression == '0' && '0123456789'.contains(key)) {
+            _expression = key;
+          } else {
+            _expression += key;
+          }
       }
     });
   }
@@ -152,11 +233,20 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
   }
 
   void _addMoreDetails(BuildContext ctx) {
+    final amount = _amount;
+    if (amount <= 0) {
+      _showSnack(ctx, 'Please enter a valid amount first');
+      return;
+    }
     Navigator.pop(ctx);
     Navigator.push(
       ctx,
       MaterialPageRoute(
-        builder: (_) => AddTransactionScreen(initialType: widget.type),
+        builder: (_) => AddTransactionScreen(
+          initialType: widget.type,
+          initialAmount: amount,
+          initialCategory: _selectedCategory?.name,
+        ),
       ),
     );
   }
@@ -233,7 +323,7 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
                     accentColor: accentColor,
                     isDark: isDark,
                     selectedCategory: _selectedCategory!,
-                    amountRaw: _amountRaw,
+                    displayExpression: _displayExpression,
                     selectedWallet: _selectedWallet,
                     onWalletChanged: (w) => setState(() => _selectedWallet = w),
                     onKey: _onKey,
@@ -496,7 +586,7 @@ class _AmountStep extends StatelessWidget {
   final Color accentColor;
   final bool isDark;
   final AppCategory selectedCategory;
-  final String amountRaw;
+  final String displayExpression;
   final String selectedWallet;
   final ValueChanged<String> onWalletChanged;
   final ValueChanged<String> onKey;
@@ -509,7 +599,7 @@ class _AmountStep extends StatelessWidget {
     required this.accentColor,
     required this.isDark,
     required this.selectedCategory,
-    required this.amountRaw,
+    required this.displayExpression,
     required this.selectedWallet,
     required this.onWalletChanged,
     required this.onKey,
@@ -696,13 +786,18 @@ class _AmountStep extends StatelessWidget {
                   children: [
                     Text(
                       settings.currencySymbol,
-                      style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w500, color: textSecondary),
+                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500, color: textSecondary),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      amountRaw,
-                      style: GoogleFonts.poppins(
-                        fontSize: 36, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -1,
+                    Flexible(
+                      child: Text(
+                        displayExpression,
+                        textAlign: TextAlign.end,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: 34, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -1,
+                        ),
                       ),
                     ),
                   ],
@@ -793,14 +888,15 @@ class _Numpad extends StatelessWidget {
       ['7', '8', '9', '÷'],
       ['4', '5', '6', '×'],
       ['1', '2', '3', '-'],
-      ['C', '0', '⌫', '+'],
-      ['.', '='],
+      ['(', '0', ')', '+'],
+      ['C', '⌫', '.', '='],
     ];
 
     Widget buildKey(String label) {
       final isOperator = ['÷', '×', '-', '+'].contains(label);
-      final isEquals = label == '=';
-      final isClear = label == 'C';
+      final isBracket  = label == '(' || label == ')';
+      final isEquals   = label == '=';
+      final isClear    = label == 'C';
       final isBackspace = label == '⌫';
 
       Color bgColor;
@@ -810,10 +906,13 @@ class _Numpad extends StatelessWidget {
         bgColor = accentColor;
         fgColor = Colors.white;
       } else if (isOperator) {
-        bgColor = accentColor.withOpacity(isDark ? 0.22 : 0.12);
+        bgColor = accentColor.withValues(alpha: isDark ? 0.22 : 0.12);
+        fgColor = accentColor;
+      } else if (isBracket) {
+        bgColor = accentColor.withValues(alpha: isDark ? 0.14 : 0.08);
         fgColor = accentColor;
       } else if (isClear) {
-        bgColor = AppColors.expense.withOpacity(isDark ? 0.22 : 0.12);
+        bgColor = AppColors.expense.withValues(alpha: isDark ? 0.22 : 0.12);
         fgColor = AppColors.expense;
       } else {
         bgColor = baseColor;
@@ -837,7 +936,7 @@ class _Numpad extends StatelessWidget {
                     : Text(
                         label,
                         style: GoogleFonts.poppins(
-                          fontSize: isEquals ? 22 : 20,
+                          fontSize: isEquals ? 22 : (isBracket ? 22 : 20),
                           fontWeight: FontWeight.w600,
                           color: fgColor,
                         ),
@@ -857,4 +956,17 @@ class _Numpad extends StatelessWidget {
       }).toList(),
     );
   }
+}
+
+// ─── Token iterator helper ────────────────────────────────────────────────────
+
+class _TokenIterator {
+  final List<String> _tokens;
+  int _pos = 0;
+
+  _TokenIterator(this._tokens);
+
+  bool get hasMore => _pos < _tokens.length;
+  String get peek => _tokens[_pos];
+  String consume() => _tokens[_pos++];
 }
