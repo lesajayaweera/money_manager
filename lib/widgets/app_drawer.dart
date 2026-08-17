@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/constants/app_colors.dart';
 import '../screens/categories_screen.dart';
+import '../screens/financial_overview_screen.dart';
 import '../screens/goals_screen.dart';
 import '../screens/lends_borrowed_screen.dart';
 import '../screens/settings_screen.dart';
@@ -85,6 +86,14 @@ class AppDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const LendsBorrowedScreen(initialIndex: 0)));
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.bar_chart_rounded,
+                  title: 'Financial Overview',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const FinancialOverviewScreen()));
                   },
                 ),
                 const Divider(height: 32, indent: 24, endIndent: 24),
