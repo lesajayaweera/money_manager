@@ -7,11 +7,12 @@ class CurrencyFormatter {
 
   /// Format as "Rs. 45,000" or "Rs. 450.50" for small numbers with decimals
   static String format(double amount, {String symbol = 'Rs.'}) {
+    final prefix = amount < 0 ? '-' : '';
     final absAmount = amount.abs();
     final formatted = (absAmount < 1000 && absAmount != absAmount.truncateToDouble())
         ? _decimalFormatter.format(absAmount)
         : _fullFormatter.format(absAmount);
-    return '$symbol $formatted';
+    return '$prefix$symbol $formatted';
   }
 
   /// Format with sign: "+Rs. 50,000" or "-Rs. 500"
@@ -27,7 +28,8 @@ class CurrencyFormatter {
   /// Format compact: "Rs. 1.2L" for large numbers
   static String formatCompact(double amount, {String symbol = 'Rs.'}) {
     if (amount.abs() >= 100000) {
-      return '$symbol ${_compactFormatter.format(amount.abs())}';
+      final prefix = amount < 0 ? '-' : '';
+      return '$prefix$symbol ${_compactFormatter.format(amount.abs())}';
     }
     return format(amount, symbol: symbol);
   }
