@@ -5,6 +5,7 @@ import '../screens/categories_screen.dart';
 import '../screens/financial_overview_screen.dart';
 import '../screens/goals_screen.dart';
 import '../screens/lends_borrowed_screen.dart';
+import '../screens/monthly_plan_screen.dart';
 import '../screens/settings_screen.dart';
 import '../main_scaffold.dart';
 
@@ -94,6 +95,14 @@ class AppDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const FinancialOverviewScreen()));
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.calendar_month_rounded,
+                  title: 'Monthly Planner',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const MonthlyPlanScreen()));
                   },
                 ),
                 const Divider(height: 32, indent: 24, endIndent: 24),
