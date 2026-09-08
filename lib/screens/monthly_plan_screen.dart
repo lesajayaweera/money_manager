@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../models/salary_plan_model.dart';
+import '../providers/budget_provider.dart';
 import '../providers/salary_plan_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/database_service.dart';
 import 'create_monthly_plan_screen.dart';
 
 class MonthlyPlanScreen extends StatefulWidget {
@@ -30,6 +32,10 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
         builder: (_) => CreateMonthlyPlanScreen(existing: existing),
       ),
     );
+    // Reload budgets after plan change so Budget screen stays in sync
+    if (mounted) {
+      await context.read<BudgetProvider>().loadBudgets();
+    }
   }
 
   Future<void> _deletePlan(BuildContext ctx, SalaryPlan plan) async {
@@ -43,7 +49,7 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'This will remove "${plan.name}" permanently.',
+          'This will remove "${plan.name}" permanently. Transactions and existing budgets will not be affected.',
           style: GoogleFonts.poppins(fontSize: 14),
         ),
         actions: [
@@ -163,25 +169,24 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
                     fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
             _infoRow(Icons.attach_money_rounded, AppColors.income,
-                'Enter monthly income',
-                'Type your salary or pull from recent income transactions.'),
+                'Enter money available',
+                'Type your salary or total available money for the month.'),
             _infoRow(Icons.pie_chart_rounded, AppColors.primary,
                 'Allocate every rupee',
                 'Assign amounts to expenses, savings goals, loans, and credit cards until the Unallocated counter reaches zero.'),
             _infoRow(Icons.sync_rounded, AppColors.budget,
                 'Auto-syncs to Budget',
-                'Expense allocations are written as budget limits — the existing Budget screen reflects them automatically.'),
+                'Expense allocations are written as budget limits — the Budget screen reflects them automatically.'),
             _infoRow(Icons.show_chart_rounded, AppColors.spending,
                 'Track planned vs actual',
-                'As you spend during the month, compare actual vs planned per category.'),
+                'As you spend during the month, see actual vs planned per category in real time.'),
           ],
         ),
       ),
     );
   }
 
-  Widget _infoRow(
-      IconData icon, Color color, String title, String subtitle) {
+  Widget _infoRow(IconData icon, Color color, String title, String subtitle) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
@@ -207,7 +212,8 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
                 Text(subtitle,
                     style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Theme.of(context).textTheme.bodySmall?.color)),
+                        color:
+                            Theme.of(context).textTheme.bodySmall?.color)),
               ],
             ),
           )
@@ -285,7 +291,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Create your first plan to start budgeting',
+              'Plan where your money should go this month.',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 14,
@@ -331,8 +337,7 @@ class _PlanList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final symbol =
-        context.watch<SettingsProvider>().currencySymbol;
+    final symbol = context.watch<SettingsProvider>().currencySymbol;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
       itemCount: plans.length,
@@ -347,9 +352,9 @@ class _PlanList extends StatelessWidget {
   }
 }
 
-// ─── Plan Card ────────────────────────────────────────────────────────────────
+// ─── Plan Card (with actual vs planned for categories) ───────────────────────
 
-class _PlanCard extends StatelessWidget {
+class _PlanCard extends StatefulWidget {
   final SalaryPlan plan;
   final String symbol;
   final VoidCallback onEdit;
@@ -363,12 +368,58 @@ class _PlanCard extends StatelessWidget {
   });
 
   @override
+  State<_PlanCard> createState() => _PlanCardState();
+}
+
+class _PlanCardState extends State<_PlanCard> {
+  Map<String, double> _categoryActual = {};
+  double _totalActualSpent = 0;
+  bool _loadingActual = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadActualSpending();
+  }
+
+  Future<void> _loadActualSpending() async {
+    if (!mounted) return;
+    setState(() => _loadingActual = true);
+    try {
+      final year = widget.plan.periodStart.year;
+      final month = widget.plan.periodStart.month;
+      final spending =
+          await DatabaseService.instance.getBudgetCategorySpendingForMonth(
+        year,
+        month,
+      );
+      final total =
+          await DatabaseService.instance.getBudgetSpendingForMonth(year, month);
+      if (mounted) {
+        setState(() {
+          _categoryActual = spending;
+          _totalActualSpent = total;
+          _loadingActual = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loadingActual = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final plan = widget.plan;
+    final symbol = widget.symbol;
     final unallocated = plan.unallocated;
     final isComplete = plan.isComplete;
     final allocPct =
         plan.monthlyIncome > 0 ? plan.totalAllocated / plan.monthlyIncome : 0.0;
+
+    // Category allocations only — those sync to budget
+    final categoryAllocs =
+        plan.byType(AllocationType.category).where((a) => a.amount > 0).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -386,14 +437,14 @@ class _PlanCard extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          onTap: onEdit,
+          onTap: widget.onEdit,
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header row
+                // ── Header row ──────────────────────────────────────────
                 Row(
                   children: [
                     Expanded(
@@ -430,15 +481,16 @@ class _PlanCard extends StatelessWidget {
                     PopupMenuButton<String>(
                       icon: Icon(
                         Icons.more_vert_rounded,
-                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        color:
+                            Theme.of(context).textTheme.bodySmall?.color,
                         size: 20,
                       ),
                       color: isDark ? AppColors.darkSurface2 : Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       onSelected: (v) {
-                        if (v == 'edit') onEdit();
-                        if (v == 'delete') onDelete();
+                        if (v == 'edit') widget.onEdit();
+                        if (v == 'delete') widget.onDelete();
                       },
                       itemBuilder: (_) => [
                         PopupMenuItem(
@@ -459,7 +511,8 @@ class _PlanCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text('Delete',
                                 style: GoogleFonts.poppins(
-                                    fontSize: 13, color: AppColors.expense)),
+                                    fontSize: 13,
+                                    color: AppColors.expense)),
                           ]),
                         ),
                       ],
@@ -469,11 +522,11 @@ class _PlanCard extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // Income row
+                // ── Income + allocation progress ─────────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Monthly Income',
+                    Text('Available',
                         style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: Theme.of(context)
@@ -490,36 +543,39 @@ class _PlanCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
 
-                // Progress bar
+                // Planned allocation bar
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
                     value: allocPct.clamp(0.0, 1.0),
                     minHeight: 7,
-                    backgroundColor:
-                        isDark ? AppColors.darkDivider : AppColors.primary.withOpacity(0.08),
+                    backgroundColor: isDark
+                        ? AppColors.darkDivider
+                        : AppColors.primary.withOpacity(0.08),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       isComplete ? AppColors.income : AppColors.primary,
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
-                // Allocation chips row
+                // Allocation + unallocated row
                 Row(
                   children: [
                     _MiniChip(
                       icon: AllocationType.category.icon,
                       color: AllocationType.category.color,
                       label: CurrencyFormatter.formatCompact(
-                          plan.categoryTotal, symbol: symbol),
+                          plan.categoryTotal,
+                          symbol: symbol),
                     ),
                     const SizedBox(width: 6),
                     _MiniChip(
                       icon: AllocationType.savingsGoal.icon,
                       color: AllocationType.savingsGoal.color,
                       label: CurrencyFormatter.formatCompact(
-                          plan.savingsTotal, symbol: symbol),
+                          plan.savingsTotal,
+                          symbol: symbol),
                     ),
                     const SizedBox(width: 6),
                     _MiniChip(
@@ -548,7 +604,7 @@ class _PlanCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'unallocated',
+                          'left to plan',
                           style: GoogleFonts.poppins(
                               fontSize: 10,
                               color: Theme.of(context)
@@ -560,6 +616,199 @@ class _PlanCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                // ── Actual vs Planned (category allocations only) ────────
+                if (categoryAllocs.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Divider(
+                      height: 1,
+                      color: isDark
+                          ? AppColors.darkDivider
+                          : Colors.grey.shade100),
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Spending Tracker',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color:
+                              Theme.of(context).textTheme.titleLarge?.color,
+                        ),
+                      ),
+                      if (_loadingActual)
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary),
+                        )
+                      else
+                        Text(
+                          'Actual vs Planned',
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Category rows
+                  ...categoryAllocs.map((alloc) {
+                    final actual = _categoryActual[alloc.name] ?? 0.0;
+                    final planned = alloc.amount;
+                    final isOver = actual > planned;
+                    final pct =
+                        planned > 0 ? (actual / planned).clamp(0.0, 1.0) : 0.0;
+                    final remaining = planned - actual;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                alloc.name,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    CurrencyFormatter.formatCompact(actual,
+                                        symbol: symbol),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isOver
+                                          ? AppColors.expense
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.color,
+                                    ),
+                                  ),
+                                  Text(
+                                    ' / ${CurrencyFormatter.formatCompact(planned, symbol: symbol)}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Stack(
+                            children: [
+                              Container(
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? AppColors.darkDivider
+                                      : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              FractionallySizedBox(
+                                widthFactor: pct,
+                                child: Container(
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: isOver
+                                        ? AppColors.expense
+                                        : AppColors.income,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isOver
+                                ? '${CurrencyFormatter.formatCompact(remaining.abs(), symbol: symbol)} over budget'
+                                : '${CurrencyFormatter.formatCompact(remaining, symbol: symbol)} remaining',
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color: isOver
+                                  ? AppColors.expense
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.color,
+                              fontWeight: isOver
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
+                  // Total actual row
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkBackground
+                          : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Spent',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color,
+                          ),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(_totalActualSpent,
+                              symbol: symbol),
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: _totalActualSpent > plan.categoryTotal
+                                ? AppColors.expense
+                                : AppColors.income,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -633,8 +882,7 @@ class _AllocationBreakdownSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final symbol =
-        context.watch<SettingsProvider>().currencySymbol;
+    final symbol = context.watch<SettingsProvider>().currencySymbol;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
@@ -660,7 +908,8 @@ class _AllocationBreakdownSheet extends StatelessWidget {
           Text(CurrencyFormatter.monthYear(plan.periodStart),
               style: GoogleFonts.poppins(
                   fontSize: 12,
-                  color: Theme.of(context).textTheme.bodySmall?.color)),
+                  color:
+                      Theme.of(context).textTheme.bodySmall?.color)),
           const SizedBox(height: 20),
           for (final type in AllocationType.values)
             _TypeSection(type: type, plan: plan, symbol: symbol),
@@ -668,7 +917,7 @@ class _AllocationBreakdownSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Unallocated',
+              Text('Left to Plan',
                   style: GoogleFonts.poppins(
                       fontSize: 14, fontWeight: FontWeight.w600)),
               Text(
@@ -726,7 +975,10 @@ class _TypeSection extends StatelessWidget {
                 Text(item.name,
                     style: GoogleFonts.poppins(
                         fontSize: 13,
-                        color: Theme.of(context).textTheme.bodyMedium?.color)),
+                        color: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.color)),
                 Text(
                   CurrencyFormatter.format(item.amount, symbol: symbol),
                   style: GoogleFonts.poppins(

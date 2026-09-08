@@ -30,6 +30,7 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
       DateTime(DateTime.now().year, DateTime.now().month, 1);
   List<SalaryAllocation> _allocations = [];
   bool _isSaving = false;
+  bool _hasCopiedFromPrev = false;
 
   // ── Derived ───────────────────────────────────────────────────────────────
   double get _income =>
@@ -114,6 +115,32 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
+  }
+
+  // ── Copy from previous month ───────────────────────────────────────────────
+  void _copyFromPrevious() {
+    final prev = context.read<SalaryPlanProvider>().previousPlan(
+          _periodStart.year,
+          _periodStart.month,
+        );
+    if (prev == null) {
+      _showError('No previous plan found to copy from.');
+      return;
+    }
+    setState(() {
+      // Copy income amount
+      _incomeController.text = prev.monthlyIncome.toStringAsFixed(0);
+      // Copy all allocations with fresh IDs so they don\'t clash
+      _allocations = prev.allocations
+          .map((a) => SalaryAllocation(
+                id: '${a.name}_${_periodStart.year}_${_periodStart.month}',
+                name: a.name,
+                type: a.type,
+                amount: a.amount,
+              ))
+          .toList();
+      _hasCopiedFromPrev = true;
+    });
   }
 
   // ── Add / Edit Allocation ────────────────────────────────────────────────
@@ -201,6 +228,18 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
                   onTap: _pickPeriod,
                   child: _PeriodTile(periodStart: _periodStart, isDark: isDark),
                 ),
+
+                // Copy from previous month (only for new plans)
+                if (widget.existing == null) ...[  
+                  const SizedBox(height: 8),
+                  _CopyFromPreviousButton(
+                    isDark: isDark,
+                    hasCopied: _hasCopiedFromPrev,
+                    hasPreviousPlan: context.read<SalaryPlanProvider>().previousPlan(
+                      _periodStart.year, _periodStart.month) != null,
+                    onCopy: _copyFromPrevious,
+                  ),
+                ],
 
                 const SizedBox(height: 20),
 
@@ -1504,6 +1543,94 @@ class _TypeHint extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Copy From Previous Month Button ─────────────────────────────────────────
+
+class _CopyFromPreviousButton extends StatelessWidget {
+  final bool isDark;
+  final bool hasCopied;
+  final bool hasPreviousPlan;
+  final VoidCallback onCopy;
+
+  const _CopyFromPreviousButton({
+    required this.isDark,
+    required this.hasCopied,
+    required this.hasPreviousPlan,
+    required this.onCopy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!hasPreviousPlan) return const SizedBox.shrink();
+    return GestureDetector(
+      onTap: hasCopied ? null : onCopy,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: hasCopied
+              ? AppColors.income.withOpacity(0.08)
+              : isDark
+                  ? AppColors.darkBackground
+                  : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasCopied
+                ? AppColors.income.withOpacity(0.3)
+                : isDark
+                    ? AppColors.darkDivider
+                    : Colors.grey.shade200,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              hasCopied
+                  ? Icons.check_circle_rounded
+                  : Icons.copy_all_rounded,
+              size: 16,
+              color: hasCopied
+                  ? AppColors.income
+                  : AppColors.primary,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                hasCopied
+                    ? 'Copied from previous month'
+                    : 'Copy from previous month',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: hasCopied
+                      ? AppColors.income
+                      : Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+            ),
+            if (!hasCopied)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Auto-fill',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../models/budget_model.dart';
 import '../models/category_model.dart';
 import '../providers/budget_provider.dart';
 import '../providers/category_provider.dart';
+import '../providers/salary_plan_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'categories_screen.dart';
@@ -274,8 +275,23 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       if (widget.existing != null) {
         await provider.updateBudget(budget);
       } else {
+        // saveBudget handles duplicate-month detection internally
         await provider.saveBudget(budget);
       }
+      if (!mounted) return;
+
+      // Two-way sync: update the matching SalaryPlan (if any) with the new
+      // budget category amounts. This is best-effort — never blocks the save.
+      try {
+        final savedBudget = await provider.getBudgetForMonth(
+            budget.startDate.year, budget.startDate.month);
+        if (savedBudget != null && mounted) {
+          await context
+              .read<SalaryPlanProvider>()
+              .updatePlanFromBudget(savedBudget);
+        }
+      } catch (_) {}
+
       if (!mounted) return;
       // Keep Dashboard's "Remaining Budget" card in sync.
       await context.read<TransactionProvider>().refreshSummary();
