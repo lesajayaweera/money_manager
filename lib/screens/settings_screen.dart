@@ -7,10 +7,11 @@ import '../models/transaction_model.dart';
 import '../providers/budget_provider.dart';
 import '../providers/goal_provider.dart';
 import '../providers/lend_borrow_provider.dart';
+import '../providers/otn_provider.dart';
+import '../providers/salary_plan_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
-
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -48,6 +49,14 @@ class _SettingsScreenState extends State<SettingsScreen>
         backgroundColor: bgColor,
         elevation: 0,
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: textPrimary,
+            size: 26,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           'Settings',
           style: GoogleFonts.poppins(
@@ -356,6 +365,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       await context.read<WalletProvider>().clearAllData();
       if (!context.mounted) return;
       await context.read<BudgetProvider>().clearAllData();
+      if (!context.mounted) return;
+      await context.read<SalaryPlanProvider>().clearAllData();
+      if (!context.mounted) return;
+      await context.read<OtnProvider>().clearAllData();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

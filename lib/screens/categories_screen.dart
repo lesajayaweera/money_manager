@@ -90,11 +90,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             ),
           ),
 
-          // ── Type Tabs ────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _TypeTabBar(controller: _tabController),
-          ),
           const SizedBox(height: 8),
 
           // ── All / Default / Custom chips ──────────────────────────────────
@@ -229,6 +224,18 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         ),
       ),
       centerTitle: true,
+      bottom: TabBar(
+        controller: _tabController,
+        labelColor: AppColors.primary,
+        unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+        indicatorColor: AppColors.primary,
+        labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14),
+        unselectedLabelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w400, fontSize: 14),
+        tabs: const [
+          Tab(text: 'Expense'),
+          Tab(text: 'Income'),
+        ],
+      ),
       actions: [
         IconButton(
           icon: Icon(Icons.more_vert_rounded,
@@ -272,70 +279,6 @@ class _SearchBar extends StatelessWidget {
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
-        ),
-      ),
-    );
-  }
-}
-
-class _TypeTabBar extends StatelessWidget {
-  final TabController controller;
-  const _TypeTabBar({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    // Custom tab bar — two buttons side by side matching the design
-    return Row(
-      children: [
-        _TabButton(
-          label: 'Expense',
-          isSelected: controller.index == 0,
-          onTap: () => controller.animateTo(0),
-        ),
-        const SizedBox(width: 8),
-        _TabButton(
-          label: 'Income',
-          isSelected: controller.index == 1,
-          onTap: () => controller.animateTo(1),
-        ),
-      ],
-    );
-  }
-}
-
-class _TabButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  const _TabButton(
-      {required this.label,
-      required this.isSelected,
-      required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color:
-                isSelected ? AppColors.primary : Theme.of(context).dividerColor,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color:
-                isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-          ),
         ),
       ),
     );

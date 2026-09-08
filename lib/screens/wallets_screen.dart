@@ -6,6 +6,7 @@ import '../core/utils/currency_formatter.dart';
 import '../models/wallet_model.dart';
 import '../providers/settings_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../main_scaffold.dart';
 import 'add_edit_wallet_screen.dart';
 import 'wallet_detail_screen.dart';
 
@@ -111,6 +112,14 @@ class _WalletsScreenState extends State<WalletsScreen>
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
+      leading: IconButton(
+        icon: Icon(
+          Icons.menu_rounded,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+          size: 26,
+        ),
+        onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+      ),
       title: Text(
         'Wallets',
         style: GoogleFonts.poppins(

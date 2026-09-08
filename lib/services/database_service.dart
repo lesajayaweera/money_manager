@@ -824,10 +824,45 @@ class DatabaseService {
     return result;
   }
 
+  /// Returns the budget whose start_date falls in [year]/[month], or null.
+  Future<BudgetModel?> getBudgetByMonth(int year, int month) async {
+    final db = await database;
+    final start = DateTime(year, month, 1).toIso8601String();
+    final end = DateTime(year, month + 1, 1).toIso8601String();
+    final budgetRows = await db.query(
+      'budgets',
+      where: 'start_date >= ? AND start_date < ?',
+      whereArgs: [start, end],
+      orderBy: 'id DESC',
+      limit: 1,
+    );
+    if (budgetRows.isEmpty) return null;
+    final row = budgetRows.first;
+    final id = row['id'] as int;
+    final catRows = await db.query('budget_categories',
+        where: 'budget_id = ?', whereArgs: [id]);
+    final cats = catRows.map(BudgetCategoryAllocation.fromMap).toList();
+    return BudgetModel.fromMap(row, cats);
+  }
+
+  /// Per-category real spending for an explicit year+month.
+  Future<Map<String, double>> getBudgetCategorySpendingForMonth(
+      int year, int month) async {
+    return getBudgetCategorySpending(year, month);
+  }
+
+  /// Total real spending for an explicit year+month.
+  Future<double> getBudgetSpendingForMonth(int year, int month) async {
+    return getBudgetSpending(year, month);
+  }
+
   Future<BudgetModel?> getLatestBudget() async {
     final db = await database;
+    // BUG 4 FIX: order by id DESC (creation order), not start_date DESC.
+    // A budget with an older start_date (e.g. a historical entry) should not
+    // displace a more recently created budget.
     final budgetRows = await db.query('budgets',
-        orderBy: 'start_date DESC', limit: 1);
+        orderBy: 'id DESC', limit: 1);
     if (budgetRows.isEmpty) return null;
     final row = budgetRows.first;
     final id = row['id'] as int;

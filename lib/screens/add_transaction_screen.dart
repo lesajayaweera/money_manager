@@ -14,11 +14,15 @@ import 'categories_screen.dart';
 class AddTransactionScreen extends StatefulWidget {
   final TransactionType initialType;
   final TransactionModel? editTransaction;
+  final double? initialAmount;
+  final String? initialCategory;
 
   const AddTransactionScreen({
     super.key,
     required this.initialType,
     this.editTransaction,
+    this.initialAmount,
+    this.initialCategory,
   });
 
   @override
@@ -51,6 +55,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedDate = tx.date;
       _type = tx.type;
       _selectedPaymentMethod = tx.walletName;
+    } else {
+      if (widget.initialAmount != null && widget.initialAmount! > 0) {
+        final amt = widget.initialAmount!;
+        _amountController.text =
+            amt == amt.truncateToDouble() ? amt.toInt().toString() : amt.toStringAsFixed(2);
+      }
+      if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
+        _selectedCategory = widget.initialCategory;
+      }
     }
   }
 
@@ -65,7 +78,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final catType = _type == TransactionType.income
         ? CategoryType.income
         : CategoryType.expense;
-    return context.read<CategoryProvider>().categoriesForType(catType);
+    return context.watch<CategoryProvider>().categoriesForType(catType);
   }
 
   Future<void> _pickDate() async {
@@ -198,11 +211,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         .toSet()
         .toList();
 
-    // Ensure selected is valid
+    // Ensure selected payment method is valid
     if (payMethods.isEmpty) {
       _selectedPaymentMethod = '';
     } else if (!payMethods.any((m) => m.name == _selectedPaymentMethod)) {
       _selectedPaymentMethod = payMethods.first.name;
+    }
+
+    // Ensure selected category is valid for the current transaction type
+    final currentCategories = _getAppCategories(context);
+    if (_selectedCategory != null &&
+        !currentCategories.any((c) => c.name == _selectedCategory)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _selectedCategory = null);
+      });
     }
 
     return Scaffold(
@@ -244,8 +266,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               _Label(isExpense ? 'Category' : 'Source / Category'),
               const SizedBox(height: 8),
               _CategoryDropdown(
-                categories: _getAppCategories(context),
-                selectedCategory: _selectedCategory,
+                categories: currentCategories,
+                selectedCategory: currentCategories.any((c) => c.name == _selectedCategory)
+                    ? _selectedCategory
+                    : null,
                 onChanged: (val) => setState(() => _selectedCategory = val),
                 onManage: () async {
                   await Navigator.push(
@@ -448,9 +472,11 @@ class _CategoryDropdown extends StatelessWidget {
                 fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
           ),
           dropdownColor: Theme.of(context).colorScheme.surface,
-          selectedItemBuilder: (_) => categories
-              .map((cat) => _CatRow(cat: cat, isSelected: true))
-              .toList(),
+          selectedItemBuilder: (_) => [
+            ...categories.map((cat) => _CatRow(cat: cat, isSelected: true)),
+            // Dummy entry for the '__manage__' item to keep list lengths equal
+            const SizedBox.shrink(),
+          ],
           items: [
             ...categories.map((cat) => DropdownMenuItem<String>(
                   value: cat.name,

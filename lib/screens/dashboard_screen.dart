@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
@@ -15,6 +16,7 @@ import 'add_transaction_screen.dart';
 import 'create_budget_screen.dart';
 import 'goals_screen.dart';
 import 'lends_borrowed_screen.dart';
+import 'quick_add_transaction_sheet.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,17 +36,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TransactionProvider>().loadAll();
     });
-  }
-
-  Future<void> _openAddTransaction(TransactionType type) async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => AddTransactionScreen(initialType: type),
-      ),
-    );
-    if (result == true && mounted) {
-      context.read<TransactionProvider>().loadAll();
-    }
   }
 
   @override
@@ -82,13 +73,45 @@ class _DashboardScreenState extends State<DashboardScreen>
           );
         },
       ),
-      bottomSheet: _ActionButtons(onAdd: _openAddTransaction),
+      floatingActionButton: FloatingActionButton(
+        heroTag: null,
+        onPressed: () => _showAddSheet(context),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        child: const Icon(Icons.add_rounded, size: 30),
+      ),
+    );
+  }
+
+  void _showAddSheet(BuildContext context) {
+    final txProvider = context.read<TransactionProvider>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _AddTransactionSheet(
+        onAdd: (type) async {
+          if (!mounted) return;
+          await showQuickAddSheet(context, type);
+          if (mounted) txProvider.loadAll();
+        },
+      ),
     );
   }
 
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      leading: IconButton(
+        icon: Icon(
+          Icons.menu_rounded,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+          size: 26,
+        ),
+        onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+      ),
       title: Text(
         'Dashboard',
         style: GoogleFonts.poppins(
@@ -101,7 +124,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         IconButton(
           icon: Stack(
             children: [
-              Icon(Icons.menu, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
+              Icon(Icons.widgets_outlined, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
               Positioned(
                 right: 0,
                 top: 0,
@@ -296,113 +319,538 @@ class _QuickNavTile extends StatelessWidget {
   }
 }
 
-// ─── Balance Card ─────────────────────────────────────────────────────────────
 
-class _BalanceCard extends StatelessWidget {
+// ─── Balance Card (swipable: Total Balance ↔ Net Cash Flow) ───────────────────
+
+class _BalanceCard extends StatefulWidget {
   final DashboardSummary summary;
   const _BalanceCard({required this.summary});
+
+  @override
+  State<_BalanceCard> createState() => _BalanceCardState();
+}
+
+class _BalanceCardState extends State<_BalanceCard> {
+  final PageController _pageCtrl = PageController();
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  void _showCashFlowSheet(
+      BuildContext context, double cashIn, double cashOut, String sym) {
+    final netCashFlow = cashIn - cashOut;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _CashFlowBottomSheet(
+        cashIn: cashIn,
+        cashOut: cashOut,
+        netCashFlow: netCashFlow,
+        currencySymbol: sym,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<SettingsProvider, WalletProvider>(
       builder: (context, settings, walletProvider, _) {
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.35),
-                blurRadius: 24,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        final sym = settings.currencySymbol;
+        final cashIn = widget.summary.monthlyIncome;
+        final cashOut = widget.summary.monthlyExpenses;
+        final netCashFlow = cashIn - cashOut;
+
+        final now = DateTime.now();
+        final firstDay = DateTime(now.year, now.month, 1);
+        final lastDay = DateTime(now.year, now.month + 1, 0);
+        final dateRange =
+            '${DateFormat('MMM d, yyyy').format(firstDay)} - ${DateFormat('MMM d, yyyy').format(lastDay)}';
+
+        return Column(
+          children: [
+            SizedBox(
+              height: 145,
+              child: PageView(
+                controller: _pageCtrl,
+                onPageChanged: (p) => setState(() => _page = p),
                 children: [
-                  Text(
-                    'Total Balance',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withOpacity(0.85),
+                  // ── Card 1: Total Balance ───────────────────────────────
+                  GestureDetector(
+                    onTap: () => _showCashFlowSheet(context, cashIn, cashOut, sym),
+                    child: _TotalBalanceCard(
+                      settings: settings,
+                      totalBalance: walletProvider.totalBalance,
                     ),
                   ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: settings.toggleBalanceVisibility,
-                        child: Icon(
-                          settings.balanceVisible
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: Colors.white.withOpacity(0.85),
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ],
+
+                  // ── Card 2: Net Cash Flow ───────────────────────────────
+                  GestureDetector(
+                    onTap: () => _showCashFlowSheet(context, cashIn, cashOut, sym),
+                    child: _NetCashFlowCard(
+                      netCashFlow: netCashFlow,
+                      cashIn: cashIn,
+                      cashOut: cashOut,
+                      dateRange: dateRange,
+                      currencySymbol: sym,
+                      visible: settings.balanceVisible,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: settings.balanceVisible
-                        ? Text(
-                            CurrencyFormatter.format(
-                              walletProvider.totalBalance,
-                              symbol: settings.currencySymbol,
-                            ),
-                            key: const ValueKey('visible'),
-                            style: GoogleFonts.poppins(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: -1,
-                            ),
-                          )
-                        : Text(
-                            '${settings.currencySymbol} ••••••',
-                            key: const ValueKey('hidden'),
-                            style: GoogleFonts.poppins(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: 4,
-                            ),
-                          ),
+            ),
+
+            // ── Dot indicator ─────────────────────────────────────────────
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(2, (i) {
+                final active = i == _page;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: active ? 20 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: active
+                        ? Colors.white.withValues(alpha: 0.9)
+                        : Colors.white.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(3),
                   ),
-                ],
-              ),
-            ],
-          ),
+                );
+              }),
+            ),
+          ],
         );
       },
     );
   }
 }
+
+// ─── Card 1 widget ─────────────────────────────────────────────────────────────
+
+class _TotalBalanceCard extends StatelessWidget {
+  final SettingsProvider settings;
+  final double totalBalance;
+
+  const _TotalBalanceCard({
+    required this.settings,
+    required this.totalBalance,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Balance',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
+              ),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: settings.toggleBalanceVisibility,
+                    child: Icon(
+                      settings.balanceVisible
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: Colors.white.withValues(alpha: 0.85),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: settings.balanceVisible
+                ? Text(
+                    CurrencyFormatter.format(totalBalance,
+                        symbol: settings.currencySymbol),
+                    key: const ValueKey('vis'),
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: -1,
+                    ),
+                  )
+                : Text(
+                    '${settings.currencySymbol} ••••••',
+                    key: const ValueKey('hid'),
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 4,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Card 2 widget ─────────────────────────────────────────────────────────────
+
+class _NetCashFlowCard extends StatelessWidget {
+  final double netCashFlow;
+  final double cashIn;
+  final double cashOut;
+  final String dateRange;
+  final String currencySymbol;
+  final bool visible;
+
+  const _NetCashFlowCard({
+    required this.netCashFlow,
+    required this.cashIn,
+    required this.cashOut,
+    required this.dateRange,
+    required this.currencySymbol,
+    required this.visible,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = cashIn == 0
+        ? 0.0
+        : ((netCashFlow / cashIn) * 100).clamp(-999.0, 999.0);
+    final pctStr = '${pct >= 0 ? '' : ''}${pct.toStringAsFixed(0)}%';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Net Cash Flow',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '− $pctStr',
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // Amount
+          visible
+              ? Text(
+                  CurrencyFormatter.format(netCashFlow,
+                      symbol: currencySymbol),
+                  style: GoogleFonts.poppins(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                )
+              : Text(
+                  '$currencySymbol ••••••',
+                  style: GoogleFonts.poppins(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 2,
+                  ),
+                ),
+          const SizedBox(height: 2),
+          // Date range
+          Text(
+            dateRange,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              color: Colors.white.withValues(alpha: 0.65),
+            ),
+          ),
+          const Spacer(),
+          // Net Income row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Net Income',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.75),
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    visible
+                        ? CurrencyFormatter.format(cashIn,
+                            symbol: currencySymbol)
+                        : '••••••',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '− 0%',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Net Cash Flow Bottom Sheet ────────────────────────────────────────────────
+
+class _CashFlowBottomSheet extends StatelessWidget {
+  final double cashIn;
+  final double cashOut;
+  final double netCashFlow;
+  final String currencySymbol;
+
+  const _CashFlowBottomSheet({
+    required this.cashIn,
+    required this.cashOut,
+    required this.netCashFlow,
+    required this.currencySymbol,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.white;
+    final textSecondary =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).dividerColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Title
+            Text(
+              'Net Cash Flow',
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Excludes loan disbursements and wallet transfers.',
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Cash In row
+            _SheetRow(
+              label: 'Cash In',
+              amount: cashIn,
+              symbol: currencySymbol,
+              color: AppColors.income,
+            ),
+            const SizedBox(height: 16),
+
+            // Cash Out row
+            _SheetRow(
+              label: 'Cash Out',
+              amount: cashOut,
+              symbol: currencySymbol,
+              color: AppColors.expense,
+            ),
+            const SizedBox(height: 20),
+
+            // Divider
+            Divider(color: Theme.of(context).dividerColor),
+            const SizedBox(height: 16),
+
+            // Net Cash Flow row (bold)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Net Cash Flow',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
+                  ),
+                ),
+                Text(
+                  CurrencyFormatter.format(netCashFlow, symbol: currencySymbol),
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: netCashFlow >= 0 ? AppColors.income : AppColors.expense,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetRow extends StatelessWidget {
+  final String label;
+  final double amount;
+  final String symbol;
+  final Color color;
+
+  const _SheetRow({
+    required this.label,
+    required this.amount,
+    required this.symbol,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
+        ),
+        Text(
+          CurrencyFormatter.format(amount, symbol: symbol),
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
 
 // ─── Stats Grid ───────────────────────────────────────────────────────────────
 
@@ -762,65 +1210,188 @@ class _TransactionTile extends StatelessWidget {
   }
 }
 
-// ─── Action Buttons ───────────────────────────────────────────────────────────
+// ─── Add Transaction Sheet ────────────────────────────────────────────────────
 
-class _ActionButtons extends StatelessWidget {
+class _AddTransactionSheet extends StatelessWidget {
   final Future<void> Function(TransactionType) onAdd;
-  const _ActionButtons({required this.onAdd});
+  const _AddTransactionSheet({required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(
-          top: BorderSide(color: Colors.grey.withOpacity(0.1)),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => onAdd(TransactionType.income),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Income'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.income,
-                side: const BorderSide(color: AppColors.income, width: 1.5),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                textStyle: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => onAdd(TransactionType.expense),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Expense'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                textStyle: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
           ),
         ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).dividerColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Add Transaction',
+              style: GoogleFonts.poppins(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                // Add Income
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      onAdd(TransactionType.income);
+                    },
+                    child: Container(
+                      height: 130,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isDark
+                              ? [const Color(0xFF1A6B3A), const Color(0xFF27AE60)]
+                              : [const Color(0xFF27AE60), const Color(0xFF2ECC71)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF27AE60).withOpacity(0.35),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_upward_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Add Income',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Salary, gifts, etc.',
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                // Add Expense
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      onAdd(TransactionType.expense);
+                    },
+                    child: Container(
+                      height: 130,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isDark
+                              ? [const Color(0xFF7B1C1C), const Color(0xFFE74C3C)]
+                              : [const Color(0xFFE74C3C), const Color(0xFFFF6B6B)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFE74C3C).withOpacity(0.35),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_downward_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Add Expense',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Bills, shopping, etc.',
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
