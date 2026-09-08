@@ -71,6 +71,14 @@ class SalaryPlanProvider extends ChangeNotifier {
     await _persist();
   }
 
+  /// Removes all salary plans from memory and SharedPreferences.
+  Future<void> clearAllData() async {
+    _plans = [];
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefsKey);
+  }
+
   // ── Two-way sync: Budget → Plan ────────────────────────────────────────────
   //
   // Called by CreateBudgetScreen / BudgetsScreen after a manual budget edit.

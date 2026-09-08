@@ -7,6 +7,8 @@ import '../models/transaction_model.dart';
 import '../providers/budget_provider.dart';
 import '../providers/goal_provider.dart';
 import '../providers/lend_borrow_provider.dart';
+import '../providers/otn_provider.dart';
+import '../providers/salary_plan_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
@@ -363,6 +365,10 @@ class _SettingsScreenState extends State<SettingsScreen>
       await context.read<WalletProvider>().clearAllData();
       if (!context.mounted) return;
       await context.read<BudgetProvider>().clearAllData();
+      if (!context.mounted) return;
+      await context.read<SalaryPlanProvider>().clearAllData();
+      if (!context.mounted) return;
+      await context.read<OtnProvider>().clearAllData();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

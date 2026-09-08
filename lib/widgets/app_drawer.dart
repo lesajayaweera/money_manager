@@ -6,6 +6,7 @@ import '../screens/financial_overview_screen.dart';
 import '../screens/goals_screen.dart';
 import '../screens/lends_borrowed_screen.dart';
 import '../screens/monthly_plan_screen.dart';
+import '../screens/otn_screen.dart';
 import '../screens/settings_screen.dart';
 import '../main_scaffold.dart';
 
@@ -103,6 +104,14 @@ class AppDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const MonthlyPlanScreen()));
+                  },
+                ),
+                _DrawerItem(
+                  icon: Icons.timer_outlined,
+                  title: 'OTN Salary',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const OtnScreen()));
                   },
                 ),
                 const Divider(height: 32, indent: 24, endIndent: 24),

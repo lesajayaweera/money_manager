@@ -7,6 +7,7 @@ import '../models/salary_plan_model.dart';
 import '../providers/budget_provider.dart';
 import '../providers/salary_plan_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/transaction_provider.dart';
 import '../services/database_service.dart';
 import 'create_monthly_plan_screen.dart';
 
@@ -376,15 +377,35 @@ class _PlanCardState extends State<_PlanCard> {
   double _totalActualSpent = 0;
   bool _loadingActual = false;
 
+  late VoidCallback _txListener;
+
   @override
   void initState() {
     super.initState();
     _loadActualSpending();
+    // Reload actual spending whenever any transaction changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _txListener = () {
+        if (mounted) _loadActualSpending();
+      };
+      context.read<TransactionProvider>().addListener(_txListener);
+    });
+  }
+
+  @override
+  void dispose() {
+    try {
+      context.read<TransactionProvider>().removeListener(_txListener);
+    } catch (_) {}
+    super.dispose();
   }
 
   Future<void> _loadActualSpending() async {
     if (!mounted) return;
-    setState(() => _loadingActual = true);
+    // Don't show the spinner on subsequent refreshes — just update silently
+    final isFirstLoad = _categoryActual.isEmpty && !_loadingActual;
+    if (isFirstLoad) setState(() => _loadingActual = true);
     try {
       final year = widget.plan.periodStart.year;
       final month = widget.plan.periodStart.month;

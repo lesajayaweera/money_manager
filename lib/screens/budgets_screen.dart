@@ -14,6 +14,7 @@ import '../providers/budget_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/salary_plan_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/transaction_provider.dart';
 import 'budget_category_detail_screen.dart';
 import 'create_budget_screen.dart';
 import 'monthly_plan_screen.dart';
@@ -30,12 +31,34 @@ class _BudgetsScreenState extends State<BudgetsScreen>
   @override
   bool get wantKeepAlive => true;
 
+  // Listener reference so we can remove it in dispose()
+  late VoidCallback _txListener;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       context.read<BudgetProvider>().loadBudgets();
+
+      // React to every transaction add/edit/delete and refresh spending figures
+      // immediately so the budget summary and category bars stay current.
+      _txListener = () {
+        if (mounted) {
+          context.read<BudgetProvider>().refreshSpending();
+        }
+      };
+      context.read<TransactionProvider>().addListener(_txListener);
     });
+  }
+
+  @override
+  void dispose() {
+    // Guard: only remove if the listener was registered (postFrameCallback ran)
+    try {
+      context.read<TransactionProvider>().removeListener(_txListener);
+    } catch (_) {}
+    super.dispose();
   }
 
   // ── Month navigation ────────────────────────────────────────────────────────
