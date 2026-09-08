@@ -5,6 +5,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/transaction_history_screen.dart';
 import 'screens/wallets_screen.dart';
 import 'screens/reports_screen.dart';
+import 'screens/budgets_screen.dart';
 import 'widgets/app_drawer.dart';
 
 final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
@@ -22,6 +23,7 @@ class MainScaffoldState extends State<MainScaffold> {
   static final List<Widget> _screens = [
     const DashboardScreen(),
     const TransactionHistoryScreen(),
+    const BudgetsScreen(),
     const ReportsScreen(),
     const WalletsScreen(),
   ];
@@ -38,6 +40,11 @@ class MainScaffoldState extends State<MainScaffold> {
       label: 'Transactions',
     ),
     _NavItem(
+      icon: Icons.pie_chart_outline,
+      activeIcon: Icons.pie_chart_rounded,
+      label: 'Budgets',
+    ),
+    _NavItem(
       icon: Icons.bar_chart_outlined,
       activeIcon: Icons.bar_chart_rounded,
       label: 'Reports',
@@ -50,7 +57,7 @@ class MainScaffoldState extends State<MainScaffold> {
   ];
 
   /// Tab indices:
-  /// 0 = Dashboard, 1 = Transactions, 2 = Reports, 3 = Wallets
+  /// 0 = Dashboard, 1 = Transactions, 2 = Budgets, 3 = Reports, 4 = Wallets
   void setTab(int index) {
     setState(() => _currentIndex = index);
   }

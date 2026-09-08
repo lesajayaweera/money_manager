@@ -39,7 +39,7 @@ class _ReportsScreenState extends State<ReportsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -108,34 +108,6 @@ class _ReportsScreenState extends State<ReportsScreen>
                   const Tab(text: 'Overview'),
                   const Tab(text: 'Categories'),
                   const Tab(text: 'Daily'),
-                  Tab(
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Text('Budget'),
-                        Positioned(
-                          top: -12,
-                          right: -24,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Text(
-                              'New',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -151,7 +123,6 @@ class _ReportsScreenState extends State<ReportsScreen>
                 ),
                 const _CategoriesTab(),
                 const _DailyTab(),
-                const _BudgetTab(),
               ],
             ),
           ),
