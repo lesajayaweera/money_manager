@@ -228,112 +228,128 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              size: 20,
-              color: Theme.of(context).textTheme.titleLarge?.color),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          widget.existing != null ? 'Edit Day' : 'Add Day',
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Theme.of(context).textTheme.titleLarge?.color,
-          ),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _SectionLabel('Status of work'),
-                const SizedBox(height: 8),
-                _StatusSelector(
-                  selected: _status,
-                  onChanged: (s) => setState(() => _status = s),
-                ),
-
-                const SizedBox(height: 20),
-                _SectionLabel('Date'),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: _pickMonthAndDay,
-                  child: _TileRow(
-                    icon: Icons.calendar_today_rounded,
-                    text: DateFormat(
-                            'EEE, d MMMM yyyy')
-                        .format(DateTime(_month.year, _month.month, _day)),
-                    isDark: isDark,
-                  ),
-                ),
-
-                if (_isWorked) ...[
-                  const SizedBox(height: 20),
-                  _SectionLabel('In / Out time'),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _pickTime(isIn: true),
-                          child: _TileRow(
-                            icon: Icons.login_rounded,
-                            text: _inTime == null
-                                ? 'In time'
-                                : _inTime!.format(context),
-                            isDark: isDark,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _pickTime(isIn: false),
-                          child: _TileRow(
-                            icon: Icons.logout_rounded,
-                            text: _outTime == null
-                                ? 'Out time'
-                                : _outTime!.format(context),
-                            isDark: isDark,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-                  _SectionLabel('Hours worked'),
-                  const SizedBox(height: 8),
-                  _HoursField(controller: _hoursController),
-                  const SizedBox(height: 10),
-                  if (_inTime != null && _outTime != null)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Text(
-                        'Calculated from in/out: ${_computeFromTimes(_inTime!, _outTime!).toStringAsFixed(1)} hrs',
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          color:
-                              Theme.of(context).textTheme.bodySmall?.color,
-                        ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Text(
+                      widget.existing != null ? 'Edit Day' : 'Add Day',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded,
+                        color: Theme.of(context).textTheme.titleLarge?.color),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ],
-              ],
+              ),
             ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
+
+            // Content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SectionLabel('Status of work'),
+                    const SizedBox(height: 8),
+                    _StatusSelector(
+                      selected: _status,
+                      onChanged: (s) => setState(() => _status = s),
+                    ),
+
+                    const SizedBox(height: 20),
+                    _SectionLabel('Date'),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _pickMonthAndDay,
+                      child: _TileRow(
+                        icon: Icons.calendar_today_rounded,
+                        text: DateFormat(
+                                'EEE, d MMMM yyyy')
+                            .format(DateTime(_month.year, _month.month, _day)),
+                        isDark: isDark,
+                      ),
+                    ),
+
+                    if (_isWorked) ...[
+                      const SizedBox(height: 20),
+                      _SectionLabel('In / Out time'),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _pickTime(isIn: true),
+                              child: _TileRow(
+                                icon: Icons.login_rounded,
+                                text: _inTime == null
+                                    ? 'In time'
+                                    : _inTime!.format(context),
+                                isDark: isDark,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _pickTime(isIn: false),
+                              child: _TileRow(
+                                icon: Icons.logout_rounded,
+                                text: _outTime == null
+                                    ? 'Out time'
+                                    : _outTime!.format(context),
+                                isDark: isDark,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+                      _SectionLabel('Hours worked'),
+                      const SizedBox(height: 8),
+                      _HoursField(controller: _hoursController),
+                      const SizedBox(height: 10),
+                      if (_inTime != null && _outTime != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: Text(
+                            'Calculated from in/out: ${_computeFromTimes(_inTime!, _outTime!).toStringAsFixed(1)} hrs',
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            // Save button
+            Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 boxShadow: [
@@ -365,8 +381,8 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
