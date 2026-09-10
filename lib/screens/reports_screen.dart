@@ -17,9 +17,11 @@ import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../services/insights_service.dart';
 import '../main_scaffold.dart';
 import 'budget_category_detail_screen.dart';
 import 'create_budget_screen.dart';
+import 'month_comparison_screen.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -39,7 +41,7 @@ class _ReportsScreenState extends State<ReportsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -108,6 +110,8 @@ class _ReportsScreenState extends State<ReportsScreen>
                   const Tab(text: 'Overview'),
                   const Tab(text: 'Categories'),
                   const Tab(text: 'Daily'),
+                  const Tab(text: 'Budget'),
+                  const Tab(text: 'Insights'),
                 ],
               ),
             ),
@@ -123,6 +127,8 @@ class _ReportsScreenState extends State<ReportsScreen>
                 ),
                 const _CategoriesTab(),
                 const _DailyTab(),
+                const _BudgetTab(),
+                const _InsightsTab(),
               ],
             ),
           ),
@@ -285,14 +291,53 @@ class _OverviewTabState extends State<_OverviewTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Report Period',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ??
-                        Colors.white,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      'Report Period',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.titleLarge?.color ??
+                            Colors.white,
+                      ),
+                    ),
+                    const Spacer(),
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const MonthComparisonScreen(),
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.compare_arrows_rounded,
+                                color: AppColors.primary, size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Compare',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 SingleChildScrollView(
@@ -2618,6 +2663,230 @@ class _HasBudgetView extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+// ─── Insights Tab ─────────────────────────────────────────────────────────────
+
+class _InsightsTab extends StatelessWidget {
+  const _InsightsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final transactionProvider = context.watch<TransactionProvider>();
+    final budgetProvider = context.watch<BudgetProvider>();
+    final settings = context.watch<SettingsProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.white;
+    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
+
+    final insights = InsightsService.generateInsights(
+      transactionProvider.allTransactions,
+      budgetProvider.categorySpending,
+      budgetProvider.currentBudget?.totalAmount,
+    );
+
+    if (insights.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 40, 20, 100),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.lightbulb_outline_rounded,
+                  color: AppColors.primary,
+                  size: 42,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'No Insights Yet',
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Add some transactions this month\nto see spending insights.',
+                style: GoogleFonts.poppins(fontSize: 14, color: textSub),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.primary.withValues(alpha: 0.12)
+                : AppColors.primarySurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.psychology_rounded,
+                  color: AppColors.primary, size: 26),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Smart insights based on your spending patterns this month.',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...insights.map((insight) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _InsightCard(
+                insight: insight,
+                surfaceColor: surfaceColor,
+                dividerColor: dividerColor,
+                textPrimary: textPrimary,
+                textSub: textSub,
+                symbol: settings.currencySymbol,
+              ),
+            )),
+      ],
+    );
+  }
+}
+
+class _InsightCard extends StatelessWidget {
+  final FinancialInsight insight;
+  final Color surfaceColor;
+  final Color dividerColor;
+  final Color textPrimary;
+  final Color textSub;
+  final String symbol;
+
+  const _InsightCard({
+    required this.insight,
+    required this.surfaceColor,
+    required this.dividerColor,
+    required this.textPrimary,
+    required this.textSub,
+    required this.symbol,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = FinancialInsight.severityColors[insight.severity]!
+        .withValues(alpha: 1.0);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: dividerColor.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(insight.icon, color: color, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        insight.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: textPrimary,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _severityLabel(insight.severity),
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  insight.description,
+                  style: GoogleFonts.poppins(fontSize: 12.5, color: textSub),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _severityLabel(InsightSeverity severity) {
+    switch (severity) {
+      case InsightSeverity.warning:
+        return 'WARNING';
+      case InsightSeverity.good:
+        return 'GOOD';
+      case InsightSeverity.bad:
+        return 'ALERT';
+      case InsightSeverity.info:
+        return 'INFO';
+    }
   }
 }
 
