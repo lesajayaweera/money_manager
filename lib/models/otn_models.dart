@@ -154,6 +154,50 @@ class WorkLogEntry {
       json.encode(entries.map((e) => e.toJson()).toList());
 }
 
+// ─── OTN Allowance ────────────────────────────────────────────────────────────
+
+class OtnAllowance {
+  final String id;
+  final String name;
+  final double amount;
+  final bool epfEligible;
+
+  const OtnAllowance({
+    required this.id,
+    required this.name,
+    required this.amount,
+    required this.epfEligible,
+  });
+
+  OtnAllowance copyWith({
+    String? id,
+    String? name,
+    double? amount,
+    bool? epfEligible,
+  }) {
+    return OtnAllowance(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      amount: amount ?? this.amount,
+      epfEligible: epfEligible ?? this.epfEligible,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'amount': amount,
+        'epfEligible': epfEligible,
+      };
+
+  factory OtnAllowance.fromJson(Map<String, dynamic> json) => OtnAllowance(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        amount: (json['amount'] as num).toDouble(),
+        epfEligible: json['epfEligible'] as bool? ?? false,
+      );
+}
+
 // ─── OTN Settings ─────────────────────────────────────────────────────────────
 
 class OtnSettings {
@@ -163,6 +207,10 @@ class OtnSettings {
   double standardHoursPerDay;
   double others;
   double processing;
+  bool autoOt;
+  double epfRate;
+  double etfRate;
+  List<OtnAllowance> allowances;
 
   OtnSettings({
     this.basicSalary = 0,
@@ -171,7 +219,11 @@ class OtnSettings {
     this.standardHoursPerDay = 8,
     this.others = 0,
     this.processing = 0,
-  });
+    this.autoOt = false,
+    this.epfRate = 8.0,
+    this.etfRate = 3.0,
+    List<OtnAllowance>? allowances,
+  }) : allowances = allowances ?? [];
 
   OtnSettings copyWith({
     double? basicSalary,
@@ -180,6 +232,10 @@ class OtnSettings {
     double? standardHoursPerDay,
     double? others,
     double? processing,
+    bool? autoOt,
+    double? epfRate,
+    double? etfRate,
+    List<OtnAllowance>? allowances,
   }) {
     return OtnSettings(
       basicSalary: basicSalary ?? this.basicSalary,
@@ -188,6 +244,10 @@ class OtnSettings {
       standardHoursPerDay: standardHoursPerDay ?? this.standardHoursPerDay,
       others: others ?? this.others,
       processing: processing ?? this.processing,
+      autoOt: autoOt ?? this.autoOt,
+      epfRate: epfRate ?? this.epfRate,
+      etfRate: etfRate ?? this.etfRate,
+      allowances: allowances ?? this.allowances,
     );
   }
 
@@ -198,6 +258,10 @@ class OtnSettings {
         'standardHoursPerDay': standardHoursPerDay,
         'others': others,
         'processing': processing,
+        'autoOt': autoOt,
+        'epfRate': epfRate,
+        'etfRate': etfRate,
+        'allowances': allowances.map((a) => a.toJson()).toList(),
       };
 
   factory OtnSettings.fromJson(Map<String, dynamic> json) => OtnSettings(
@@ -207,6 +271,13 @@ class OtnSettings {
         standardHoursPerDay: (json['standardHoursPerDay'] as num).toDouble(),
         others: (json['others'] as num?)?.toDouble() ?? 0,
         processing: (json['processing'] as num?)?.toDouble() ?? 0,
+        autoOt: json['autoOt'] as bool? ?? false,
+        epfRate: (json['epfRate'] as num?)?.toDouble() ?? 8.0,
+        etfRate: (json['etfRate'] as num?)?.toDouble() ?? 3.0,
+        allowances: (json['allowances'] as List<dynamic>?)
+                ?.map((e) => OtnAllowance.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 
   String toJsonString() => json.encode(toJson());

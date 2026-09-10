@@ -33,7 +33,7 @@ class _OtnScreenState extends State<OtnScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() => setState(() {}));
 
     final now = DateTime.now();
@@ -70,11 +70,6 @@ class _OtnScreenState extends State<OtnScreen>
     );
   }
 
-  Future<void> _openSetup() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const OtnSetupScreen()),
-    );
-  }
 
   Future<void> _deleteEntry(WorkLogEntry entry) async {
     final confirmed = await showDialog<bool>(
@@ -151,6 +146,7 @@ class _OtnScreenState extends State<OtnScreen>
                   settings: provider.settings,
                   month: _month,
                 ),
+                const OtnSetupScreen(),
               ],
             ),
           );
@@ -217,13 +213,8 @@ class _OtnScreenState extends State<OtnScreen>
             ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.tune_rounded,
-              color: Theme.of(context).textTheme.bodySmall?.color),
-          onPressed: _openSetup,
-        ),
-        const SizedBox(width: 4),
+      actions: const [
+        SizedBox(width: 4),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(108),
@@ -307,7 +298,7 @@ class _OtnScreenState extends State<OtnScreen>
   }
 
   Widget _buildTabBar(bool isDark) {
-    final labels = ['Overview', 'Daily Log', 'Pay Preview'];
+    final labels = ['Overview', 'Daily Log', 'Pay Preview', 'Setup'];
     return Container(
       decoration: BoxDecoration(
         border: Border(
