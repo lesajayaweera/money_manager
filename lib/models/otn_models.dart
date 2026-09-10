@@ -198,6 +198,36 @@ class OtnAllowance {
       );
 }
 
+// ─── OTN Deduction ────────────────────────────────────────────────────────────
+
+class OtnDeduction {
+  final String id;
+  final String name;
+  final double amount;
+
+  const OtnDeduction({
+    required this.id,
+    required this.name,
+    required this.amount,
+  });
+
+  OtnDeduction copyWith({String? id, String? name, double? amount}) {
+    return OtnDeduction(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      amount: amount ?? this.amount,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'amount': amount};
+
+  factory OtnDeduction.fromJson(Map<String, dynamic> json) => OtnDeduction(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        amount: (json['amount'] as num).toDouble(),
+      );
+}
+
 // ─── OTN Settings ─────────────────────────────────────────────────────────────
 
 class OtnSettings {
@@ -211,6 +241,7 @@ class OtnSettings {
   double epfRate;
   double etfRate;
   List<OtnAllowance> allowances;
+  List<OtnDeduction> deductions;
 
   OtnSettings({
     this.basicSalary = 0,
@@ -223,7 +254,9 @@ class OtnSettings {
     this.epfRate = 8.0,
     this.etfRate = 3.0,
     List<OtnAllowance>? allowances,
-  }) : allowances = allowances ?? [];
+    List<OtnDeduction>? deductions,
+  })  : allowances = allowances ?? [],
+        deductions = deductions ?? [];
 
   OtnSettings copyWith({
     double? basicSalary,
@@ -236,6 +269,7 @@ class OtnSettings {
     double? epfRate,
     double? etfRate,
     List<OtnAllowance>? allowances,
+    List<OtnDeduction>? deductions,
   }) {
     return OtnSettings(
       basicSalary: basicSalary ?? this.basicSalary,
@@ -248,6 +282,7 @@ class OtnSettings {
       epfRate: epfRate ?? this.epfRate,
       etfRate: etfRate ?? this.etfRate,
       allowances: allowances ?? this.allowances,
+      deductions: deductions ?? this.deductions,
     );
   }
 
@@ -262,6 +297,7 @@ class OtnSettings {
         'epfRate': epfRate,
         'etfRate': etfRate,
         'allowances': allowances.map((a) => a.toJson()).toList(),
+        'deductions': deductions.map((d) => d.toJson()).toList(),
       };
 
   factory OtnSettings.fromJson(Map<String, dynamic> json) => OtnSettings(
@@ -276,6 +312,10 @@ class OtnSettings {
         etfRate: (json['etfRate'] as num?)?.toDouble() ?? 3.0,
         allowances: (json['allowances'] as List<dynamic>?)
                 ?.map((e) => OtnAllowance.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
+        deductions: (json['deductions'] as List<dynamic>?)
+                ?.map((e) => OtnDeduction.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             [],
       );

@@ -170,14 +170,17 @@ class _OtnScreenState extends State<OtnScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final symbol = context.watch<SettingsProvider>().currencySymbol;
     final stats = provider.statsForMonth(_month.year, _month.month);
-    final basic = provider.settings.basicSalary;
-    final ot = stats.otHours * provider.settings.overtimeRatePerHour;
-    final others = provider.settings.others;
-    final gross = basic + ot + others;
-    final processing = provider.settings.processing;
-    final ebf1 = basic * 0.08;
-    final etf = basic * 0.03;
-    final netPay = gross - processing - ebf1 - etf;
+    final s = provider.settings;
+    final basic = s.basicSalary;
+    final ot = stats.otHours * s.overtimeRatePerHour;
+    final totalAllowances = s.allowances.fold<double>(0, (sum, a) => sum + a.amount);
+    final epfBase = basic + s.allowances.where((a) => a.epfEligible).fold<double>(0, (sum, a) => sum + a.amount);
+    final gross = basic + ot + totalAllowances;
+    final processing = s.processing;
+    final ebf1 = epfBase * (s.epfRate / 100);
+    final etf = epfBase * (s.etfRate / 100);
+    final customDeductionsTotal = s.deductions.fold<double>(0, (sum, d) => sum + d.amount);
+    final netPay = gross - processing - ebf1 - etf - customDeductionsTotal;
 
     return SliverAppBar(
       pinned: true,
@@ -1416,13 +1419,40 @@ class _PayPreviewTab extends StatelessWidget {
 
     final basic = settings.basicSalary;
     final ot = stats.otHours * settings.overtimeRatePerHour;
-    final others = settings.others;
-    final gross = basic + ot + others;
+
+    // Sum all allowances
+    final totalAllowances = settings.allowances.fold<double>(0, (sum, a) => sum + a.amount);
+
+    // EPF base = basic + EPF-eligible allowances
+    final epfBase = basic +
+        settings.allowances
+            .where((a) => a.epfEligible)
+            .fold<double>(0, (sum, a) => sum + a.amount);
+
+    final gross = basic + ot + totalAllowances;
     final processing = settings.processing;
-    final ebf1 = basic * 0.08;
-    final etf = basic * 0.03;
-    final totalDeductions = processing + ebf1 + etf;
+    final ebf1 = epfBase * (settings.epfRate / 100);
+    final etf = epfBase * (settings.etfRate / 100);
+    // Sum custom deductions
+    final customDeductionsTotal =
+        settings.deductions.fold<double>(0, (sum, d) => sum + d.amount);
+    final totalDeductions = processing + ebf1 + etf + customDeductionsTotal;
     final netPay = gross - totalDeductions;
+
+    // Build allowance earning rows
+    final allowanceRows = settings.allowances
+        .map((a) => _Row(
+              '${a.name}${a.epfEligible ? ' (EPF)' : ''}',
+              a.amount,
+              symbol,
+              color: Theme.of(context).textTheme.titleLarge?.color,
+            ))
+        .toList();
+
+    // Build custom deduction rows
+    final customDeductionRows = settings.deductions
+        .map((d) => _Row(d.name, d.amount, symbol, color: AppColors.expense))
+        .toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
@@ -1434,10 +1464,10 @@ class _PayPreviewTab extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppColors.income, const Color(0xFF00CBA9)],
+                colors: [AppColors.income, Color(0xFF00CBA9)],
               ),
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
@@ -1524,8 +1554,7 @@ class _PayPreviewTab extends StatelessWidget {
               _Row('Overtime (${_fmtHours(stats.otHours)}h × rate)', ot,
                   symbol,
                   color: AppColors.income),
-              _Row('Others', others, symbol,
-                  color: Theme.of(context).textTheme.titleLarge?.color),
+              ...allowanceRows,
             ],
             total: gross,
             totalLabel: 'Gross Pay',
@@ -1540,10 +1569,21 @@ class _PayPreviewTab extends StatelessWidget {
             isDark: isDark,
             title: 'Deductions',
             rows: [
-              _Row('Processing', processing, symbol, color: AppColors.expense),
-              _Row('EBF1 (8% of basic)', ebf1, symbol,
-                  color: AppColors.expense),
-              _Row('ETF (3% of basic)', etf, symbol, color: AppColors.expense),
+              if (processing > 0)
+                _Row('Processing', processing, symbol, color: AppColors.expense),
+              _Row(
+                'EPF (${settings.epfRate.toStringAsFixed(0)}% of base)',
+                ebf1,
+                symbol,
+                color: AppColors.expense,
+              ),
+              _Row(
+                'ETF (${settings.etfRate.toStringAsFixed(0)}% of base)',
+                etf,
+                symbol,
+                color: AppColors.expense,
+              ),
+              ...customDeductionRows,
             ],
             total: totalDeductions,
             totalLabel: 'Total Deductions',
