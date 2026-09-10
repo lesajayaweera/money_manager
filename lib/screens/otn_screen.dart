@@ -108,7 +108,7 @@ class _OtnScreenState extends State<OtnScreen>
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openAdd(),
-        backgroundColor: AppColors.income,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 6,
         shape: const CircleBorder(),
@@ -258,14 +258,14 @@ class _OtnScreenState extends State<OtnScreen>
                   const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
               decoration: BoxDecoration(
                 color: isActive
-                    ? AppColors.income
+                    ? AppColors.primary
                     : (isDark
                         ? AppColors.darkSurface
                         : Colors.white),
                 borderRadius: BorderRadius.circular(50),
                 border: Border.all(
                   color: isActive
-                      ? AppColors.income
+                      ? AppColors.primary
                       : (isDark
                           ? AppColors.darkDivider
                           : Colors.grey.shade300),
@@ -274,7 +274,7 @@ class _OtnScreenState extends State<OtnScreen>
                 boxShadow: isActive
                     ? [
                         BoxShadow(
-                          color: AppColors.income.withOpacity(0.3),
+                          color: AppColors.primary.withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -326,7 +326,7 @@ class _OtnScreenState extends State<OtnScreen>
                   border: Border(
                     bottom: BorderSide(
                       color:
-                          isActive ? AppColors.income : Colors.transparent,
+                          isActive ? AppColors.primary : Colors.transparent,
                       width: 2.5,
                     ),
                   ),
@@ -338,7 +338,7 @@ class _OtnScreenState extends State<OtnScreen>
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: isActive
-                        ? AppColors.income
+                        ? AppColors.primary
                         : (isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary),
@@ -505,7 +505,7 @@ class _HeroStatsCard extends StatelessWidget {
                   child: _BigStat(
                     value: '${stats.workedDays}',
                     label: 'Days worked',
-                    color: AppColors.income,
+                    color: AppColors.primary,
                     isDark: isDark,
                   ),
                 ),
@@ -717,12 +717,12 @@ class _TodayCard extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.income,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(width: 2),
             Icon(Icons.chevron_right_rounded,
-                color: AppColors.income, size: 18),
+                color: AppColors.primary, size: 18),
           ],
         ),
       ),
@@ -748,7 +748,7 @@ class _DayBreakdownCard extends StatelessWidget {
         stats.holidays;
 
     final segments = [
-      _Segment(count: stats.workedDays, color: AppColors.income),
+      _Segment(count: stats.workedDays, color: AppColors.primary),
       _Segment(count: stats.leaveDays, color: const Color(0xFFFDAA3D)),
       _Segment(count: stats.noPayDays, color: AppColors.expense),
       _Segment(count: stats.holidays, color: AppColors.budget),
@@ -812,7 +812,7 @@ class _DayBreakdownCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _LegendItem(
-                  color: AppColors.income,
+                  color: AppColors.primary,
                   label: 'Worked',
                   count: stats.workedDays,
                 ),
@@ -1081,11 +1081,11 @@ class _WorkedPopulationsCard extends StatelessWidget {
                         minHeight: 7,
                         backgroundColor: isDark
                             ? AppColors.darkDivider
-                            : AppColors.income.withOpacity(0.08),
+                            : AppColors.primary.withOpacity(0.08),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           e.hours > stats.standardHoursPerDay
                               ? AppColors.spending
-                              : AppColors.income,
+                              : AppColors.primary,
                         ),
                       ),
                     ),
@@ -1464,15 +1464,11 @@ class _PayPreviewTab extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.income, Color(0xFF00CBA9)],
-              ),
+              gradient: AppColors.primaryGradient,
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.income.withOpacity(0.35),
+                  color: AppColors.primary.withOpacity(0.35),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -1553,12 +1549,12 @@ class _PayPreviewTab extends StatelessWidget {
                   color: Theme.of(context).textTheme.titleLarge?.color),
               _Row('Overtime (${_fmtHours(stats.otHours)}h × rate)', ot,
                   symbol,
-                  color: AppColors.income),
+                  color: AppColors.primary),
               ...allowanceRows,
             ],
             total: gross,
             totalLabel: 'Gross Pay',
-            totalColor: AppColors.income,
+            totalColor: AppColors.primary,
             symbol: symbol,
           ),
 

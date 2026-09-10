@@ -101,13 +101,13 @@ class SalaryPlanProvider extends ChangeNotifier {
     final existing = _plans[idx];
 
     // Keep non-category allocations intact
-    final nonCategoryAllocations =
-        existing.allocations.where((a) => a.type != AllocationType.category).toList();
+    final nonCategoryAllocations = existing.allocations
+        .where((a) => a.type != AllocationType.category)
+        .toList();
 
     // Build category allocations from the budget
-    final newCategoryAllocations = budget.categories
-        .where((c) => c.allocatedAmount > 0)
-        .map((c) {
+    final newCategoryAllocations =
+        budget.categories.where((c) => c.allocatedAmount > 0).map((c) {
       // Find existing allocation to preserve its id
       final existingAlloc = existing.allocations.firstWhere(
         (a) => a.type == AllocationType.category && a.name == c.categoryName,
@@ -215,9 +215,7 @@ class SalaryPlanProvider extends ChangeNotifier {
   /// Used for the "Copy from previous month" feature.
   SalaryPlan? previousPlan(int year, int month) {
     final cutoff = DateTime(year, month, 1);
-    final older = _plans
-        .where((p) => p.periodStart.isBefore(cutoff))
-        .toList()
+    final older = _plans.where((p) => p.periodStart.isBefore(cutoff)).toList()
       ..sort((a, b) => b.periodStart.compareTo(a.periodStart));
     return older.isEmpty ? null : older.first;
   }

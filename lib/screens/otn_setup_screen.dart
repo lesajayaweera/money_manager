@@ -81,7 +81,7 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Settings saved', style: GoogleFonts.poppins(fontSize: 13)),
-        backgroundColor: AppColors.income,
+        backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -485,7 +485,7 @@ class _AllowanceRow extends StatelessWidget {
                         style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.income)),
+                            color: AppColors.primary)),
                     const SizedBox(width: 10),
                     if (allowance.epfEligible)
                       Container(
