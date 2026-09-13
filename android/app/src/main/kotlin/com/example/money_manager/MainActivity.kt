@@ -49,6 +49,12 @@ class MainActivity : FlutterActivity() {
                         val since = call.argument<Long>("since") ?: 0L
                         result.success(scanInboxSince(since))
                     }
+                    "discoverSenders" -> result.success(discoverSenders())
+                    "getRecentMessages" -> {
+                        val since = call.argument<Long>("since") ?: 0L
+                        val limit = call.argument<Int>("limit") ?: 200
+                        result.success(getRecentMessages(since, limit))
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -156,6 +162,33 @@ class MainActivity : FlutterActivity() {
         return list
     }
 
+    private fun discoverSenders(): List<Map<String, Any>> {
+        val counts = LinkedHashMap<String, Int>()
+        try {
+            val uri: Uri = Telephony.Sms.Inbox.CONTENT_URI
+            val projection = arrayOf(Telephony.Sms.ADDRESS)
+            val cursor: Cursor? = contentResolver.query(
+                uri,
+                projection,
+                null,
+                null,
+                "${Telephony.Sms.DATE} DESC",
+            )
+            cursor?.use { c ->
+                while (c.moveToNext()) {
+                    val address = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.ADDRESS)) ?: ""
+                    if (address.isBlank()) continue
+                    counts[address] = (counts[address] ?: 0) + 1
+                }
+            }
+        } catch (_: Throwable) {
+            // READ_SMS missing or content provider unavailable — return empty.
+        }
+        return counts.entries
+            .sortedByDescending { it.value }
+            .map { mapOf("sender" to it.key, "count" to it.value) }
+    }
+
     private fun matchesWhitelist(sender: String, whitelist: Set<String>): Boolean {
         if (sender.isBlank()) return false
         val normalized = sender.lowercase(Locale.ROOT).trim()
@@ -163,6 +196,42 @@ class MainActivity : FlutterActivity() {
             val entry = it.lowercase(Locale.ROOT).trim()
             normalized == entry || normalized.contains(entry) || entry.contains(normalized)
         }
+    }
+
+    /// Recent SMS from the ENTIRE inbox (any sender), newest first, capped at
+    /// [limit]. Used by the message-view screen to show bank messages plus
+    /// what would otherwise be filtered out. Requires READ_SMS.
+    private fun getRecentMessages(since: Long, limit: Int): List<Map<String, Any>> {
+        val list = mutableListOf<Map<String, Any>>()
+        if (limit <= 0) return list
+        try {
+            val uri: Uri = Telephony.Sms.Inbox.CONTENT_URI
+            val projection = arrayOf(
+                Telephony.Sms._ID,
+                Telephony.Sms.ADDRESS,
+                Telephony.Sms.BODY,
+                Telephony.Sms.DATE,
+            )
+            val cursor: Cursor? = contentResolver.query(
+                uri,
+                projection,
+                "${Telephony.Sms.DATE} > ?",
+                arrayOf(since.toString()),
+                "${Telephony.Sms.DATE} DESC LIMIT $limit",
+            )
+            cursor?.use { c ->
+                while (c.moveToNext()) {
+                    val address =
+                        c.getString(c.getColumnIndexOrThrow(Telephony.Sms.ADDRESS)) ?: ""
+                    val body = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.BODY)) ?: ""
+                    val date = c.getLong(c.getColumnIndexOrThrow(Telephony.Sms.DATE))
+                    list.add(mapOf("sender" to address, "body" to body, "date" to date))
+                }
+            }
+        } catch (_: Throwable) {
+            // READ_SMS missing or content provider unavailable — return empty.
+        }
+        return list
     }
 
     companion object {

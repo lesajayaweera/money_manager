@@ -2,6 +2,9 @@ import 'transaction_model.dart';
 
 enum SmsDraftStatus { draft, saved, dismissed }
 
+/// What a captured bank SMS represents once saved.
+enum DraftKind { income, expense, withdrawal }
+
 /// A captured bank SMS awaiting review. Nothing becomes a real transaction
 /// until the user taps Save in the review inbox.
 class SmsDraftModel {
@@ -12,6 +15,7 @@ class SmsDraftModel {
   final String title;
   final double amount;
   final TransactionType txType;
+  final DraftKind kind;
   final String category;
   final String walletName;
   final DateTime? transactionDate;
@@ -27,6 +31,7 @@ class SmsDraftModel {
     required this.title,
     required this.amount,
     required this.txType,
+    this.kind = DraftKind.expense,
     required this.category,
     this.walletName = 'Cash',
     this.transactionDate,
@@ -36,6 +41,7 @@ class SmsDraftModel {
   }) : createdAt = createdAt ?? DateTime.now();
 
   bool get isDraft => status == SmsDraftStatus.draft;
+  bool get isWithdrawal => kind == DraftKind.withdrawal;
 
   SmsDraftModel copyWith({
     int? id,
@@ -45,6 +51,7 @@ class SmsDraftModel {
     String? title,
     double? amount,
     TransactionType? txType,
+    DraftKind? kind,
     String? category,
     String? walletName,
     DateTime? transactionDate,
@@ -60,6 +67,7 @@ class SmsDraftModel {
       title: title ?? this.title,
       amount: amount ?? this.amount,
       txType: txType ?? this.txType,
+      kind: kind ?? this.kind,
       category: category ?? this.category,
       walletName: walletName ?? this.walletName,
       transactionDate: transactionDate ?? this.transactionDate,
@@ -78,6 +86,7 @@ class SmsDraftModel {
       'title': title,
       'amount': amount,
       'tx_type': txType.name,
+      'draft_kind': kind.name,
       'category': category,
       'wallet_name': walletName,
       'transaction_date': transactionDate?.toIso8601String(),
@@ -99,6 +108,10 @@ class SmsDraftModel {
       txType: TransactionType.values.firstWhere(
         (e) => e.name == map['tx_type'],
         orElse: () => TransactionType.expense,
+      ),
+      kind: DraftKind.values.firstWhere(
+        (e) => e.name == map['draft_kind'],
+        orElse: () => DraftKind.expense,
       ),
       category: map['category'] as String? ?? 'Other',
       walletName: map['wallet_name'] as String? ?? 'Cash',

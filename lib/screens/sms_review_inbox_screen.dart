@@ -7,6 +7,7 @@ import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../models/sms_draft_model.dart';
 import '../models/transaction_model.dart';
+import '../models/wallet_model.dart';
 import '../providers/settings_provider.dart';
 import '../providers/sms_draft_provider.dart';
 import '../providers/transaction_provider.dart';
@@ -14,8 +15,20 @@ import '../providers/wallet_provider.dart';
 
 /// Review inbox: every captured bank SMS appears here as an editable draft.
 /// Nothing becomes a real transaction until the user taps Save.
-class SmsReviewInboxScreen extends StatelessWidget {
+class SmsReviewInboxScreen extends StatefulWidget {
   const SmsReviewInboxScreen({super.key});
+
+  @override
+  State<SmsReviewInboxScreen> createState() => _SmsReviewInboxScreenState();
+}
+
+class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Drain anything the receiver queued since the last import.
+    context.read<SmsDraftProvider>().refresh();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,17 +68,48 @@ class SmsReviewInboxScreen extends StatelessWidget {
                               color: Theme.of(context).textTheme.bodySmall?.color),
                         ),
                       ),
-                      _SaveAllButton(onSaved: () {
+                      _SaveAllButton(onSaved: () async {
+                        final smsProvider =
+                            context.read<SmsDraftProvider>();
+                        final txProvider =
+                            context.read<TransactionProvider>();
+                        final walletProvider =
+                            context.read<WalletProvider>();
+                        final messenger = ScaffoldMessenger.of(context);
                         var count = 0;
+                        var transfers = 0;
                         for (final d in pending) {
-                          context
-                              .read<TransactionProvider>()
-                              .addTransaction(provider.toTransaction(d));
-                          provider.markSaved(d.id!);
+                          if (d.isWithdrawal) {
+                            final wallets = walletProvider.wallets;
+                            final from = SmsDraftProvider.bestBankWallet(
+                                wallets, d.bank);
+                            final to = SmsDraftProvider.bestCashWallet(wallets);
+                            if (from != null &&
+                                to != null &&
+                                from.id != to.id) {
+                              await walletProvider.transferBetweenWallets(
+                                fromId: from.id!,
+                                toId: to.id!,
+                                amount: d.amount,
+                                date: d.transactionDate ?? DateTime.now(),
+                                note: 'Auto-captured from ${d.bank} SMS (withdrawal)',
+                              );
+                              transfers++;
+                            } else {
+                              await txProvider.addTransaction(smsProvider
+                                  .toTransaction(d)
+                                  .copyWith(walletName: from?.name ?? 'Cash'));
+                            }
+                          } else {
+                            await txProvider.addTransaction(
+                                smsProvider.toTransaction(d));
+                          }
+                          await smsProvider.markSaved(d.id!);
                           count++;
                         }
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('$count transaction(s) saved',
+                        messenger.showSnackBar(SnackBar(
+                          content: Text(
+                              '$count saved · $transfers as transfer(s)',
                               style: GoogleFonts.poppins(fontSize: 13)),
                           backgroundColor: AppColors.primary,
                           behavior: SnackBarBehavior.floating,
@@ -143,7 +187,12 @@ class _DraftTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = draft.txType == TransactionType.income;
-    final accent = isIncome ? AppColors.income : AppColors.expense;
+    final isWithdrawal = draft.isWithdrawal;
+    final accent = isIncome
+        ? AppColors.income
+        : isWithdrawal
+            ? AppColors.primary
+            : AppColors.expense;
     final symbol = context.watch<SettingsProvider>().currencySymbol;
 
     return GestureDetector(
@@ -168,11 +217,15 @@ class _DraftTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: accent.withOpacity(0.12),
+                color: accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                isWithdrawal
+                    ? Icons.swap_horiz_rounded
+                    : isIncome
+                        ? Icons.arrow_downward_rounded
+                        : Icons.arrow_upward_rounded,
                 color: accent,
                 size: 20,
               ),
@@ -190,6 +243,26 @@ class _DraftTile extends StatelessWidget {
                   const SizedBox(height: 3),
                   Row(
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          isWithdrawal
+                              ? 'Withdrawal'
+                              : isIncome
+                                  ? 'Income'
+                                  : 'Expense',
+                          style: GoogleFonts.poppins(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: accent),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
                       Text('${draft.bank} · ${draft.category}',
                           style: GoogleFonts.poppins(
                               fontSize: 11,
@@ -205,7 +278,9 @@ class _DraftTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${isIncome ? '+' : '-'}$symbol ${CurrencyFormatter.format(draft.amount)}',
+                  isWithdrawal
+                      ? '$symbol ${CurrencyFormatter.format(draft.amount)}'
+                      : '${isIncome ? '+' : '-'}$symbol ${CurrencyFormatter.format(draft.amount)}',
                   style: GoogleFonts.poppins(
                       fontSize: 14, fontWeight: FontWeight.w700, color: accent),
                 ),
@@ -244,9 +319,12 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
   late final TextEditingController _titleController;
   late final TextEditingController _amountController;
   late TransactionType _type;
+  late DraftKind _kind;
   late String _category;
   late String _wallet;
   late DateTime? _date;
+  int? _fromWalletId;
+  int? _toWalletId;
   bool _saving = false;
 
   @override
@@ -256,6 +334,7 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
     _amountController =
         TextEditingController(text: widget.draft.amount.toStringAsFixed(2));
     _type = widget.draft.txType;
+    _kind = widget.draft.kind;
     _category = widget.draft.category;
     _wallet = widget.draft.walletName;
     _date = widget.draft.transactionDate;
@@ -306,18 +385,55 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
           : _titleController.text.trim(),
       amount: amount,
       txType: _type,
+      kind: _kind,
       category: _category,
-      walletName: _wallet,
+      walletName: _kind == DraftKind.withdrawal ? null : _wallet,
       transactionDate: _date,
     );
 
-    await context
-        .read<TransactionProvider>()
-        .addTransaction(provider.toTransaction(updated));
-    await provider.markSaved(widget.draft.id!);
+    if (_kind == DraftKind.withdrawal) {
+      final walletProvider = context.read<WalletProvider>();
+      final wallets = walletProvider.wallets;
+      final from = _walletById(wallets, _fromWalletId) ??
+          SmsDraftProvider.bestBankWallet(wallets, widget.draft.bank);
+      final to = _walletById(wallets, _toWalletId) ??
+          SmsDraftProvider.bestCashWallet(wallets);
+      if (from == null || to == null || from.id == to.id) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(from == null || to == null
+              ? 'Add the bank and cash wallets first.'
+              : 'Choose two different wallets.'),
+          backgroundColor: AppColors.expense,
+        ));
+        return;
+      }
+      await walletProvider.transferBetweenWallets(
+        fromId: from.id!,
+        toId: to.id!,
+        amount: amount,
+        date: _date ?? DateTime.now(),
+        note:
+            'Auto-captured from ${widget.draft.bank} SMS (withdrawal)',
+      );
+      await provider.markSaved(widget.draft.id!);
+    } else {
+      await context
+          .read<TransactionProvider>()
+          .addTransaction(provider.toTransaction(updated));
+      await provider.markSaved(widget.draft.id!);
+    }
 
     if (!mounted) return;
     Navigator.pop(context);
+  }
+
+  WalletModel? _walletById(List<WalletModel> wallets, int? id) {
+    if (id == null) return null;
+    for (final w in wallets) {
+      if (w.id == id) return w;
+    }
+    return null;
   }
 
   Future<void> _dismiss() async {
@@ -334,6 +450,11 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
     final wallets = context.watch<WalletProvider>().wallets;
     final walletNames =
         wallets.map((w) => w.name).toList()..add(_wallet);
+    final isWithdrawal = _kind == DraftKind.withdrawal;
+    final fromWallet = _walletById(wallets, _fromWalletId) ??
+        SmsDraftProvider.bestBankWallet(wallets, widget.draft.bank);
+    final toWallet = _walletById(wallets, _toWalletId) ??
+        SmsDraftProvider.bestCashWallet(wallets);
 
     return Container(
       decoration: BoxDecoration(
@@ -377,15 +498,18 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                 ),
                 const SizedBox(height: 8),
 
-                // Type toggle
-                _TypeToggle(
-                  type: _type,
-                  onChange: (t) => setState(() {
-                    _type = t;
-                    if (!_categoryOptions().contains(_category)) {
-                      _category = _type == TransactionType.income
-                          ? 'Other'
-                          : 'Other';
+                // Kind selector
+                _KindSelector(
+                  kind: _kind,
+                  onChange: (k) => setState(() {
+                    _kind = k;
+                    _type = k == DraftKind.income
+                        ? TransactionType.income
+                        : TransactionType.expense;
+                    if (k == DraftKind.withdrawal) {
+                      _category = 'Other';
+                    } else if (!_categoryOptions().contains(_category)) {
+                      _category = 'Other';
                     }
                   }),
                 ),
@@ -430,20 +554,50 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                 ),
                 const SizedBox(height: 14),
 
-                _Label('Wallet'),
-                const SizedBox(height: 6),
-                DropdownButtonFormField<String>(
-                  value: walletNames.contains(_wallet) ? _wallet : null,
-                  isExpanded: true,
-                  decoration: _inputDecoration('Wallet', borderColor, isDark),
-                  style: GoogleFonts.poppins(fontSize: 14),
-                  items: walletNames
-                      .map((w) => DropdownMenuItem(value: w, child: Text(w)))
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) setState(() => _wallet = v);
-                  },
-                ),
+                if (isWithdrawal) ...[
+                  _Label('From wallet (${widget.draft.bank})'),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<int>(
+                    value: fromWallet?.id,
+                    isExpanded: true,
+                    decoration: _inputDecoration('Bank wallet', borderColor, isDark),
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    items: wallets
+                        .map((w) =>
+                            DropdownMenuItem(value: w.id, child: Text(w.name)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _fromWalletId = v),
+                  ),
+                  const SizedBox(height: 14),
+                  _Label('To wallet (Cash)'),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<int>(
+                    value: toWallet?.id,
+                    isExpanded: true,
+                    decoration: _inputDecoration('Cash wallet', borderColor, isDark),
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    items: wallets
+                        .map((w) =>
+                            DropdownMenuItem(value: w.id, child: Text(w.name)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _toWalletId = v),
+                  ),
+                ] else ...[
+                  _Label('Wallet'),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    value: walletNames.contains(_wallet) ? _wallet : null,
+                    isExpanded: true,
+                    decoration: _inputDecoration('Wallet', borderColor, isDark),
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    items: walletNames
+                        .map((w) => DropdownMenuItem(value: w, child: Text(w)))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) setState(() => _wallet = v);
+                    },
+                  ),
+                ],
                 const SizedBox(height: 14),
 
                 _Label('Date'),
@@ -533,13 +687,25 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
 
 // ─── Small widgets ─────────────────────────────────────────────────────────────
 
-class _TypeToggle extends StatelessWidget {
-  final TransactionType type;
-  final ValueChanged<TransactionType> onChange;
-  const _TypeToggle({required this.type, required this.onChange});
+class _KindSelector extends StatelessWidget {
+  final DraftKind kind;
+  final ValueChanged<DraftKind> onChange;
+  const _KindSelector({required this.kind, required this.onChange});
 
   @override
   Widget build(BuildContext context) {
+    Widget option(DraftKind k, String label, IconData icon, Color color) {
+      return Expanded(
+        child: _KindButton(
+          label: label,
+          icon: icon,
+          color: color,
+          selected: kind == k,
+          onTap: () => onChange(k),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -550,38 +716,27 @@ class _TypeToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _TypeButton(
-              label: 'Expense',
-              icon: Icons.arrow_upward_rounded,
-              color: AppColors.expense,
-              selected: type == TransactionType.expense,
-              onTap: () => onChange(TransactionType.expense),
-            ),
-          ),
+          option(DraftKind.expense, 'Expense', Icons.arrow_upward_rounded,
+              AppColors.expense),
           const SizedBox(width: 4),
-          Expanded(
-            child: _TypeButton(
-              label: 'Income',
-              icon: Icons.arrow_downward_rounded,
-              color: AppColors.income,
-              selected: type == TransactionType.income,
-              onTap: () => onChange(TransactionType.income),
-            ),
-          ),
+          option(DraftKind.withdrawal, 'Withdraw', Icons.swap_horiz_rounded,
+              AppColors.primary),
+          const SizedBox(width: 4),
+          option(DraftKind.income, 'Income', Icons.arrow_downward_rounded,
+              AppColors.income),
         ],
       ),
     );
   }
 }
 
-class _TypeButton extends StatelessWidget {
+class _KindButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final Color color;
   final bool selected;
   final VoidCallback onTap;
-  const _TypeButton({
+  const _KindButton({
     required this.label,
     required this.icon,
     required this.color,
@@ -597,10 +752,10 @@ class _TypeButton extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.14) : Colors.transparent,
+          color: selected ? color.withValues(alpha: 0.14) : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: selected ? color.withOpacity(0.5) : Colors.transparent,
+            color: selected ? color.withValues(alpha: 0.5) : Colors.transparent,
           ),
         ),
         child: Row(
@@ -610,9 +765,11 @@ class _TypeButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(label,
                 style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: selected ? color : Theme.of(context).textTheme.bodySmall?.color)),
+                    color: selected
+                        ? color
+                        : Theme.of(context).textTheme.bodySmall?.color)),
           ],
         ),
       ),

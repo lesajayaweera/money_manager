@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -7,9 +8,12 @@ import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
 import '../main_scaffold.dart';
 import '../models/category_model.dart';
+import '../models/sms_draft_model.dart';
 import '../models/transaction_model.dart';
+import '../models/wallet_model.dart';
 import '../providers/category_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/sms_draft_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
 import 'add_transaction_screen.dart';
@@ -17,6 +21,7 @@ import 'create_budget_screen.dart';
 import 'goals_screen.dart';
 import 'lends_borrowed_screen.dart';
 import 'quick_add_transaction_sheet.dart';
+import 'sms_review_inbox_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -35,6 +40,10 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TransactionProvider>().loadAll();
+      // Non-blocking: drain any SMS captured since the last session so the
+      // dashboard badge shows up-to-date pending drafts immediately.
+      final sms = context.read<SmsDraftProvider>();
+      if (sms.enabled) sms.refresh();
     });
   }
 
@@ -63,6 +72,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                   _BalanceCard(summary: provider.summary),
                   const SizedBox(height: 20),
                   _StatsGrid(summary: provider.summary),
+                  // SMS Drafts banner — visible only when pending drafts exist.
+                  const _SmsDraftsBannerCard(),
                   const SizedBox(height: 24),
                   _RecentTransactionsSection(
                     transactions: provider.recentTransactions,
@@ -1392,6 +1403,962 @@ class _AddTransactionSheet extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+// ─── SMS Drafts Banner Card ────────────────────────────────────────────────────
+//
+// Shows on the dashboard whenever there are pending SMS-captured drafts.
+// Expands inline to show up to 3 mini tiles; tapping a tile opens the full
+// edit sheet without leaving the dashboard. "View All" navigates to the
+// full SmsReviewInboxScreen.
+
+class _SmsDraftsBannerCard extends StatefulWidget {
+  const _SmsDraftsBannerCard();
+
+  @override
+  State<_SmsDraftsBannerCard> createState() => _SmsDraftsBannerCardState();
+}
+
+class _SmsDraftsBannerCardState extends State<_SmsDraftsBannerCard> {
+  bool _expanded = false;
+
+  void _toggleExpand() => setState(() => _expanded = !_expanded);
+
+  void _openEditSheet(BuildContext context, SmsDraftModel draft) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: _DashboardDraftEditSheet(draft: draft),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final smsProvider = context.watch<SmsDraftProvider>();
+    final pending = smsProvider.pendingDrafts;
+
+    // Banner only visible when SMS capture is on AND there are pending drafts.
+    if (!smsProvider.enabled || pending.isEmpty) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? AppColors.darkSurface : Colors.white;
+    final borderColor = isDark ? AppColors.darkDivider : Colors.grey.shade200;
+    final previewDrafts = pending.take(3).toList();
+
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border(
+              left: BorderSide(color: AppColors.primary, width: 4),
+              top: BorderSide(color: borderColor),
+              right: BorderSide(color: borderColor),
+              bottom: BorderSide(color: borderColor),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Header row ────────────────────────────────────────────────
+              InkWell(
+                onTap: _toggleExpand,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                  bottom: Radius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      // Badge icon with count overlay
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(Icons.sms_rounded,
+                                color: AppColors.primary, size: 20),
+                          ),
+                          Positioned(
+                            right: -4,
+                            top: -4,
+                            child: Container(
+                              width: 18,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                color: AppColors.expense,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: cardColor, width: 2),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${pending.length > 9 ? '9+' : pending.length}',
+                                style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${pending.length} SMS Transaction${pending.length == 1 ? '' : 's'}',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.color),
+                            ),
+                            Text(
+                              'Tap to review & save',
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      AnimatedRotation(
+                        turns: _expanded ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(Icons.keyboard_arrow_down_rounded,
+                            size: 22,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Expandable draft list ─────────────────────────────────────
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 250),
+                firstCurve: Curves.easeOut,
+                secondCurve: Curves.easeIn,
+                crossFadeState: _expanded
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                firstChild: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Divider(height: 1, thickness: 1, color: borderColor),
+                    ...previewDrafts.map((draft) => _MiniDraftTile(
+                          draft: draft,
+                          onTap: () => _openEditSheet(context, draft),
+                        )),
+                    if (pending.length > 3)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                        child: Text(
+                          '+ ${pending.length - 3} more drafts',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 42,
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const SmsReviewInboxScreen(),
+                            ),
+                          ),
+                          icon: const Icon(Icons.inbox_rounded, size: 18),
+                          label: Text(
+                              'View All ${pending.length} Drafts',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                secondChild: const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Mini Draft Tile ──────────────────────────────────────────────────────────
+
+class _MiniDraftTile extends StatelessWidget {
+  final SmsDraftModel draft;
+  final VoidCallback onTap;
+  const _MiniDraftTile({required this.draft, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isIncome = draft.txType == TransactionType.income;
+    final isWithdrawal = draft.isWithdrawal;
+    final accent = isIncome
+        ? AppColors.income
+        : isWithdrawal
+            ? AppColors.primary
+            : AppColors.expense;
+    final symbol = context.watch<SettingsProvider>().currencySymbol;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark ? AppColors.darkDivider : Colors.grey.shade100;
+
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: borderColor, width: 1)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(
+                isWithdrawal
+                    ? Icons.swap_horiz_rounded
+                    : isIncome
+                        ? Icons.arrow_downward_rounded
+                        : Icons.arrow_upward_rounded,
+                color: accent,
+                size: 16,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    draft.title.isEmpty ? draft.bank : draft.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                        fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    '${draft.bank} · ${draft.category}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  isWithdrawal
+                      ? '$symbol ${CurrencyFormatter.format(draft.amount)}'
+                      : '${isIncome ? '+' : '-'}$symbol ${CurrencyFormatter.format(draft.amount)}',
+                  style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: accent),
+                ),
+                Text(
+                  draft.transactionDate == null
+                      ? 'Unknown date'
+                      : CurrencyFormatter.shortDate(draft.transactionDate!),
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 6),
+            const Icon(Icons.chevron_right_rounded,
+                size: 18, color: AppColors.textHint),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Dashboard Inline Draft Edit Sheet ───────────────────────────────────────
+
+class _DashboardDraftEditSheet extends StatefulWidget {
+  final SmsDraftModel draft;
+  const _DashboardDraftEditSheet({required this.draft});
+
+  @override
+  State<_DashboardDraftEditSheet> createState() =>
+      _DashboardDraftEditSheetState();
+}
+
+class _DashboardDraftEditSheetState
+    extends State<_DashboardDraftEditSheet> {
+  late final TextEditingController _titleCtrl;
+  late final TextEditingController _amountCtrl;
+  late TransactionType _type;
+  late DraftKind _kind;
+  late String _category;
+  late String _wallet;
+  late DateTime? _date;
+  int? _fromWalletId;
+  int? _toWalletId;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleCtrl = TextEditingController(text: widget.draft.title);
+    _amountCtrl = TextEditingController(
+        text: widget.draft.amount.toStringAsFixed(2));
+    _type = widget.draft.txType;
+    _kind = widget.draft.kind;
+    _category = widget.draft.category;
+    _wallet = widget.draft.walletName;
+    _date = widget.draft.transactionDate;
+  }
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    _amountCtrl.dispose();
+    super.dispose();
+  }
+
+  List<String> _categoryOptions() {
+    const incomeNames = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
+    const expenseNames = [
+      'Food', 'Transport', 'Bills', 'Health', 'Education',
+      'Entertainment', 'Shopping', 'Other',
+    ];
+    final names = _type == TransactionType.income
+        ? List<String>.from(incomeNames)
+        : List<String>.from(expenseNames);
+    if (!names.contains(_category)) names.add(_category);
+    return names;
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date ?? now,
+      firstDate: DateTime(now.year - 1),
+      lastDate: now,
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
+  WalletModel? _walletById(List<WalletModel> wallets, int? id) {
+    if (id == null) return null;
+    for (final w in wallets) {
+      if (w.id == id) return w;
+    }
+    return null;
+  }
+
+  Future<void> _save() async {
+    final amount =
+        double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0;
+    if (amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Enter a valid amount.',
+            style: GoogleFonts.poppins(fontSize: 13)),
+        backgroundColor: AppColors.expense,
+      ));
+      return;
+    }
+    setState(() => _saving = true);
+
+    final smsProvider = context.read<SmsDraftProvider>();
+    final txProvider = context.read<TransactionProvider>();
+    final walletProvider = context.read<WalletProvider>();
+    final updated = widget.draft.copyWith(
+      title: _titleCtrl.text.trim().isEmpty
+          ? widget.draft.bank
+          : _titleCtrl.text.trim(),
+      amount: amount,
+      txType: _type,
+      kind: _kind,
+      category: _category,
+      walletName: _kind == DraftKind.withdrawal ? null : _wallet,
+      transactionDate: _date,
+    );
+
+    if (_kind == DraftKind.withdrawal) {
+      final wallets = walletProvider.wallets;
+      final from = _walletById(wallets, _fromWalletId) ??
+          SmsDraftProvider.bestBankWallet(wallets, widget.draft.bank);
+      final to = _walletById(wallets, _toWalletId) ??
+          SmsDraftProvider.bestCashWallet(wallets);
+      if (from == null || to == null || from.id == to.id) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(from == null || to == null
+              ? 'Add the bank and cash wallets first.'
+              : 'Choose two different wallets.'),
+          backgroundColor: AppColors.expense,
+        ));
+        return;
+      }
+      await walletProvider.transferBetweenWallets(
+        fromId: from.id!,
+        toId: to.id!,
+        amount: amount,
+        date: _date ?? DateTime.now(),
+        note: 'Auto-captured from ${widget.draft.bank} SMS (withdrawal)',
+      );
+      await smsProvider.markSaved(widget.draft.id!);
+    } else {
+      await txProvider.addTransaction(smsProvider.toTransaction(updated));
+      await smsProvider.markSaved(widget.draft.id!);
+    }
+    // Refresh the transactions list so the Recent Transactions section updates.
+    if (mounted) txProvider.loadAll();
+    if (!mounted) return;
+    Navigator.pop(context);
+  }
+
+  Future<void> _dismiss() async {
+    await context.read<SmsDraftProvider>().dismissDraft(widget.draft.id!);
+    if (mounted) Navigator.pop(context);
+  }
+
+  InputDecoration _inputDec(String hint, Color borderColor, bool isDark) =>
+      InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.poppins(fontSize: 13),
+        isDense: true,
+        filled: true,
+        fillColor: isDark ? AppColors.darkSurface : Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderColor)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderColor)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.primary, width: 1.5)),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final borderColor = isDark ? AppColors.darkDivider : Colors.grey.shade200;
+    final symbol = context.watch<SettingsProvider>().currencySymbol;
+    final wallets = context.watch<WalletProvider>().wallets;
+    final walletNames = wallets.map((w) => w.name).toList();
+    if (!walletNames.contains(_wallet)) walletNames.add(_wallet);
+    final isWithdrawal = _kind == DraftKind.withdrawal;
+    final fromWallet = _walletById(wallets, _fromWalletId) ??
+        SmsDraftProvider.bestBankWallet(wallets, widget.draft.bank);
+    final toWallet = _walletById(wallets, _toWalletId) ??
+        SmsDraftProvider.bestCashWallet(wallets);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: borderColor,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Header
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Review SMS Draft',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700)),
+                          Text(
+                            'From ${widget.draft.bank} · ${widget.draft.transactionDate == null ? 'Unknown date' : CurrencyFormatter.shortDate(widget.draft.transactionDate!)}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+
+                // Raw SMS snippet (privacy-redacted)
+                if (widget.draft.rawBody.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkSurface2
+                          : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.sms_outlined,
+                            size: 14,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            widget.draft.rawBody,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.sourceCodePro(
+                              fontSize: 10,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.color,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 14),
+
+                // Amount display
+                Center(
+                  child: Text(
+                    '${isWithdrawal ? '' : _type == TransactionType.income ? '+' : '-'}$symbol ${CurrencyFormatter.format(double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? widget.draft.amount)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      color: _kind == DraftKind.income
+                          ? AppColors.income
+                          : _kind == DraftKind.withdrawal
+                              ? AppColors.primary
+                              : AppColors.expense,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // Kind selector
+                _DashboardKindSelector(
+                  kind: _kind,
+                  onChange: (k) => setState(() {
+                    _kind = k;
+                    _type = k == DraftKind.income
+                        ? TransactionType.income
+                        : TransactionType.expense;
+                    if (k == DraftKind.withdrawal) {
+                      _category = 'Other';
+                    } else if (!_categoryOptions().contains(_category)) {
+                      _category = 'Other';
+                    }
+                  }),
+                ),
+                const SizedBox(height: 14),
+
+                // Title
+                Text('Title',
+                    style: GoogleFonts.poppins(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _titleCtrl,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  decoration: _inputDec(
+                      'Merchant / description', borderColor, isDark),
+                ),
+                const SizedBox(height: 14),
+
+                // Amount (editable)
+                Text('Amount',
+                    style: GoogleFonts.poppins(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _amountCtrl,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d*'))
+                  ],
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  onChanged: (_) => setState(() {}),
+                  decoration:
+                      _inputDec('$symbol 0.00', borderColor, isDark)
+                          .copyWith(prefixText: '$symbol  '),
+                ),
+                const SizedBox(height: 14),
+
+                // Category chips
+                if (!isWithdrawal) ...[
+                  Text('Category',
+                      style: GoogleFonts.poppins(
+                          fontSize: 12, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _categoryOptions()
+                        .map((c) => GestureDetector(
+                              onTap: () => setState(() => _category = c),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: c == _category
+                                      ? AppColors.primary
+                                          .withValues(alpha: 0.12)
+                                      : isDark
+                                          ? AppColors.darkSurface2
+                                          : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: c == _category
+                                        ? AppColors.primary
+                                            .withValues(alpha: 0.5)
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                                child: Text(
+                                  c,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: c == _category
+                                        ? AppColors.primary
+                                        : Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.color,
+                                  ),
+                                ),
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                // Wallet / transfer pickers
+                if (isWithdrawal) ...[
+                  Text('From wallet (${widget.draft.bank})',
+                      style: GoogleFonts.poppins(
+                          fontSize: 12, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<int>(
+                    value: fromWallet?.id,
+                    isExpanded: true,
+                    decoration:
+                        _inputDec('Bank wallet', borderColor, isDark),
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    items: wallets
+                        .map((w) => DropdownMenuItem(
+                            value: w.id, child: Text(w.name)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _fromWalletId = v),
+                  ),
+                  const SizedBox(height: 14),
+                  Text('To wallet (Cash)',
+                      style: GoogleFonts.poppins(
+                          fontSize: 12, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<int>(
+                    value: toWallet?.id,
+                    isExpanded: true,
+                    decoration:
+                        _inputDec('Cash wallet', borderColor, isDark),
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    items: wallets
+                        .map((w) => DropdownMenuItem(
+                            value: w.id, child: Text(w.name)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _toWalletId = v),
+                  ),
+                  const SizedBox(height: 14),
+                ] else ...[
+                  Text('Wallet',
+                      style: GoogleFonts.poppins(
+                          fontSize: 12, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    value: walletNames.contains(_wallet) ? _wallet : null,
+                    isExpanded: true,
+                    decoration: _inputDec('Wallet', borderColor, isDark),
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    items: walletNames
+                        .map((w) =>
+                            DropdownMenuItem(value: w, child: Text(w)))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) setState(() => _wallet = v);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                // Date picker
+                Text('Date',
+                    style: GoogleFonts.poppins(
+                        fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                GestureDetector(
+                  onTap: _pickDate,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today_rounded,
+                            size: 16, color: AppColors.textSecondary),
+                        const SizedBox(width: 10),
+                        Text(
+                          _date == null
+                              ? 'Now'
+                              : CurrencyFormatter.shortDate(_date!),
+                          style: GoogleFonts.poppins(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Save / Dismiss
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 50,
+                        child: OutlinedButton(
+                          onPressed: _saving ? null : _dismiss,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.expense,
+                            side: const BorderSide(color: AppColors.expense),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text('Dismiss',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _saving ? null : _save,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: _saving
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2))
+                              : Text('Save Transaction',
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Dashboard Kind Selector ──────────────────────────────────────────────────
+
+class _DashboardKindSelector extends StatelessWidget {
+  final DraftKind kind;
+  final ValueChanged<DraftKind> onChange;
+  const _DashboardKindSelector({required this.kind, required this.onChange});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget option(DraftKind k, String label, IconData icon, Color color) {
+      final selected = kind == k;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => onChange(k),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: selected
+                  ? color.withValues(alpha: 0.14)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: selected
+                    ? color.withValues(alpha: 0.5)
+                    : Colors.transparent,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 16, color: color),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: selected
+                          ? color
+                          : Theme.of(context).textTheme.bodySmall?.color),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.darkSurface
+            : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          option(DraftKind.expense, 'Expense',
+              Icons.arrow_upward_rounded, AppColors.expense),
+          const SizedBox(width: 4),
+          option(DraftKind.withdrawal, 'Withdraw',
+              Icons.swap_horiz_rounded, AppColors.primary),
+          const SizedBox(width: 4),
+          option(DraftKind.income, 'Income',
+              Icons.arrow_downward_rounded, AppColors.income),
+        ],
       ),
     );
   }

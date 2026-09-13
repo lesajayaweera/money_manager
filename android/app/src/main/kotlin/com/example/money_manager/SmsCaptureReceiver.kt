@@ -38,7 +38,11 @@ class SmsCaptureReceiver : BroadcastReceiver() {
                     val sender =
                         message.displayOriginatingAddress ?: message.originatingAddress ?: ""
                     if (!matchesWhitelist(sender, whitelist)) continue
-                    appendCapture(prefs, sender, message.messageBody ?: "")
+                    // Use the message's own timestamp so the queue entry and the
+                    // inbox catch-up scan produce identical dedup keys.
+                    appendCapture(
+                        prefs, sender, message.messageBody ?: "", message.timestampMillis
+                    )
                 }
             } catch (t: Throwable) {
                 Log.w(TAG, "SMS capture failed", t)
@@ -57,13 +61,15 @@ class SmsCaptureReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun appendCapture(prefs: SharedPreferences, sender: String, body: String) {
+    private fun appendCapture(
+        prefs: SharedPreferences, sender: String, body: String, timestampMillis: Long
+    ) {
         val raw = prefs.getString(KEY_PENDING, null)
         val array = if (raw.isNullOrBlank()) JSONArray() else JSONArray(raw)
         val entry = JSONObject()
             .put("sender", sender)
             .put("body", body)
-            .put("date", System.currentTimeMillis())
+            .put("date", timestampMillis)
         array.put(entry)
         while (array.length() > MAX_PENDING) {
             array.remove(0)

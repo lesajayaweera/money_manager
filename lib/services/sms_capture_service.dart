@@ -91,4 +91,40 @@ class SmsCaptureService {
       return [];
     }
   }
+
+  /// Distinct SMS inbox senders with message counts, most frequent first.
+  /// Used to auto-detect banks and fill the whitelist. Requires READ_SMS.
+  static Future<List<Map<String, dynamic>>> discoverSenders() async {
+    try {
+      final result = await _channel
+          .invokeListMethod<Map<dynamic, dynamic>>('discoverSenders');
+      if (result == null) return [];
+      return result.map((e) => e.cast<String, dynamic>()).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Recent SMS from the whole inbox (any sender), newest first, capped at
+  /// [limit]. Used by the message-view screen to show bank messages plus the
+  /// senders that are filtered out. Requires READ_SMS.
+  static Future<List<Map<String, dynamic>>> getRecentMessages({
+    DateTime? since,
+    int limit = 200,
+  }) async {
+    try {
+      final result = await _channel.invokeListMethod<Map<dynamic, dynamic>>(
+        'getRecentMessages',
+        {
+          'since': (since ?? DateTime.now().subtract(const Duration(days: 7)))
+              .millisecondsSinceEpoch,
+          'limit': limit,
+        },
+      );
+      if (result == null) return [];
+      return result.map((e) => e.cast<String, dynamic>()).toList();
+    } catch (_) {
+      return [];
+    }
+  }
 }

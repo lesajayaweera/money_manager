@@ -13,7 +13,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 12;
+  static const int _dbVersion = 13;
   static const String _tableName = 'transactions';
   static const String _draftsTable = 'sms_drafts';
 
@@ -312,6 +312,13 @@ class DatabaseService {
         await _createSmsDraftsTable(db);
       } catch (_) {}
     }
+    if (oldVersion < 13) {
+      try {
+        await db.execute(
+          'ALTER TABLE $_draftsTable ADD COLUMN draft_kind TEXT NOT NULL DEFAULT \'expense\'',
+        );
+      } catch (_) {}
+    }
   }
 
   Future<void> _createSmsDraftsTable(Database db) async {
@@ -324,6 +331,7 @@ class DatabaseService {
         title TEXT NOT NULL DEFAULT '',
         amount REAL NOT NULL DEFAULT 0,
         tx_type TEXT NOT NULL,
+        draft_kind TEXT NOT NULL DEFAULT 'expense',
         category TEXT NOT NULL DEFAULT 'Other',
         wallet_name TEXT NOT NULL DEFAULT 'Cash',
         transaction_date TEXT,

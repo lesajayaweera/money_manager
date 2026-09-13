@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:money_manager/models/sms_draft_model.dart';
 import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/services/sms_parser.dart';
 
@@ -159,6 +160,45 @@ Hotline:94112462462''';
       expect(result.type, TransactionType.income);
       expect(result.category, 'Salary');
       expect(result.amount, 120000.00);
+    });
+  });
+
+  group('Kind classification', () {
+    test('ATM withdrawal e-Receipt becomes a withdrawal transfer', () {
+      final result = SmsParser.parse(
+        sender: 'HNB',
+        body: hnbReceipt,
+        receivedAt: DateTime(2026, 9, 9, 13, 11),
+      );
+      expect(result.matched, isTrue);
+      expect(result.kind, DraftKind.withdrawal);
+    });
+
+    test('salary credit becomes income', () {
+      final result = SmsParser.parse(
+        sender: 'HNB',
+        body: 'Salary credited to your account Rs 120,000.00.',
+        receivedAt: DateTime(2026, 9, 1, 9, 0),
+      );
+      expect(result.kind, DraftKind.income);
+    });
+
+    test('a purchase alert becomes an expense', () {
+      final result = SmsParser.parse(
+        sender: 'HNB',
+        body: hnbAlert,
+        receivedAt: DateTime(2026, 9, 12, 10, 6),
+      );
+      expect(result.kind, DraftKind.expense);
+    });
+  });
+
+  group('Bank detection helpers', () {
+    test('recognises known senders by canonical preset name', () {
+      expect(SmsParser.isKnownBankSender('HNB'), isTrue);
+      expect(SmsParser.bankNameForSender('HNB'), 'HNB');
+      expect(SmsParser.isKnownBankSender('abc-notabank'), isFalse);
+      expect(SmsParser.bankNameForSender(''), isNull);
     });
   });
 
