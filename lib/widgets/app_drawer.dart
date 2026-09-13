@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
+import '../providers/sms_draft_provider.dart';
 import '../screens/categories_screen.dart';
 import '../screens/financial_overview_screen.dart';
 import '../screens/goals_screen.dart';
@@ -8,7 +10,8 @@ import '../screens/lends_borrowed_screen.dart';
 import '../screens/monthly_plan_screen.dart';
 import '../screens/otn_screen.dart';
 import '../screens/settings_screen.dart';
-import '../main_scaffold.dart';
+import '../screens/sms_capture_screen.dart';
+import '../screens/sms_review_inbox_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -107,6 +110,24 @@ class AppDrawer extends StatelessWidget {
                   },
                 ),
                 _DrawerItem(
+                  icon: Icons.sms_rounded,
+                  title: 'Auto Capture',
+                  badge: context.watch<SmsDraftProvider>().pendingCount,
+                  onTap: () {
+                    Navigator.pop(context);
+                    final pending =
+                        context.read<SmsDraftProvider>().pendingCount;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => pending > 0
+                            ? const SmsReviewInboxScreen()
+                            : const SmsCaptureScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _DrawerItem(
                   icon: Icons.timer_outlined,
                   title: 'OTN Salary',
                   onTap: () {
@@ -146,11 +167,13 @@ class _DrawerItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
+  final int? badge;
 
   const _DrawerItem({
     required this.icon,
     required this.title,
     required this.onTap,
+    this.badge,
   });
 
   @override
@@ -165,6 +188,20 @@ class _DrawerItem extends StatelessWidget {
           color: Theme.of(context).textTheme.titleLarge?.color,
         ),
       ),
+      trailing: (badge != null && badge! > 0)
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$badge',
+                style: GoogleFonts.poppins(
+                    color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+            )
+          : null,
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
     );

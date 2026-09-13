@@ -14,6 +14,7 @@ import 'providers/lend_borrow_provider.dart';
 import 'providers/otn_provider.dart';
 import 'providers/salary_plan_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/sms_draft_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/wallet_provider.dart';
 import 'screens/splash_screen.dart';
@@ -79,6 +80,9 @@ class MoneyManagerApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => OtnProvider()..load(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SmsDraftProvider()..load(),
         ),
       ],
       child: Consumer<SettingsProvider>(

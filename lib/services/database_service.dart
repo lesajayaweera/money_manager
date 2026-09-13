@@ -6,14 +6,16 @@ import '../models/goal_model.dart';
 import '../models/lend_borrow_model.dart';
 import '../models/wallet_model.dart';
 import '../models/budget_model.dart';
+import '../models/sms_draft_model.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 11;
+  static const int _dbVersion = 12;
   static const String _tableName = 'transactions';
+  static const String _draftsTable = 'sms_drafts';
 
   Database? _db;
 
@@ -145,6 +147,8 @@ class DatabaseService {
         FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE
       )
     ''');
+
+    await _createSmsDraftsTable(db);
 
     // Seed with sample data
     await _seedSampleData(db);
@@ -303,6 +307,32 @@ class DatabaseService {
         ''');
       } catch (_) {}
     }
+    if (oldVersion < 12) {
+      try {
+        await _createSmsDraftsTable(db);
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _createSmsDraftsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS $_draftsTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender TEXT NOT NULL,
+        bank TEXT NOT NULL,
+        raw_body TEXT NOT NULL,
+        title TEXT NOT NULL DEFAULT '',
+        amount REAL NOT NULL DEFAULT 0,
+        tx_type TEXT NOT NULL,
+        category TEXT NOT NULL DEFAULT 'Other',
+        wallet_name TEXT NOT NULL DEFAULT 'Cash',
+        transaction_date TEXT,
+        status TEXT NOT NULL DEFAULT 'draft',
+        dedup_key TEXT NOT NULL UNIQUE,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<void> _seedSampleWallets(Database db) async {
@@ -876,5 +906,54 @@ class DatabaseService {
     final db = await database;
     await db.delete('budget_categories');
     await db.delete('budgets');
+  }
+
+  // ─── SMS Drafts CRUD ────────────────────────────────────────────────────────────
+
+  /// Inserts a draft, silently ignoring rows whose dedup_key already exists
+  /// (i.e. the same bank SMS was already captured and is saved or dismissed).
+  Future<int> insertSmsDraft(SmsDraftModel draft) async {
+    final db = await database;
+    return db.insert(_draftsTable, draft.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  Future<int> updateSmsDraft(SmsDraftModel draft) async {
+    final db = await database;
+    return db.update(_draftsTable, draft.toMap(),
+        where: 'id = ?', whereArgs: [draft.id]);
+  }
+
+  Future<void> markDraftStatus(int id, SmsDraftStatus status) async {
+    final db = await database;
+    await db.update(
+      _draftsTable,
+      {'status': status.name, 'updated_at': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<SmsDraftModel>> getSmsDrafts({SmsDraftStatus? status}) async {
+    final db = await database;
+    final rows = status == null
+        ? await db.query(_draftsTable, orderBy: 'created_at DESC')
+        : await db.query(_draftsTable,
+            where: 'status = ?', whereArgs: [status.name],
+            orderBy: 'created_at DESC');
+    return rows.map(SmsDraftModel.fromMap).toList();
+  }
+
+  Future<int> countSmsDraftsByStatus(SmsDraftStatus status) async {
+    final db = await database;
+    final result = await db.rawQuery(
+        'SELECT COUNT(*) as c FROM $_draftsTable WHERE status = ?',
+        [status.name]);
+    return (result.first['c'] as num).toInt();
+  }
+
+  Future<void> clearAllSmsDrafts() async {
+    final db = await database;
+    await db.delete(_draftsTable);
   }
 }
