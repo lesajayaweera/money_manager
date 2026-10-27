@@ -90,9 +90,7 @@ class _BudgetsScreenState extends State<BudgetsScreen>
         final bp = context.read<BudgetProvider>();
         final budget = bp.currentBudget;
         if (budget != null) {
-          await context
-              .read<SalaryPlanProvider>()
-              .updatePlanFromBudget(budget);
+          await context.read<SalaryPlanProvider>().updatePlanFromBudget(budget);
         }
       }
     }
@@ -117,8 +115,8 @@ class _BudgetsScreenState extends State<BudgetsScreen>
     final selectedMonth = budgetProvider.selectedMonth;
 
     // Is there a salary plan for the selected month?
-    final plan = planProvider.planForMonth(
-        selectedMonth.year, selectedMonth.month);
+    final plan =
+        planProvider.planForMonth(selectedMonth.year, selectedMonth.month);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -178,9 +176,13 @@ class _BudgetsScreenState extends State<BudgetsScreen>
               padding: EdgeInsets.zero,
             ),
             GestureDetector(
-              onTap: isCurrentMonth ? null : () {
-                context.read<BudgetProvider>().setSelectedMonth(DateTime.now());
-              },
+              onTap: isCurrentMonth
+                  ? null
+                  : () {
+                      context
+                          .read<BudgetProvider>()
+                          .setSelectedMonth(DateTime.now());
+                    },
               child: Text(
                 DateFormat('MMM yyyy').format(selectedMonth),
                 style: GoogleFonts.poppins(
@@ -324,7 +326,8 @@ class _NoBudgetView extends StatelessWidget {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: onCreateBudget,
-              icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+              icon:
+                  const Icon(Icons.add_rounded, color: Colors.white, size: 20),
               label: Text(
                 'Create Budget',
                 style: GoogleFonts.poppins(
@@ -570,8 +573,8 @@ class _HasBudgetView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.expense.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: AppColors.expense.withOpacity(0.25)),
+                    border:
+                        Border.all(color: AppColors.expense.withOpacity(0.25)),
                   ),
                   child: Row(
                     children: [
@@ -641,8 +644,7 @@ class _HasBudgetView extends StatelessWidget {
                   final pct = cat.allocatedAmount == 0
                       ? 0.0
                       : (catSpent / cat.allocatedAmount).clamp(0.0, 1.0);
-                  final catRemaining =
-                      (cat.allocatedAmount - catSpent);
+                  final catRemaining = (cat.allocatedAmount - catSpent);
 
                   return Padding(
                     padding: EdgeInsets.only(bottom: isLast ? 0 : 24),
@@ -670,8 +672,7 @@ class _HasBudgetView extends StatelessWidget {
                               color: color,
                               shape: BoxShape.circle,
                             ),
-                            child:
-                                Icon(icon, color: Colors.white, size: 22),
+                            child: Icon(icon, color: Colors.white, size: 22),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -736,28 +737,45 @@ class _HasBudgetView extends StatelessWidget {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      '${CurrencyFormatter.format(catSpent, symbol: symbol)} spent',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        color: catOver
-                                            ? AppColors.expense
-                                            : textSub,
-                                        fontWeight: catOver
-                                            ? FontWeight.w600
-                                            : FontWeight.w400,
+                                    Expanded(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          '${CurrencyFormatter.format(catSpent, symbol: symbol)} spent',
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 11,
+                                            color: catOver
+                                                ? AppColors.expense
+                                                : textSub,
+                                            fontWeight: catOver
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    Text(
-                                      catOver
-                                          ? '${CurrencyFormatter.format(catRemaining.abs(), symbol: symbol)} over'
-                                          : '${CurrencyFormatter.format(catRemaining, symbol: symbol)} left',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        color: catOver
-                                            ? AppColors.expense
-                                            : AppColors.income,
-                                        fontWeight: FontWeight.w500,
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          catOver
+                                              ? '${CurrencyFormatter.format(catRemaining.abs(), symbol: symbol)} over'
+                                              : '${CurrencyFormatter.format(catRemaining, symbol: symbol)} left',
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 11,
+                                            color: catOver
+                                                ? AppColors.expense
+                                                : AppColors.income,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -772,8 +790,7 @@ class _HasBudgetView extends StatelessWidget {
                                         color: isDark
                                             ? AppColors.darkDivider
                                             : dividerColor,
-                                        borderRadius:
-                                            BorderRadius.circular(4),
+                                        borderRadius: BorderRadius.circular(4),
                                       ),
                                     ),
                                     FractionallySizedBox(

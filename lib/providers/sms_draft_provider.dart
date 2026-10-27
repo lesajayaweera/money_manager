@@ -17,8 +17,10 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const String _sendersKey = 'sms_capture_senders';
   static const String _lastScanKey = 'sms_capture_last_scan';
   static const String _lastDetectKey = 'sms_capture_last_detect';
+
   /// Persisted flag: have we ever done a full-history import?
   static const String _historyScanKey = 'sms_capture_history_scanned';
+
   /// Persisted: comma-joined set of senders whose history was already imported.
   static const String _historyScannedSendersKey = 'sms_capture_history_senders';
 
@@ -65,7 +67,8 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
   String? get lastError => _lastError;
 
   List<SmsDraftModel> get pendingDrafts =>
-      _drafts.where((d) => d.isDraft).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      _drafts.where((d) => d.isDraft).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   int get pendingCount => pendingDrafts.length;
 
@@ -125,7 +128,8 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
           receivedAt: receivedAt,
         );
         if (result.matched) {
-          inserted += await _insertIfNew(result, sender: raw['sender'] as String? ?? '');
+          inserted += await _insertIfNew(result,
+              sender: raw['sender'] as String? ?? '');
         }
       }
       await SmsCaptureService.clearPendingCaptures();
@@ -148,7 +152,8 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
           receivedAt: receivedAt,
         );
         if (result.matched) {
-          inserted += await _insertIfNew(result, sender: raw['sender'] as String? ?? '');
+          inserted += await _insertIfNew(result,
+              sender: raw['sender'] as String? ?? '');
         }
       }
       await prefs.setInt(_lastScanKey, DateTime.now().millisecondsSinceEpoch);
@@ -178,11 +183,13 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  Future<int> _insertIfNew(SmsParseResult result, {required String sender}) async {
+  Future<int> _insertIfNew(SmsParseResult result,
+      {required String sender}) async {
     final draft = SmsDraftModel(
       sender: sender,
       bank: result.bank,
       rawBody: result.redactedBody,
+      originalBody: result.originalBody,
       title: result.title,
       amount: result.amount,
       txType: result.type,
@@ -192,7 +199,11 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
       dedupKey: result.dedupKey,
     );
     final id = await _db.insertSmsDraft(draft);
-    return id == -1 ? 0 : 1;
+    if (id == -1) {
+      await _db.backfillOriginalBody(result.dedupKey, result.originalBody);
+      return 0;
+    }
+    return 1;
   }
 
   // ── Bank discovery ───────────────────────────────────────────────────────────
@@ -235,8 +246,8 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// the merged list to the native receiver + inbox scanner.
   Future<void> autoMergeDetected() async {
     final toAdd = _detectedBanks
-        .where((b) => !_senders.any(
-            (s) => s.toLowerCase().trim() == b.toLowerCase().trim()))
+        .where((b) => !_senders
+            .any((s) => s.toLowerCase().trim() == b.toLowerCase().trim()))
         .toList();
     if (toAdd.isEmpty) return;
     _senders = List.unmodifiable([..._senders, ...toAdd]);
@@ -357,7 +368,42 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // ── Full history scan ────────────────────────────────────────────────────────
 
+  /// Analyses [messages] that the user manually selected from their inbox.
+  /// Each entry must have 'sender' (String), 'body' (String), and 'date' (int
+  /// epoch-ms) fields. The sender-whitelist gate is intentionally bypassed so
+  /// any message the user picks is examined regardless of its origin.
+  ///
+  /// Returns a record: (inserted, skipped) counts.
+  Future<({int inserted, int skipped})> analyzeSelectedMessages(
+    List<Map<String, dynamic>> messages,
+  ) async {
+    var inserted = 0;
+    var skipped = 0;
+    for (final raw in messages) {
+      final sender = raw['sender'] as String? ?? '';
+      final body = raw['body'] as String? ?? '';
+      final receivedAt = _epochToDate(raw['date']);
+      final result = SmsParser.parseIgnoringWhitelist(
+        sender: sender,
+        body: body,
+        receivedAt: receivedAt,
+      );
+      if (result.matched) {
+        final added = await _insertIfNew(result, sender: sender);
+        inserted += added;
+      } else {
+        skipped++;
+      }
+    }
+    if (inserted > 0) {
+      await _reloadDrafts();
+      notifyListeners();
+    }
+    return (inserted: inserted, skipped: skipped);
+  }
+
   /// Scans the entire SMS inbox from the beginning of time (or since a
+
   /// custom [since]) for all whitelisted senders and inserts every bank
   /// transaction found as a draft.
   ///
@@ -382,13 +428,13 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
           receivedAt: receivedAt,
         );
         if (result.matched) {
-          inserted += await _insertIfNew(
-              result, sender: msg['sender'] as String? ?? '');
+          inserted += await _insertIfNew(result,
+              sender: msg['sender'] as String? ?? '');
         }
         // Emit progress every 25 messages
         if (scanned % 25 == 0) {
-          _historyProgressCtrl.add(
-              (scanned: scanned, inserted: inserted, done: false));
+          _historyProgressCtrl
+              .add((scanned: scanned, inserted: inserted, done: false));
         }
       }
       // Mark full history as done
@@ -396,12 +442,12 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
       await prefs.setBool(_historyScanKey, true);
       await _reloadDrafts();
       notifyListeners();
-      _historyProgressCtrl.add(
-          (scanned: scanned, inserted: inserted, done: true));
+      _historyProgressCtrl
+          .add((scanned: scanned, inserted: inserted, done: true));
     } catch (e) {
       _lastError = e.toString();
-      _historyProgressCtrl.add(
-          (scanned: scanned, inserted: inserted, done: true));
+      _historyProgressCtrl
+          .add((scanned: scanned, inserted: inserted, done: true));
     } finally {
       _importingHistory = false;
       notifyListeners();
@@ -426,8 +472,8 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
 
       // Only scan senders that haven't had their history imported yet
       final toScan = bankSenders
-          .where((b) => !alreadyScanned.any(
-              (s) => s.toLowerCase().trim() == b.toLowerCase().trim()))
+          .where((b) => !alreadyScanned
+              .any((s) => s.toLowerCase().trim() == b.toLowerCase().trim()))
           .toList();
       if (toScan.isEmpty) {
         _importingHistory = false;
@@ -457,23 +503,22 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
           inserted += await _insertIfNew(result, sender: sender);
         }
         if (scanned % 25 == 0) {
-          _historyProgressCtrl.add(
-              (scanned: scanned, inserted: inserted, done: false));
+          _historyProgressCtrl
+              .add((scanned: scanned, inserted: inserted, done: false));
           notifyListeners();
         }
       }
       // Record these senders as history-scanned
       final nowScanned = {...alreadyScanned, ...toScan};
-      await prefs.setStringList(
-          _historyScannedSendersKey, nowScanned.toList());
+      await prefs.setStringList(_historyScannedSendersKey, nowScanned.toList());
       await _reloadDrafts();
       notifyListeners();
-      _historyProgressCtrl.add(
-          (scanned: scanned, inserted: inserted, done: true));
+      _historyProgressCtrl
+          .add((scanned: scanned, inserted: inserted, done: true));
     } catch (e) {
       _lastError = e.toString();
-      _historyProgressCtrl.add(
-          (scanned: scanned, inserted: inserted, done: true));
+      _historyProgressCtrl
+          .add((scanned: scanned, inserted: inserted, done: true));
     } finally {
       _importingHistory = false;
       notifyListeners();

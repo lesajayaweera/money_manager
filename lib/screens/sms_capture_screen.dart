@@ -74,6 +74,8 @@ class _SmsCaptureScreenState extends State<SmsCaptureScreen> {
   void _startHistoryScan() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
@@ -134,8 +136,9 @@ class _SmsCaptureScreenState extends State<SmsCaptureScreen> {
                     _DetectedBanksCard(
                       banks: provider.detectedBanks,
                       isScanning: provider.isImportingHistory,
-                      onRescan: () =>
-                          context.read<SmsDraftProvider>().detectBanks(force: true),
+                      onRescan: () => context
+                          .read<SmsDraftProvider>()
+                          .detectBanks(force: true),
                       onHistoryScan: () => _startHistoryScan(),
                       onTap: () => Navigator.push(
                         context,
@@ -159,7 +162,9 @@ class _SmsCaptureScreenState extends State<SmsCaptureScreen> {
                       children: [
                         _SectionRow(
                           icon: Icons.sms_rounded,
-                          iconColor: _hasPermission ? AppColors.income : AppColors.expense,
+                          iconColor: _hasPermission
+                              ? AppColors.income
+                              : AppColors.expense,
                           title: 'Read bank SMS',
                           subtitle: _hasPermission
                               ? 'Granted — capture is active'
@@ -265,8 +270,7 @@ class _SenderWhitelistState extends State<_SenderWhitelist> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor =
-        widget.isDark ? AppColors.darkSurface : Colors.white;
+    final bgColor = widget.isDark ? AppColors.darkSurface : Colors.white;
     final borderColor =
         widget.isDark ? AppColors.darkDivider : Colors.grey.shade200;
 
@@ -292,7 +296,8 @@ class _SenderWhitelistState extends State<_SenderWhitelist> {
               activeColor: AppColors.primary,
               dense: true,
               title: Text(presets[i],
-                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
+                  style: GoogleFonts.poppins(
+                      fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ],
           Divider(height: 1, thickness: 1, color: borderColor),
@@ -360,10 +365,13 @@ class _CustomSenderAdderState extends State<_CustomSenderAdder> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(id,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                             fontSize: 14, fontWeight: FontWeight.w600)),
                   ),
-                  _TinyButton(label: 'Remove', onTap: () => widget.onRemove(id)),
+                  _TinyButton(
+                      label: 'Remove', onTap: () => widget.onRemove(id)),
                 ],
               ),
             ),
@@ -393,7 +401,8 @@ class _CustomSenderAdderState extends State<_CustomSenderAdder> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                      borderSide:
+                          BorderSide(color: AppColors.primary, width: 1.5),
                     ),
                   ),
                 ),
@@ -583,10 +592,11 @@ class _ParseTesterState extends State<_ParseTester> {
       _resultText = !result.matched
           ? switch (result.skipReason) {
               null => 'Could not recognise a transaction.',
-              SmsSkipReason.notBankSender => 'Sender is not a whitelisted bank.',
-              SmsSkipReason.otpOrPromo => 'Blocked: looks like an OTP or promo.',
-              SmsSkipReason.notTransaction =>
-                'No transaction keywords found.',
+              SmsSkipReason.notBankSender =>
+                'Sender is not a whitelisted bank.',
+              SmsSkipReason.otpOrPromo =>
+                'Blocked: looks like an OTP or promo.',
+              SmsSkipReason.notTransaction => 'No transaction keywords found.',
               SmsSkipReason.notRecognised =>
                 'No amount found — cannot build a draft.',
             }
@@ -615,8 +625,7 @@ class _ParseTesterState extends State<_ParseTester> {
             maxLines: 4,
             style: GoogleFonts.poppins(fontSize: 13),
             decoration: InputDecoration(
-              hintText:
-                  'Paste a real bank SMS to verify on-device parsing…',
+              hintText: 'Paste a real bank SMS to verify on-device parsing…',
               hintStyle: GoogleFonts.poppins(fontSize: 13),
               filled: true,
               fillColor: isDark ? AppColors.darkSurface : Colors.white,
@@ -836,8 +845,7 @@ class _HistoryScanProgressSheet extends StatefulWidget {
       _HistoryScanProgressSheetState();
 }
 
-class _HistoryScanProgressSheetState
-    extends State<_HistoryScanProgressSheet> {
+class _HistoryScanProgressSheetState extends State<_HistoryScanProgressSheet> {
   int _scanned = 0;
   int _inserted = 0;
   bool _done = false;
@@ -898,8 +906,8 @@ class _HistoryScanProgressSheetState
                         color: AppColors.income.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child:
-                          Icon(Icons.check_rounded, color: AppColors.income, size: 36),
+                      child: Icon(Icons.check_rounded,
+                          color: AppColors.income, size: 36),
                     )
                   : Container(
                       key: const ValueKey('scanning'),

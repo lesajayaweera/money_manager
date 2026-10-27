@@ -63,7 +63,8 @@ class _WalletsScreenState extends State<WalletsScreen>
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                        color: Theme.of(context).textTheme.titleLarge?.color ??
+                            Colors.white,
                       ),
                     ),
                   ),
@@ -84,8 +85,8 @@ class _WalletsScreenState extends State<WalletsScreen>
                           padding: const EdgeInsets.only(bottom: 12),
                           child: _WalletTile(
                             wallet: provider.wallets[index],
-                            onTap: () => _openWalletDetail(
-                                provider.wallets[index]),
+                            onTap: () =>
+                                _openWalletDetail(provider.wallets[index]),
                           ),
                         ),
                         childCount: provider.wallets.length,
@@ -211,12 +212,18 @@ class _WalletSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Total Balance',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                        fontWeight: FontWeight.w500,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Total Balance',
+                        maxLines: 1,
+                        softWrap: false,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -250,12 +257,18 @@ class _WalletSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Active Wallets',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                        fontWeight: FontWeight.w500,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Active Wallets',
+                        maxLines: 1,
+                        softWrap: false,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -283,12 +296,18 @@ class _WalletSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'This Month Transfers',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                        fontWeight: FontWeight.w500,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'This Month Transfers',
+                        maxLines: 1,
+                        softWrap: false,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -296,7 +315,8 @@ class _WalletSummaryCard extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        CurrencyFormatter.formatCompact(provider.thisMonthTransfers,
+                        CurrencyFormatter.formatCompact(
+                            provider.thisMonthTransfers,
                             symbol: settings.currencySymbol),
                         style: GoogleFonts.poppins(
                           fontSize: 22,
@@ -364,10 +384,13 @@ class _WalletTile extends StatelessWidget {
                 children: [
                   Text(
                     wallet.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.titleLarge?.color ??
+                          Colors.white,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -376,9 +399,12 @@ class _WalletTile extends StatelessWidget {
                         ? '${CurrencyFormatter.format(wallet.balance, symbol: settings.currencySymbol)} due'
                         : CurrencyFormatter.format(wallet.balance,
                             symbol: settings.currencySymbol),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
                     ),
                   ),
                 ],
@@ -418,7 +444,8 @@ class _WalletTile extends StatelessWidget {
             // Chevron
             Icon(
               Icons.chevron_right_rounded,
-              color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
               size: 20,
             ),
           ],
@@ -465,7 +492,8 @@ class _EmptyWallets extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 6),
@@ -473,7 +501,8 @@ class _EmptyWallets extends StatelessWidget {
             'Add your first wallet to start\ntracking your money',
             style: GoogleFonts.poppins(
               fontSize: 13,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
             textAlign: TextAlign.center,
           ),

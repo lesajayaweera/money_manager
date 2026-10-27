@@ -34,8 +34,10 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
     super.initState();
     final s = context.read<OtnProvider>().settings;
     _basicController = TextEditingController(text: _num(s.basicSalary));
-    _otRateController = TextEditingController(text: _num(s.overtimeRatePerHour));
-    _workingDaysController = TextEditingController(text: '${s.workingDaysPerMonth}');
+    _otRateController =
+        TextEditingController(text: _num(s.overtimeRatePerHour));
+    _workingDaysController =
+        TextEditingController(text: '${s.workingDaysPerMonth}');
     _epfRateController = TextEditingController(text: _num(s.epfRate));
     _etfRateController = TextEditingController(text: _num(s.etfRate));
     _autoOt = s.autoOt;
@@ -43,7 +45,8 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
     _deductions = List.from(s.deductions);
   }
 
-  String _num(double v) => v == v.truncateToDouble() ? v.toStringAsFixed(0) : v.toString();
+  String _num(double v) =>
+      v == v.truncateToDouble() ? v.toStringAsFixed(0) : v.toString();
 
   @override
   void dispose() {
@@ -57,7 +60,8 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
 
   double get _basic => CurrencyFormatter.parse(_basicController.text) ?? 0;
   double get _otRate => CurrencyFormatter.parse(_otRateController.text) ?? 0;
-  int get _workingDays => int.tryParse(_workingDaysController.text.replaceAll(',', '')) ?? 0;
+  int get _workingDays =>
+      int.tryParse(_workingDaysController.text.replaceAll(',', '')) ?? 0;
   double get _epfRate => CurrencyFormatter.parse(_epfRateController.text) ?? 0;
   double get _etfRate => CurrencyFormatter.parse(_etfRateController.text) ?? 0;
 
@@ -66,21 +70,22 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
     final current = context.read<OtnProvider>().settings;
 
     await context.read<OtnProvider>().saveSettings(current.copyWith(
-      basicSalary: _basic,
-      overtimeRatePerHour: _otRate,
-      workingDaysPerMonth: _workingDays,
-      autoOt: _autoOt,
-      epfRate: _epfRate,
-      etfRate: _etfRate,
-      allowances: _allowances,
-      deductions: _deductions,
-    ));
+          basicSalary: _basic,
+          overtimeRatePerHour: _otRate,
+          workingDaysPerMonth: _workingDays,
+          autoOt: _autoOt,
+          epfRate: _epfRate,
+          etfRate: _etfRate,
+          allowances: _allowances,
+          deductions: _deductions,
+        ));
 
     if (!mounted) return;
     setState(() => _isSaving = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Settings saved', style: GoogleFonts.poppins(fontSize: 13)),
+        content:
+            Text('Settings saved', style: GoogleFonts.poppins(fontSize: 13)),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -92,9 +97,11 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
     final result = await showModalBottomSheet<OtnAllowance>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: _AllowanceSheet(existing: editing),
       ),
     );
@@ -119,9 +126,11 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
     final result = await showModalBottomSheet<OtnDeduction>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: _DeductionSheet(existing: editing),
       ),
     );
@@ -170,7 +179,8 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                       _SetupRow(
                         title: 'Currency symbol',
                         valueWidget: Text(symbol,
-                            style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 15)),
+                            style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w700, fontSize: 15)),
                       ),
                       _Divider(color: borderColor),
                       _SetupRow(
@@ -182,17 +192,22 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                       _SetupRow(
                         title: 'OT rate (per hour)',
                         valueWidget: _InlineTextField(
-                            controller: _otRateController, isDark: isDark, hint: '0.00'),
+                            controller: _otRateController,
+                            isDark: isDark,
+                            hint: '0.00'),
                       ),
                       _Divider(color: borderColor),
                       _SetupRow(
                         title: 'Working days / month',
                         valueWidget: _InlineTextField(
-                            controller: _workingDaysController, isDark: isDark, hint: '22'),
+                            controller: _workingDaysController,
+                            isDark: isDark,
+                            hint: '22'),
                       ),
                       _Divider(color: borderColor),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -204,12 +219,18 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                                       style: GoogleFonts.poppins(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
-                                          color: Theme.of(context).textTheme.titleLarge?.color)),
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.color)),
                                   const SizedBox(height: 2),
                                   Text('Calculate OT from daily attendance',
                                       style: GoogleFonts.poppins(
                                           fontSize: 13,
-                                          color: Theme.of(context).textTheme.bodySmall?.color,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.color,
                                           fontWeight: FontWeight.w600)),
                                 ],
                               ),
@@ -240,11 +261,14 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                       _SetupRow(
                         title: 'EPF employee rate (%)',
                         valueWidget: _InlineTextField(
-                            controller: _epfRateController, isDark: isDark, hint: '12'),
+                            controller: _epfRateController,
+                            isDark: isDark,
+                            hint: '12'),
                       ),
                       _Divider(color: borderColor),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -257,13 +281,19 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                                       style: GoogleFonts.poppins(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
-                                          color: Theme.of(context).textTheme.titleLarge?.color)),
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.color)),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Employer-paid — for reference\nonly, not deducted from your net',
                                     style: GoogleFonts.poppins(
                                         fontSize: 12,
-                                        color: Theme.of(context).textTheme.bodySmall?.color,
+                                        color: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.color,
                                         fontWeight: FontWeight.w600,
                                         height: 1.3),
                                   ),
@@ -272,7 +302,9 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                             ),
                             const SizedBox(width: 12),
                             _InlineTextField(
-                                controller: _etfRateController, isDark: isDark, hint: '3'),
+                                controller: _etfRateController,
+                                isDark: isDark,
+                                hint: '3'),
                           ],
                         ),
                       ),
@@ -337,7 +369,8 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                             allowance: _allowances[i],
                             symbol: symbol,
                             isDark: isDark,
-                            onEdit: () => _showAllowanceSheet(editing: _allowances[i]),
+                            onEdit: () =>
+                                _showAllowanceSheet(editing: _allowances[i]),
                             onDelete: () => _deleteAllowance(_allowances[i]),
                           ),
                         ],
@@ -400,7 +433,8 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                           _DeductionRow(
                             deduction: _deductions[i],
                             symbol: symbol,
-                            onEdit: () => _showDeductionSheet(editing: _deductions[i]),
+                            onEdit: () =>
+                                _showDeductionSheet(editing: _deductions[i]),
                             onDelete: () => _deleteDeduction(_deductions[i]),
                           ),
                         ],
@@ -429,15 +463,18 @@ class _OtnSetupScreenState extends State<OtnSetupScreen> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
               child: _isSaving
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2))
                   : Text('Save Settings',
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ),
         ),
@@ -474,6 +511,8 @@ class _AllowanceRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(allowance.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -481,24 +520,34 @@ class _AllowanceRow extends StatelessWidget {
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    Text('$symbol ${allowance.amount.toStringAsFixed(0)}',
-                        style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary)),
+                    Flexible(
+                      child: Text(
+                          '$symbol ${allowance.amount.toStringAsFixed(0)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary)),
+                    ),
                     const SizedBox(width: 10),
                     if (allowance.epfEligible)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(6),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text('EPF eligible',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary)),
                         ),
-                        child: Text('EPF eligible',
-                            style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary)),
                       ),
                   ],
                 ),
@@ -507,13 +556,14 @@ class _AllowanceRow extends StatelessWidget {
           ),
           IconButton(
             onPressed: onEdit,
-            icon: Icon(Icons.edit_rounded, size: 18,
-                color: Theme.of(context).textTheme.bodySmall?.color),
+            icon: Icon(Icons.edit_rounded,
+                size: 18, color: Theme.of(context).textTheme.bodySmall?.color),
             visualDensity: VisualDensity.compact,
           ),
           IconButton(
             onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.expense),
+            icon: const Icon(Icons.delete_outline_rounded,
+                size: 18, color: AppColors.expense),
             visualDensity: VisualDensity.compact,
           ),
         ],
@@ -542,7 +592,9 @@ class _AllowanceSheetState extends State<_AllowanceSheet> {
     super.initState();
     _nameController = TextEditingController(text: widget.existing?.name ?? '');
     _amountController = TextEditingController(
-        text: widget.existing != null ? widget.existing!.amount.toStringAsFixed(0) : '');
+        text: widget.existing != null
+            ? widget.existing!.amount.toStringAsFixed(0)
+            : '');
     _epfEligible = widget.existing?.epfEligible ?? false;
   }
 
@@ -555,7 +607,8 @@ class _AllowanceSheetState extends State<_AllowanceSheet> {
 
   void _submit() {
     final name = _nameController.text.trim();
-    final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+    final amount =
+        double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -592,190 +645,222 @@ class _AllowanceSheetState extends State<_AllowanceSheet> {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
 
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkDivider : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Title
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.existing != null ? 'Edit Allowance' : 'Add Allowance',
-                    style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).textTheme.titleLarge?.color),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close_rounded,
-                        color: Theme.of(context).textTheme.titleLarge?.color),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Name field
-              Text('Allowance name',
-                  style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.titleLarge?.color)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _nameController,
-                textCapitalization: TextCapitalization.words,
-                style: GoogleFonts.poppins(fontSize: 15),
-                decoration: InputDecoration(
-                  hintText: 'e.g. Transport, Meal',
-                  hintStyle: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: isDark ? AppColors.darkTextHint : AppColors.textHint),
-                  filled: true,
-                  fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Amount field
-              Text('Amount',
-                  style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.titleLarge?.color)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
-                style: GoogleFonts.poppins(fontSize: 15),
-                decoration: InputDecoration(
-                  prefixText: '$symbol  ',
-                  prefixStyle: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
                       color:
-                          isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
-                  hintText: '0.00',
-                  hintStyle: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: isDark ? AppColors.darkTextHint : AppColors.textHint),
-                  filled: true,
-                  fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // EPF Eligible toggle
-              GestureDetector(
-                onTap: () => setState(() => _epfEligible = !_epfEligible),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: _epfEligible
-                        ? AppColors.primary.withOpacity(0.08)
-                        : (isDark ? AppColors.darkSurface : Colors.white),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: _epfEligible ? AppColors.primary.withOpacity(0.4) : borderColor,
-                      width: _epfEligible ? 1.5 : 1,
+                          isDark ? AppColors.darkDivider : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('EPF eligible',
-                                style: GoogleFonts.poppins(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: _epfEligible
-                                        ? AppColors.primary
-                                        : Theme.of(context).textTheme.titleLarge?.color)),
-                            const SizedBox(height: 2),
-                            Text('This allowance counts toward EPF calculation',
-                                style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Theme.of(context).textTheme.bodySmall?.color)),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: _epfEligible,
-                        onChanged: (val) => setState(() => _epfEligible = val),
-                        activeColor: AppColors.primary,
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
-              // Submit button
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: Text(
-                    widget.existing != null ? 'Update Allowance' : 'Add Allowance',
-                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+                // Title
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.existing != null
+                          ? 'Edit Allowance'
+                          : 'Add Allowance',
+                      style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).textTheme.titleLarge?.color),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded,
+                          color: Theme.of(context).textTheme.titleLarge?.color),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Name field
+                Text('Allowance name',
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).textTheme.titleLarge?.color)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  style: GoogleFonts.poppins(fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'e.g. Transport, Meal',
+                    hintStyle: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: isDark
+                            ? AppColors.darkTextHint
+                            : AppColors.textHint),
+                    filled: true,
+                    fillColor: isDark ? AppColors.darkSurface : Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          BorderSide(color: AppColors.primary, width: 1.5),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-            ],
+                const SizedBox(height: 16),
+
+                // Amount field
+                Text('Amount',
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).textTheme.titleLarge?.color)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _amountController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
+                  ],
+                  style: GoogleFonts.poppins(fontSize: 15),
+                  decoration: InputDecoration(
+                    prefixText: '$symbol  ',
+                    prefixStyle: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary),
+                    hintText: '0.00',
+                    hintStyle: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: isDark
+                            ? AppColors.darkTextHint
+                            : AppColors.textHint),
+                    filled: true,
+                    fillColor: isDark ? AppColors.darkSurface : Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          BorderSide(color: AppColors.primary, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // EPF Eligible toggle
+                GestureDetector(
+                  onTap: () => setState(() => _epfEligible = !_epfEligible),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: _epfEligible
+                          ? AppColors.primary.withOpacity(0.08)
+                          : (isDark ? AppColors.darkSurface : Colors.white),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: _epfEligible
+                            ? AppColors.primary.withOpacity(0.4)
+                            : borderColor,
+                        width: _epfEligible ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('EPF eligible',
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: _epfEligible
+                                          ? AppColors.primary
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.color)),
+                              const SizedBox(height: 2),
+                              Text(
+                                  'This allowance counts toward EPF calculation',
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color)),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: _epfEligible,
+                          onChanged: (val) =>
+                              setState(() => _epfEligible = val),
+                          activeColor: AppColors.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: Text(
+                      widget.existing != null
+                          ? 'Update Allowance'
+                          : 'Add Allowance',
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
           ),
         ),
       ),
@@ -839,7 +924,8 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(height: 1, thickness: 1, color: color, indent: 16, endIndent: 16);
+    return Divider(
+        height: 1, thickness: 1, color: color, indent: 16, endIndent: 16);
   }
 }
 
@@ -848,7 +934,8 @@ class _InlineTextField extends StatelessWidget {
   final bool isDark;
   final String? hint;
 
-  const _InlineTextField({required this.controller, required this.isDark, this.hint});
+  const _InlineTextField(
+      {required this.controller, required this.isDark, this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -858,11 +945,14 @@ class _InlineTextField extends StatelessWidget {
         controller: controller,
         textAlign: TextAlign.right,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
+        ],
         style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700),
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
           border: InputBorder.none,
           hintText: hint,
           hintStyle: GoogleFonts.poppins(
@@ -903,6 +993,8 @@ class _DeductionRow extends StatelessWidget {
               children: [
                 Text(
                   deduction.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -1006,154 +1098,164 @@ class _DeductionSheetState extends State<_DeductionSheet> {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
 
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkDivider : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color:
+                          isDark ? AppColors.darkDivider : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Title
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.existing != null ? 'Edit Deduction' : 'Add Deduction',
+                // Title
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.existing != null
+                          ? 'Edit Deduction'
+                          : 'Add Deduction',
+                      style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).textTheme.titleLarge?.color),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded,
+                          color: Theme.of(context).textTheme.titleLarge?.color),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Name field
+                Text('Deduction name',
                     style: GoogleFonts.poppins(
-                        fontSize: 18,
+                        fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Theme.of(context).textTheme.titleLarge?.color),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close_rounded,
-                        color: Theme.of(context).textTheme.titleLarge?.color),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Name field
-              Text('Deduction name',
-                  style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.titleLarge?.color)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _nameController,
-                textCapitalization: TextCapitalization.words,
-                style: GoogleFonts.poppins(fontSize: 15),
-                decoration: InputDecoration(
-                  hintText: 'e.g. Loan, Advance',
-                  hintStyle: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: isDark ? AppColors.darkTextHint : AppColors.textHint),
-                  filled: true,
-                  fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: AppColors.expense, width: 1.5),
+                        color: Theme.of(context).textTheme.titleLarge?.color)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  style: GoogleFonts.poppins(fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'e.g. Loan, Advance',
+                    hintStyle: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: isDark
+                            ? AppColors.darkTextHint
+                            : AppColors.textHint),
+                    filled: true,
+                    fillColor: isDark ? AppColors.darkSurface : Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          BorderSide(color: AppColors.expense, width: 1.5),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Amount field
-              Text('Amount',
-                  style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.titleLarge?.color)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _amountController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
-                ],
-                style: GoogleFonts.poppins(fontSize: 15),
-                decoration: InputDecoration(
-                  prefixText: '- $symbol  ',
-                  prefixStyle: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.expense),
-                  hintText: '0.00',
-                  hintStyle: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: isDark ? AppColors.darkTextHint : AppColors.textHint),
-                  filled: true,
-                  fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: AppColors.expense, width: 1.5),
+                // Amount field
+                Text('Amount',
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).textTheme.titleLarge?.color)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _amountController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
+                  ],
+                  style: GoogleFonts.poppins(fontSize: 15),
+                  decoration: InputDecoration(
+                    prefixText: '- $symbol  ',
+                    prefixStyle: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.expense),
+                    hintText: '0.00',
+                    hintStyle: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: isDark
+                            ? AppColors.darkTextHint
+                            : AppColors.textHint),
+                    filled: true,
+                    fillColor: isDark ? AppColors.darkSurface : Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          BorderSide(color: AppColors.expense, width: 1.5),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Submit button
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.expense,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: Text(
-                    widget.existing != null
-                        ? 'Update Deduction'
-                        : 'Add Deduction',
-                    style:
-                        GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.expense,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: Text(
+                      widget.existing != null
+                          ? 'Update Deduction'
+                          : 'Add Deduction',
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-            ],
+                const SizedBox(height: 12),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-

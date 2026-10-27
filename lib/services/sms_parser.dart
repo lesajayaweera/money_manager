@@ -32,6 +32,9 @@ class SmsParseResult {
   /// Privacy-cleaned body (account/card/balance/phone digits stripped).
   final String redactedBody;
 
+  /// The exact message body as received from the bank.
+  final String originalBody;
+
   final SmsSkipReason? skipReason;
 
   const SmsParseResult._({
@@ -45,6 +48,7 @@ class SmsParseResult {
     this.transactionDate,
     this.dedupKey = '',
     this.redactedBody = '',
+    this.originalBody = '',
     this.skipReason,
   });
 
@@ -343,21 +347,52 @@ class SmsParser {
     required String body,
     required DateTime receivedAt,
   }) {
-    // Stage 1 — sender check.
     final config = _findBank(sender);
-    if (config == null) return SmsParseResult.skipped(SmsSkipReason.notBankSender);
+    if (config == null) {
+      return SmsParseResult.skipped(SmsSkipReason.notBankSender);
+    }
+    return _parseMessage(
+      config: config,
+      sender: sender,
+      body: body,
+      receivedAt: receivedAt,
+    );
+  }
 
-    // Stage 2 — OTP / promo block.
+  static SmsParseResult parseIgnoringWhitelist({
+    required String sender,
+    required String body,
+    required DateTime receivedAt,
+  }) {
+    final config = _findBank(sender);
+    final resolved = config ??
+        BankParserConfig(
+          bank: bankNameForSender(sender) ??
+              (sender.trim().isEmpty ? 'Unknown' : sender.trim()),
+          senderIds: const [],
+        );
+    return _parseMessage(
+      config: resolved,
+      sender: sender,
+      body: body,
+      receivedAt: receivedAt,
+    );
+  }
+
+  static SmsParseResult _parseMessage({
+    required BankParserConfig config,
+    required String sender,
+    required String body,
+    required DateTime receivedAt,
+  }) {
     if (_otpPattern.hasMatch(body)) {
       return SmsParseResult.skipped(SmsSkipReason.otpOrPromo);
     }
 
-    // Stage 3 — payment keywords.
     if (!_paymentKeywordPattern.hasMatch(body)) {
       return SmsParseResult.skipped(SmsSkipReason.notTransaction);
     }
 
-    // Stage 4 — bank confirmation: match a known format, else generic LKR.
     ParsedTransaction? parsed;
     for (final format in config.formats) {
       if (format.header.hasMatch(body)) {
@@ -381,7 +416,6 @@ class SmsParser {
       receivedAt: receivedAt,
     );
 
-    // Stage 5 — redaction before anything is stored.
     final redacted = redactSmsBody(body);
 
     return SmsParseResult._(
@@ -395,6 +429,7 @@ class SmsParser {
       transactionDate: parsed.date,
       dedupKey: dedupKey,
       redactedBody: redacted,
+      originalBody: body,
     );
   }
 
@@ -427,8 +462,7 @@ class SmsParser {
     return null;
   }
 
-  static bool isWhitelistedSender(String sender) =>
-      _findBank(sender) != null;
+  static bool isWhitelistedSender(String sender) => _findBank(sender) != null;
 
   /// True when [sender] matches one of the known bank/wallet sender IDs.
   static bool isKnownBankSender(String sender) =>
@@ -454,10 +488,9 @@ class SmsParser {
 
   /// HNB "SMS ALERT: <LABEL>, Debit account:...,Location:...,Amount(Approx.):..."
   static ParsedTransaction? _extractHnbAlert(String body) {
-    final amountMatch =
-        RegExp(r'Amount\(Approx\.\):\s*([\d,]+(?:\.\d{2})?)',
-                caseSensitive: false)
-            .firstMatch(body);
+    final amountMatch = RegExp(r'Amount\(Approx\.\):\s*([\d,]+(?:\.\d{2})?)',
+            caseSensitive: false)
+        .firstMatch(body);
     if (amountMatch == null) return null;
 
     final labelMatch =
@@ -492,8 +525,7 @@ class SmsParser {
   /// HNB ATM Withdrawal e-Receipt (multi-line).
   static ParsedTransaction? _extractHnbReceipt(String body) {
     final amountMatch =
-        RegExp(r'Amt\(Approx\.\):\s*([\d,]+(?:\.\d{2})?)',
-                caseSensitive: false)
+        RegExp(r'Amt\(Approx\.\):\s*([\d,]+(?:\.\d{2})?)', caseSensitive: false)
             .firstMatch(body);
     if (amountMatch == null) return null;
 
@@ -506,7 +538,10 @@ class SmsParser {
             .firstMatch(body);
 
     return ParsedTransaction(
-      title: locationMatch?.group(1)?.replaceAll(RegExp(r',\s*LKA\s*$'), '').trim(),
+      title: locationMatch
+          ?.group(1)
+          ?.replaceAll(RegExp(r',\s*LKA\s*$'), '')
+          .trim(),
       amount: _parseAmount(amountMatch.group(1)!),
       type: TransactionType.expense,
       kind: DraftKind.withdrawal,
@@ -541,9 +576,8 @@ class SmsParser {
     final isIncome = RegExp(r'credited|deposited|salary|refund|cashback',
             caseSensitive: false)
         .hasMatch(body);
-    final isWithdrawal = RegExp(r'withdraw(al|n)?|atm',
-            caseSensitive: false)
-        .hasMatch(body);
+    final isWithdrawal =
+        RegExp(r'withdraw(al|n)?|atm', caseSensitive: false).hasMatch(body);
 
     final dateMatch = RegExp(r'(\d{2})/(\d{2})/(\d{2,4})').firstMatch(body);
     final timeMatch = _genericTime.firstMatch(body);
@@ -559,7 +593,9 @@ class SmsParser {
           h = int.tryParse(timeMatch.group(1)!) ?? 0;
           min = int.tryParse(timeMatch.group(2)!) ?? 0;
         }
-        try { date = DateTime(y, m, d, h, min); } catch (_) {}
+        try {
+          date = DateTime(y, m, d, h, min);
+        } catch (_) {}
       }
     }
 
@@ -597,8 +633,8 @@ class SmsParser {
     final isIncome = RegExp(r'credited|deposited|salary|refund|cashback',
             caseSensitive: false)
         .hasMatch(body);
-    final isWithdrawal = RegExp(r'withdraw(al|n)?|atm', caseSensitive: false)
-        .hasMatch(body);
+    final isWithdrawal =
+        RegExp(r'withdraw(al|n)?|atm', caseSensitive: false).hasMatch(body);
 
     final dateMatch = _genericDate.firstMatch(body);
     final timeMatch = _genericTime.firstMatch(body);
@@ -636,8 +672,8 @@ class SmsParser {
     final isIncome = RegExp(r'credited|deposited|salary|refund|cashback',
             caseSensitive: false)
         .hasMatch(body);
-    final isWithdrawal = RegExp(r'withdraw(al|n)?|atm', caseSensitive: false)
-        .hasMatch(body);
+    final isWithdrawal =
+        RegExp(r'withdraw(al|n)?|atm', caseSensitive: false).hasMatch(body);
 
     // ComBank uses "09-Sep-26" format
     final comDate = RegExp(
@@ -647,15 +683,27 @@ class SmsParser {
     DateTime? date;
     if (comDate != null) {
       const months = {
-        'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
-        'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+        'jan': 1,
+        'feb': 2,
+        'mar': 3,
+        'apr': 4,
+        'may': 5,
+        'jun': 6,
+        'jul': 7,
+        'aug': 8,
+        'sep': 9,
+        'oct': 10,
+        'nov': 11,
+        'dec': 12,
       };
       final d = int.tryParse(comDate.group(1)!);
       final m = months[comDate.group(2)!.toLowerCase()];
       var y = int.tryParse(comDate.group(3)!) ?? 0;
       if (y < 100) y += 2000;
       if (d != null && m != null) {
-        try { date = DateTime(y, m, d); } catch (_) {}
+        try {
+          date = DateTime(y, m, d);
+        } catch (_) {}
       }
     } else {
       final dm = _genericDate.firstMatch(body);
@@ -697,8 +745,8 @@ class SmsParser {
     final isIncome = RegExp(r'credited|deposited|salary|refund|cashback',
             caseSensitive: false)
         .hasMatch(body);
-    final isWithdrawal = RegExp(r'withdraw(al|n)?|atm', caseSensitive: false)
-        .hasMatch(body);
+    final isWithdrawal =
+        RegExp(r'withdraw(al|n)?|atm', caseSensitive: false).hasMatch(body);
 
     final dateMatch = _genericDate.firstMatch(body);
     final timeMatch = _genericTime.firstMatch(body);
@@ -718,8 +766,8 @@ class SmsParser {
   /// Shared extractor for banks whose SMS layouts we match well enough with
   /// the generic Rs / LKR patterns but we want to try to extract a merchant name.
   static ParsedTransaction? _extractGenericNamedAlert(String body) {
-    final amountMatch = _lkrSuffixAmount.firstMatch(body) ??
-        _rsPrefixAmount.firstMatch(body);
+    final amountMatch =
+        _lkrSuffixAmount.firstMatch(body) ?? _rsPrefixAmount.firstMatch(body);
     if (amountMatch == null) return null;
 
     // Attempt to find a merchant label pattern common to many SL bank alerts
@@ -732,8 +780,8 @@ class SmsParser {
     final isIncome = RegExp(r'credited|deposited|salary|refund|cashback',
             caseSensitive: false)
         .hasMatch(body);
-    final isWithdrawal = RegExp(r'withdraw(al|n)?|atm', caseSensitive: false)
-        .hasMatch(body);
+    final isWithdrawal =
+        RegExp(r'withdraw(al|n)?|atm', caseSensitive: false).hasMatch(body);
 
     final dateMatch = _genericDate.firstMatch(body);
     final timeMatch = _genericTime.firstMatch(body);
@@ -752,8 +800,8 @@ class SmsParser {
   /// Generic LKR fallback for banks without a dedicated format yet.
   static ParsedTransaction? _tryGeneric(String sender, String body) {
     double? amount;
-    var amountMatch = _lkrSuffixAmount.firstMatch(body) ??
-        _rsPrefixAmount.firstMatch(body);
+    var amountMatch =
+        _lkrSuffixAmount.firstMatch(body) ?? _rsPrefixAmount.firstMatch(body);
     if (amountMatch != null) {
       amount = _parseAmount(amountMatch.group(1)!);
     } else {
@@ -762,9 +810,9 @@ class SmsParser {
 
     final dateMatch = _genericDate.firstMatch(body);
     final timeMatch = _genericTime.firstMatch(body);
-    final isIncome = RegExp(r'salary|refund|credited|deposit',
-            caseSensitive: false)
-        .hasMatch(body);
+    final isIncome =
+        RegExp(r'salary|refund|credited|deposit', caseSensitive: false)
+            .hasMatch(body);
 
     // Try to extract a merchant rather than falling back to the raw sender ID.
     final merchantMatch = RegExp(
@@ -823,48 +871,47 @@ class SmsParser {
 
     if (RegExp(
             r'restaurant|cafe|lunch|dinner|food|pizza|kottu|burger|rice curve|'
-            r'\bhotel\b|eat|noodles|dosa|breakfast|tea shop|kfc|mcd'
-            , caseSensitive: false)
+            r'\bhotel\b|eat|noodles|dosa|breakfast|tea shop|kfc|mcd',
+            caseSensitive: false)
         .hasMatch(b)) {
       return 'Food';
     }
     if (RegExp(
             r'fuel|petrol|diesel|gas station|taxi|uber|pickme|bus|train|'
-            r'toll|transport'
-            , caseSensitive: false)
+            r'toll|transport',
+            caseSensitive: false)
         .hasMatch(b)) {
       return 'Transport';
     }
     if (RegExp(
             r'elec|water|ceb|cey|dialog|mobitel|hutch|airtel|tariff|bill|'
-            r'recharge|insurance|internet|invoice|loan instal'
-            , caseSensitive: false)
+            r'recharge|insurance|internet|invoice|loan instal',
+            caseSensitive: false)
         .hasMatch(b)) {
       return 'Bills';
     }
-    if (RegExp(
-            r'pharm|medical|hospital|doctor|clinic|medicare|health|dental'
-            , caseSensitive: false)
+    if (RegExp(r'pharm|medical|hospital|doctor|clinic|medicare|health|dental',
+            caseSensitive: false)
         .hasMatch(b)) {
       return 'Health';
     }
     if (RegExp(
-            r'school|tuition|university|college|fees|exam|bookstore|education'
-            , caseSensitive: false)
+            r'school|tuition|university|college|fees|exam|bookstore|education',
+            caseSensitive: false)
         .hasMatch(b)) {
       return 'Education';
     }
     if (RegExp(
             r'cinema|carnival|theatre|netflix|spotify|entertainment|movie|'
-            r'games'
-            , caseSensitive: false)
+            r'games',
+            caseSensitive: false)
         .hasMatch(b)) {
       return 'Entertainment';
     }
     if (RegExp(
             r'purchase|pos|debit|mall|supermarket|keells|cargills|abans|'
-            r'singhagiri|lanka sathosa|shopping|retail|store|shop'
-            , caseSensitive: false)
+            r'singhagiri|lanka sathosa|shopping|retail|store|shop',
+            caseSensitive: false)
         .hasMatch(b)) {
       return 'Shopping';
     }
@@ -901,8 +948,7 @@ class SmsParser {
     b = b.replaceAll(RegExp(r'Debit\s+account:?\s*\S+', caseSensitive: false),
         'Debit account: [REDACTED]');
     // Card digits (masked like XXXX1234)
-    b = b.replaceAll(
-        RegExp(r'[Xx*]{4,}\d{4}'), 'CARD [REDACTED]');
+    b = b.replaceAll(RegExp(r'[Xx*]{4,}\d{4}'), 'CARD [REDACTED]');
     // Balances
     b = b.replaceAll(
         RegExp(
@@ -910,7 +956,8 @@ class SmsParser {
             caseSensitive: false),
         'Bal: [REDACTED]');
     b = b.replaceAll(
-        RegExp(r'Avail(?:able)?\s*Bal(?:ance)?:?\s*(?:LKR|Rs\.?)?\s*[\d,]+(?:\.\d{1,2})?',
+        RegExp(
+            r'Avail(?:able)?\s*Bal(?:ance)?:?\s*(?:LKR|Rs\.?)?\s*[\d,]+(?:\.\d{1,2})?',
             caseSensitive: false),
         'Avail Bal: [REDACTED]');
     // Phone numbers (SL format: 07XXXXXXXX or +947XXXXXXXX)
@@ -924,8 +971,8 @@ class SmsParser {
         'Term ID: [REDACTED]');
     b = b.replaceAll(RegExp(r'Txn\s?No:?\s*\S+', caseSensitive: false),
         'Txn No: [REDACTED]');
-    b = b.replaceAll(RegExp(r'Ref(?:erence)?\s*(?:No\.?)?:?\s*\S+',
-            caseSensitive: false),
+    b = b.replaceAll(
+        RegExp(r'Ref(?:erence)?\s*(?:No\.?)?:?\s*\S+', caseSensitive: false),
         'Ref: [REDACTED]');
     return b;
   }

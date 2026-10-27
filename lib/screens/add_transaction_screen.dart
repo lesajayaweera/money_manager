@@ -58,10 +58,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     } else {
       if (widget.initialAmount != null && widget.initialAmount! > 0) {
         final amt = widget.initialAmount!;
-        _amountController.text =
-            amt == amt.truncateToDouble() ? amt.toInt().toString() : amt.toStringAsFixed(2);
+        _amountController.text = amt == amt.truncateToDouble()
+            ? amt.toInt().toString()
+            : amt.toStringAsFixed(2);
       }
-      if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
+      if (widget.initialCategory != null &&
+          widget.initialCategory!.isNotEmpty) {
         _selectedCategory = widget.initialCategory;
       }
     }
@@ -146,16 +148,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       if (widget.editTransaction != null) {
         await provider.updateTransaction(tx);
-        
+
         // Update wallet balance by difference
         try {
-          final wallet = walletProvider.wallets.firstWhere((w) => w.name == _selectedPaymentMethod);
+          final wallet = walletProvider.wallets
+              .firstWhere((w) => w.name == _selectedPaymentMethod);
           final diff = amount - widget.editTransaction!.amount;
           if (diff != 0) {
-            final newBalance = _type == TransactionType.income 
-                ? wallet.balance + diff 
+            final newBalance = _type == TransactionType.income
+                ? wallet.balance + diff
                 : wallet.balance - diff;
-            await walletProvider.updateWallet(wallet.copyWith(balance: newBalance));
+            await walletProvider
+                .updateWallet(wallet.copyWith(balance: newBalance));
           }
         } catch (_) {}
       } else {
@@ -163,11 +167,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
         // Update wallet balance
         try {
-          final wallet = walletProvider.wallets.firstWhere((w) => w.name == _selectedPaymentMethod);
-          final newBalance = _type == TransactionType.income 
-              ? wallet.balance + amount 
+          final wallet = walletProvider.wallets
+              .firstWhere((w) => w.name == _selectedPaymentMethod);
+          final newBalance = _type == TransactionType.income
+              ? wallet.balance + amount
               : wallet.balance - amount;
-          await walletProvider.updateWallet(wallet.copyWith(balance: newBalance));
+          await walletProvider
+              .updateWallet(wallet.copyWith(balance: newBalance));
         } catch (_) {}
       }
 
@@ -184,7 +190,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
+        content: Text(message,
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -199,11 +206,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final isEditing = widget.editTransaction != null;
 
     final wallets = context.watch<WalletProvider>().wallets;
-    final List<_PayMethod> payMethods = wallets
-        .map((w) => _PayMethod(w.name, w.icon, w.color))
-        .toList();
+    final List<_PayMethod> payMethods =
+        wallets.map((w) => _PayMethod(w.name, w.icon, w.color)).toList();
 
-    final suggestions = context.read<TransactionProvider>().allTransactions
+    final suggestions = context
+        .read<TransactionProvider>()
+        .allTransactions
         .where((t) => t.type == _type)
         .map((t) => t.note)
         .where((n) => n != null && n.trim().isNotEmpty)
@@ -234,7 +242,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -244,7 +254,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -267,9 +278,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(height: 8),
               _CategoryDropdown(
                 categories: currentCategories,
-                selectedCategory: currentCategories.any((c) => c.name == _selectedCategory)
-                    ? _selectedCategory
-                    : null,
+                selectedCategory:
+                    currentCategories.any((c) => c.name == _selectedCategory)
+                        ? _selectedCategory
+                        : null,
                 onChanged: (val) => setState(() => _selectedCategory = val),
                 onManage: () async {
                   await Navigator.push(
@@ -313,9 +325,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               _NoteField(
                 controller: _noteController,
                 suggestions: suggestions,
-                hint: isExpense
-                    ? 'e.g. Lunch at restaurant'
-                    : 'e.g. May salary',
+                hint:
+                    isExpense ? 'e.g. Lunch at restaurant' : 'e.g. May salary',
               ),
               const SizedBox(height: 36),
 
@@ -329,7 +340,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
+                    disabledBackgroundColor:
+                        AppColors.primary.withValues(alpha: 0.6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -404,7 +416,10 @@ class _AmountField extends StatelessWidget {
       ),
       decoration: InputDecoration(
         hintText: '0',
-        hintStyle: GoogleFonts.poppins(fontSize: 18, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+        hintStyle: GoogleFonts.poppins(
+            fontSize: 18,
+            color:
+                Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
         contentPadding:
@@ -465,11 +480,14 @@ class _CategoryDropdown extends StatelessWidget {
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           hint: Text(
             'Select category',
             style: GoogleFonts.poppins(
-                fontSize: 15, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+                fontSize: 15,
+                color: Theme.of(context).textTheme.bodySmall?.color ??
+                    Colors.white),
           ),
           dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (_) => [
@@ -491,18 +509,24 @@ class _CategoryDropdown extends StatelessWidget {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                          color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.darkPrimarySurface
+                              : AppColors.primarySurface,
                           shape: BoxShape.circle),
                       child: Icon(Icons.settings_rounded,
                           color: AppColors.primary, size: 17),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      'Manage Categories',
-                      style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primary),
+                    Expanded(
+                      child: Text(
+                        'Manage Categories',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.primary),
+                      ),
                     ),
                   ],
                 ),
@@ -539,13 +563,17 @@ class _CatRow extends StatelessWidget {
           child: Icon(cat.icon, color: cat.color, size: 17),
         ),
         const SizedBox(width: 12),
-        Text(
-          cat.name,
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight:
-                isSelected ? FontWeight.w500 : FontWeight.w400,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+        Expanded(
+          child: Text(
+            cat.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            ),
           ),
         ),
       ],
@@ -578,7 +606,8 @@ class _PaymentMethodDropdown extends StatelessWidget {
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (_) => payMethods
               .map((m) => _PayRow(method: m, isSelected: true))
@@ -610,18 +639,22 @@ class _PayRow extends StatelessWidget {
         Container(
           width: 34,
           height: 34,
-          decoration: BoxDecoration(
-              color: method.color, shape: BoxShape.circle),
+          decoration:
+              BoxDecoration(color: method.color, shape: BoxShape.circle),
           child: Icon(method.icon, color: Colors.white, size: 17),
         ),
         const SizedBox(width: 12),
-        Text(
-          method.name,
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight:
-                isSelected ? FontWeight.w500 : FontWeight.w400,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+        Expanded(
+          child: Text(
+            method.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            ),
           ),
         ),
       ],
@@ -632,16 +665,14 @@ class _PayRow extends StatelessWidget {
 class _DatePickerField extends StatelessWidget {
   final DateTime selectedDate;
   final VoidCallback onTap;
-  const _DatePickerField(
-      {required this.selectedDate, required this.onTap});
+  const _DatePickerField({required this.selectedDate, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
@@ -650,13 +681,20 @@ class _DatePickerField extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.calendar_month_outlined,
-                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 20),
+                color: Theme.of(context).textTheme.bodyMedium?.color ??
+                    Colors.white,
+                size: 20),
             const SizedBox(width: 12),
-            Text(
-              DateFormat('d MMM yyyy').format(selectedDate),
-              style: GoogleFonts.poppins(
-                fontSize: 15,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            Expanded(
+              child: Text(
+                DateFormat('d MMM yyyy').format(selectedDate),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
+                ),
               ),
             ),
           ],
@@ -670,7 +708,10 @@ class _NoteField extends StatefulWidget {
   final TextEditingController controller;
   final String hint;
   final List<String> suggestions;
-  const _NoteField({required this.controller, required this.hint, required this.suggestions});
+  const _NoteField(
+      {required this.controller,
+      required this.hint,
+      required this.suggestions});
 
   @override
   State<_NoteField> createState() => _NoteFieldState();
@@ -702,21 +743,30 @@ class _NoteFieldState extends State<_NoteField> {
             return const Iterable<String>.empty();
           }
           return widget.suggestions.where((String option) {
-            return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+            return option
+                .toLowerCase()
+                .contains(textEditingValue.text.toLowerCase());
           });
         },
-        fieldViewBuilder: (BuildContext context, TextEditingController textEditingController,
-            FocusNode focusNode, VoidCallback onFieldSubmitted) {
+        fieldViewBuilder: (BuildContext context,
+            TextEditingController textEditingController,
+            FocusNode focusNode,
+            VoidCallback onFieldSubmitted) {
           return TextFormField(
             controller: textEditingController,
             focusNode: focusNode,
             maxLines: 4,
             minLines: 1,
-            style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+            style: GoogleFonts.poppins(
+                fontSize: 15,
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white),
             decoration: InputDecoration(
               hintText: widget.hint,
               hintStyle: GoogleFonts.poppins(
-                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
+                  color: Theme.of(context).textTheme.bodySmall?.color ??
+                      Colors.white,
+                  fontSize: 14),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surface,
               contentPadding:
@@ -731,13 +781,14 @@ class _NoteFieldState extends State<_NoteField> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide:
-                    BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide: BorderSide(color: AppColors.primary, width: 1.5),
               ),
             ),
           );
         },
-        optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+        optionsViewBuilder: (BuildContext context,
+            AutocompleteOnSelected<String> onSelected,
+            Iterable<String> options) {
           return Align(
             alignment: Alignment.topLeft,
             child: Material(
@@ -745,7 +796,8 @@ class _NoteFieldState extends State<_NoteField> {
               borderRadius: BorderRadius.circular(10),
               color: Theme.of(context).colorScheme.surface,
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 200, maxWidth: constraints.maxWidth),
+                constraints: BoxConstraints(
+                    maxHeight: 200, maxWidth: constraints.maxWidth),
                 child: ListView.builder(
                   padding: EdgeInsets.zero,
                   shrinkWrap: true,
@@ -758,7 +810,13 @@ class _NoteFieldState extends State<_NoteField> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: Text(option, style: GoogleFonts.poppins(color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
+                        child: Text(option,
+                            style: GoogleFonts.poppins(
+                                color: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.color ??
+                                    Colors.white)),
                       ),
                     );
                   },

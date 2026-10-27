@@ -441,6 +441,8 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                           children: [
                             Text(
                               _entry.personName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -468,50 +470,70 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Accumulated',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Accumulated',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                CurrencyFormatter.format(_entry.accumulatedAmount,
-                                    symbol: settings.currencySymbol),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.primary,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    CurrencyFormatter.format(_entry.accumulatedAmount,
+                                        symbol: settings.currencySymbol),
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'Total',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Total',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                CurrencyFormatter.format(_entry.amount,
-                                    symbol: settings.currencySymbol),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    CurrencyFormatter.format(_entry.amount,
+                                        symbol: settings.currencySymbol),
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -946,13 +968,16 @@ class _DetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               ),
             ),
           ),
-          valueWidget,
+          const SizedBox(width: 8),
+          Flexible(child: valueWidget),
         ],
       ),
     );

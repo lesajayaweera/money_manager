@@ -74,7 +74,10 @@ class AppDrawer extends StatelessWidget {
                   title: 'Categories',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const CategoriesScreen()));
                   },
                 ),
                 _DrawerItem(
@@ -82,7 +85,8 @@ class AppDrawer extends StatelessWidget {
                   title: 'Goals',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const GoalsScreen()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const GoalsScreen()));
                   },
                 ),
                 _DrawerItem(
@@ -90,7 +94,11 @@ class AppDrawer extends StatelessWidget {
                   title: 'Lends & Borrowed',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const LendsBorrowedScreen(initialIndex: 0)));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                const LendsBorrowedScreen(initialIndex: 0)));
                   },
                 ),
                 _DrawerItem(
@@ -98,7 +106,10 @@ class AppDrawer extends StatelessWidget {
                   title: 'Financial Overview',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const FinancialOverviewScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const FinancialOverviewScreen()));
                   },
                 ),
                 _DrawerItem(
@@ -106,7 +117,10 @@ class AppDrawer extends StatelessWidget {
                   title: 'Monthly Planner',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const MonthlyPlanScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const MonthlyPlanScreen()));
                   },
                 ),
                 _DrawerItem(
@@ -132,7 +146,8 @@ class AppDrawer extends StatelessWidget {
                   title: 'OTN Salary',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const OtnScreen()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const OtnScreen()));
                   },
                 ),
                 const Divider(height: 32, indent: 24, endIndent: 24),
@@ -141,7 +156,10 @@ class AppDrawer extends StatelessWidget {
                   title: 'Settings',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const SettingsScreen()));
                   },
                 ),
               ],
@@ -182,6 +200,8 @@ class _DrawerItem extends StatelessWidget {
       leading: Icon(icon, color: AppColors.primary, size: 24),
       title: Text(
         title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: GoogleFonts.poppins(
           fontSize: 15,
           fontWeight: FontWeight.w500,
@@ -198,7 +218,9 @@ class _DrawerItem extends StatelessWidget {
               child: Text(
                 '$badge',
                 style: GoogleFonts.poppins(
-                    color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700),
               ),
             )
           : null,

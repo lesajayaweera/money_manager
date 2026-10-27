@@ -57,17 +57,21 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                 decoration: InputDecoration(
                   hintText: 'Search transactions...',
                   hintStyle: GoogleFonts.poppins(
-                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
+                      color: Theme.of(context).textTheme.bodySmall?.color ??
+                          Colors.white,
+                      fontSize: 14),
                   prefixIcon: Icon(Icons.search_rounded,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 20),
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
+                      size: 20),
                   suffixIcon: IconButton(
                     icon: Icon(Icons.clear_rounded,
-                        size: 18, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                        size: 18,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ??
+                            Colors.white),
                     onPressed: () {
                       _searchController.clear();
-                      context
-                          .read<TransactionProvider>()
-                          .setSearchQuery('');
+                      context.read<TransactionProvider>().setSearchQuery('');
                     },
                   ),
                   filled: true,
@@ -89,63 +93,70 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
             child: Consumer2<TransactionProvider, WalletProvider>(
               builder: (context, provider, walletProvider, _) {
                 final txs = provider.filteredTransactions;
-                
+
                 // Map transfers to dummy transactions (Out and In)
                 final allTransfers = walletProvider.allTransfers;
                 final mappedTransfers = allTransfers.expand((t) {
-                   final fromW = walletProvider.findById(t.fromWalletId);
-                   final toW = walletProvider.findById(t.toWalletId);
-                   
-                   final baseTitleOut = (t.note != null && t.note!.isNotEmpty) 
-                       ? t.note! 
-                       : 'Transfer to ${toW?.name ?? '?'}';
-                   
-                   final baseTitleIn = (t.note != null && t.note!.isNotEmpty) 
-                       ? t.note! 
-                       : 'Transfer from ${fromW?.name ?? '?'}';
+                  final fromW = walletProvider.findById(t.fromWalletId);
+                  final toW = walletProvider.findById(t.toWalletId);
 
-                   final outTx = TransactionModel(
-                     id: -(t.id ?? 999999) * 2,
-                     title: '$baseTitleOut (Out)',
-                     amount: t.amount,
-                     type: TransactionType.expense,
-                     category: 'Transfer',
-                     date: t.date,
-                     note: null, // Note is integrated into title
-                     walletName: fromW?.name ?? 'Unknown',
-                   );
+                  final baseTitleOut = (t.note != null && t.note!.isNotEmpty)
+                      ? t.note!
+                      : 'Transfer to ${toW?.name ?? '?'}';
 
-                   final inTx = TransactionModel(
-                     id: -(t.id ?? 999999) * 2 - 1,
-                     title: '$baseTitleIn (In)',
-                     amount: t.amount,
-                     type: TransactionType.income,
-                     category: 'Transfer',
-                     date: t.date,
-                     note: null,
-                     walletName: toW?.name ?? 'Unknown',
-                   );
+                  final baseTitleIn = (t.note != null && t.note!.isNotEmpty)
+                      ? t.note!
+                      : 'Transfer from ${fromW?.name ?? '?'}';
 
-                   return [outTx, inTx];
+                  final outTx = TransactionModel(
+                    id: -(t.id ?? 999999) * 2,
+                    title: '$baseTitleOut (Out)',
+                    amount: t.amount,
+                    type: TransactionType.expense,
+                    category: 'Transfer',
+                    date: t.date,
+                    note: null, // Note is integrated into title
+                    walletName: fromW?.name ?? 'Unknown',
+                  );
+
+                  final inTx = TransactionModel(
+                    id: -(t.id ?? 999999) * 2 - 1,
+                    title: '$baseTitleIn (In)',
+                    amount: t.amount,
+                    type: TransactionType.income,
+                    category: 'Transfer',
+                    date: t.date,
+                    note: null,
+                    walletName: toW?.name ?? 'Unknown',
+                  );
+
+                  return [outTx, inTx];
                 }).where((tx) {
                   // Apply active filters
                   final f = provider.activeFilter;
-                  if (f == TransactionFilter.income) return false; // Hide transfers when filtering income
-                  if (f == TransactionFilter.expense) return false; // Hide transfers when filtering expense
+                  if (f == TransactionFilter.income)
+                    return false; // Hide transfers when filtering income
+                  if (f == TransactionFilter.expense)
+                    return false; // Hide transfers when filtering expense
                   final now = DateTime.now();
                   if (f == TransactionFilter.today) {
-                    if (tx.date.year != now.year || tx.date.month != now.month || tx.date.day != now.day) return false;
+                    if (tx.date.year != now.year ||
+                        tx.date.month != now.month ||
+                        tx.date.day != now.day) return false;
                   }
                   if (f == TransactionFilter.thisMonth) {
-                    if (tx.date.year != now.year || tx.date.month != now.month) return false;
+                    if (tx.date.year != now.year || tx.date.month != now.month)
+                      return false;
                   }
                   if (provider.searchQuery.isNotEmpty) {
                     final q = provider.searchQuery.toLowerCase();
-                    if (!tx.title.toLowerCase().contains(q) && !(tx.note?.toLowerCase().contains(q) ?? false)) return false;
+                    if (!tx.title.toLowerCase().contains(q) &&
+                        !(tx.note?.toLowerCase().contains(q) ?? false))
+                      return false;
                   }
                   return true;
                 }).toList();
-                
+
                 final transactions = [...txs, ...mappedTransfers];
                 transactions.sort((a, b) => b.date.compareTo(a.date));
 
@@ -186,10 +197,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
       actions: [
         IconButton(
           icon: Icon(
-            _showSearch
-                ? Icons.search_off_rounded
-                : Icons.filter_list_rounded,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            _showSearch ? Icons.search_off_rounded : Icons.filter_list_rounded,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
           onPressed: () {
             setState(() {
@@ -236,8 +246,7 @@ class _FilterChipsRow extends StatelessWidget {
                   isActive: activeFilter == TransactionFilter.income,
                   activeColor: AppColors.income,
                   textColor: AppColors.income,
-                  onTap: () =>
-                      provider.setFilter(TransactionFilter.income),
+                  onTap: () => provider.setFilter(TransactionFilter.income),
                 ),
                 const SizedBox(width: 8),
                 _Chip(
@@ -245,26 +254,25 @@ class _FilterChipsRow extends StatelessWidget {
                   isActive: activeFilter == TransactionFilter.expense,
                   activeColor: AppColors.expense,
                   textColor: AppColors.expense,
-                  onTap: () =>
-                      provider.setFilter(TransactionFilter.expense),
+                  onTap: () => provider.setFilter(TransactionFilter.expense),
                 ),
                 const SizedBox(width: 8),
                 _Chip(
                   label: 'Today',
                   isActive: activeFilter == TransactionFilter.today,
                   activeColor: AppColors.primary,
-                  textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-                  onTap: () =>
-                      provider.setFilter(TransactionFilter.today),
+                  textColor: Theme.of(context).textTheme.bodyMedium?.color ??
+                      Colors.white,
+                  onTap: () => provider.setFilter(TransactionFilter.today),
                 ),
                 const SizedBox(width: 8),
                 _Chip(
                   label: 'This Month',
                   isActive: activeFilter == TransactionFilter.thisMonth,
                   activeColor: AppColors.primary,
-                  textColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-                  onTap: () =>
-                      provider.setFilter(TransactionFilter.thisMonth),
+                  textColor: Theme.of(context).textTheme.bodyMedium?.color ??
+                      Colors.white,
+                  onTap: () => provider.setFilter(TransactionFilter.thisMonth),
                 ),
               ],
             ),
@@ -307,7 +315,8 @@ class _Chip extends StatelessWidget {
           border: Border.all(
             color: isActive
                 ? activeColor
-                : Theme.of(context).dividerTheme.color ?? Theme.of(context).dividerColor,
+                : Theme.of(context).dividerTheme.color ??
+                    Theme.of(context).dividerColor,
           ),
           boxShadow: isActive
               ? [
@@ -375,7 +384,8 @@ class _GroupedList extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                  color: Theme.of(context).textTheme.bodyMedium?.color ??
+                      Colors.white,
                 ),
               ),
             ),
@@ -386,17 +396,17 @@ class _GroupedList extends StatelessWidget {
                 transaction: tx,
                 isLast: i == txs.length - 1,
                 onEdit: () async {
-                        final result = await Navigator.of(context).push<bool>(
-                          MaterialPageRoute(
-                            builder: (_) => TransactionDetailScreen(
-                              transaction: tx,
-                            ),
-                          ),
-                        );
-                        if (result == true && context.mounted) {
-                          await context.read<TransactionProvider>().loadAll();
-                        }
-                      },
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => TransactionDetailScreen(
+                        transaction: tx,
+                      ),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    await context.read<TransactionProvider>().loadAll();
+                  }
+                },
                 onDelete: () => _deleteTx(ctx, tx),
               );
             }),
@@ -407,32 +417,32 @@ class _GroupedList extends StatelessWidget {
     );
   }
 
-  Future<void> _deleteTx(
-      BuildContext context, TransactionModel tx) async {
+  Future<void> _deleteTx(BuildContext context, TransactionModel tx) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Delete Transaction',
             style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
         content: Text(
           'Delete "${tx.title}"?',
-          style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          style: GoogleFonts.poppins(
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text('Cancel',
-                style:
-                    GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
+                style: GoogleFonts.poppins(
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.white)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text('Delete',
                 style: GoogleFonts.poppins(
-                    color: AppColors.expense,
-                    fontWeight: FontWeight.w600)),
+                    color: AppColors.expense, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -470,13 +480,17 @@ class _TxTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryProvider = context.watch<CategoryProvider>();
     final walletProvider = context.watch<WalletProvider>();
-    final type = transaction.isIncome ? CategoryType.income : CategoryType.expense;
+    final type =
+        transaction.isIncome ? CategoryType.income : CategoryType.expense;
     final settings = context.watch<SettingsProvider>();
     final isIncome = transaction.isIncome;
-    
+
     final isTransfer = transaction.category == 'Transfer';
-    final matchingWallets = walletProvider.wallets.where((w) => w.name == transaction.walletName);
-    final transferWallet = (isTransfer && matchingWallets.isNotEmpty) ? matchingWallets.first : null;
+    final matchingWallets =
+        walletProvider.wallets.where((w) => w.name == transaction.walletName);
+    final transferWallet = (isTransfer && matchingWallets.isNotEmpty)
+        ? matchingWallets.first
+        : null;
 
     final Color bgColor;
     final IconData iconData;
@@ -493,82 +507,101 @@ class _TxTile extends StatelessWidget {
     }
 
     return InkWell(
-        onTap: isTransfer ? null : onEdit,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            border: isLast
-                ? null
-                : const Border(
-                    bottom: BorderSide(color: Color(0xFFF5F5F5))),
-          ),
-          child: Row(
-            children: [
-              // Category icon circle
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(iconData, color: Colors.white, size: 20),
+      onTap: isTransfer ? null : onEdit,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: isLast
+              ? null
+              : const Border(bottom: BorderSide(color: Color(0xFFF5F5F5))),
+        ),
+        child: Row(
+          children: [
+            // Category icon circle
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: bgColor,
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: 14),
-              // Title + date
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      (transaction.note != null && transaction.note!.trim().isNotEmpty)
-                          ? transaction.note!
-                          : transaction.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      CurrencyFormatter.shortDate(transaction.date),
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Amount
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              child: Icon(iconData, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 14),
+            // Title + date
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    CurrencyFormatter.formatWithSign(transaction.signedAmount,
-                        symbol: settings.currencySymbol),
+                    (transaction.note != null &&
+                            transaction.note!.trim().isNotEmpty)
+                        ? transaction.note!
+                        : transaction.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: isIncome ? AppColors.income : AppColors.expense,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.titleLarge?.color ??
+                          Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    CurrencyFormatter.shortDate(transaction.date),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Amount
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 130),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      CurrencyFormatter.formatWithSign(transaction.signedAmount,
+                          symbol: settings.currencySymbol),
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: isIncome ? AppColors.income : AppColors.expense,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     transaction.walletName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 11,
-                      color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodySmall?.color ??
+                          Colors.white,
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }
 
@@ -585,9 +618,7 @@ class _EmptyState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            hasSearch
-                ? Icons.search_off_rounded
-                : Icons.receipt_long_outlined,
+            hasSearch ? Icons.search_off_rounded : Icons.receipt_long_outlined,
             size: 64,
             color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
           ),
@@ -597,7 +628,8 @@ class _EmptyState extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 6),
@@ -606,7 +638,9 @@ class _EmptyState extends StatelessWidget {
                 ? 'Try a different search term'
                 : 'Add your first transaction\nfrom the Dashboard',
             style: GoogleFonts.poppins(
-                fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+                fontSize: 13,
+                color: Theme.of(context).textTheme.bodySmall?.color ??
+                    Colors.white),
             textAlign: TextAlign.center,
           ),
         ],

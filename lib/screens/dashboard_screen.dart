@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
 import '../core/utils/currency_formatter.dart';
+import '../core/utils/responsive.dart';
 import '../main_scaffold.dart';
 import '../models/category_model.dart';
 import '../models/sms_draft_model.dart';
@@ -16,6 +17,7 @@ import '../providers/settings_provider.dart';
 import '../providers/sms_draft_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../widgets/sms_message_card.dart';
 import 'add_transaction_screen.dart';
 import 'create_budget_screen.dart';
 import 'goals_screen.dart';
@@ -70,10 +72,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _BalanceCard(summary: provider.summary),
+                  // Pending SMS drafts — shown right after balance card when drafts exist.
+                  const _SmsDraftsBannerCard(),
                   const SizedBox(height: 20),
                   _StatsGrid(summary: provider.summary),
-                  // SMS Drafts banner — visible only when pending drafts exist.
-                  const _SmsDraftsBannerCard(),
                   const SizedBox(height: 24),
                   _RecentTransactionsSection(
                     transactions: provider.recentTransactions,
@@ -135,7 +137,10 @@ class _DashboardScreenState extends State<DashboardScreen>
         IconButton(
           icon: Stack(
             children: [
-              Icon(Icons.widgets_outlined, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
+              Icon(Icons.widgets_outlined,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
+                  size: 26),
               Positioned(
                 right: 0,
                 top: 0,
@@ -185,7 +190,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
                 ),
               ),
               const SizedBox(height: 20),
@@ -196,7 +202,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                       icon: Icons.flag_rounded,
                       label: 'Goals',
                       color: AppColors.primary,
-                      lightColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
+                      lightColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.darkPrimarySurface
+                              : AppColors.primarySurface,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.of(context).push(
@@ -330,7 +339,6 @@ class _QuickNavTile extends StatelessWidget {
   }
 }
 
-
 // ─── Balance Card (swipable: Total Balance ↔ Net Cash Flow) ───────────────────
 
 class _BalanceCard extends StatefulWidget {
@@ -385,14 +393,15 @@ class _BalanceCardState extends State<_BalanceCard> {
         return Column(
           children: [
             SizedBox(
-              height: 145,
+              height: Responsive.scaledHeight(context, 145, extra: 38),
               child: PageView(
                 controller: _pageCtrl,
                 onPageChanged: (p) => setState(() => _page = p),
                 children: [
                   // ── Card 1: Total Balance ───────────────────────────────
                   GestureDetector(
-                    onTap: () => _showCashFlowSheet(context, cashIn, cashOut, sym),
+                    onTap: () =>
+                        _showCashFlowSheet(context, cashIn, cashOut, sym),
                     child: _TotalBalanceCard(
                       settings: settings,
                       totalBalance: walletProvider.totalBalance,
@@ -401,7 +410,8 @@ class _BalanceCardState extends State<_BalanceCard> {
 
                   // ── Card 2: Net Cash Flow ───────────────────────────────
                   GestureDetector(
-                    onTap: () => _showCashFlowSheet(context, cashIn, cashOut, sym),
+                    onTap: () =>
+                        _showCashFlowSheet(context, cashIn, cashOut, sym),
                     child: _NetCashFlowCard(
                       netCashFlow: netCashFlow,
                       cashIn: cashIn,
@@ -515,28 +525,25 @@ class _TotalBalanceCard extends StatelessWidget {
           ),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child: settings.balanceVisible
-                ? Text(
-                    CurrencyFormatter.format(totalBalance,
-                        symbol: settings.currencySymbol),
-                    key: const ValueKey('vis'),
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: -1,
-                    ),
-                  )
-                : Text(
-                    '${settings.currencySymbol} ••••••',
-                    key: const ValueKey('hid'),
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 4,
-                    ),
-                  ),
+            child: FittedBox(
+              key: ValueKey(settings.balanceVisible),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                settings.balanceVisible
+                    ? CurrencyFormatter.format(totalBalance,
+                        symbol: settings.currencySymbol)
+                    : '${settings.currencySymbol} ••••••',
+                maxLines: 1,
+                softWrap: false,
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: settings.balanceVisible ? -1 : 4,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -565,9 +572,8 @@ class _NetCashFlowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pct = cashIn == 0
-        ? 0.0
-        : ((netCashFlow / cashIn) * 100).clamp(-999.0, 999.0);
+    final pct =
+        cashIn == 0 ? 0.0 : ((netCashFlow / cashIn) * 100).clamp(-999.0, 999.0);
     final pctStr = '${pct >= 0 ? '' : ''}${pct.toStringAsFixed(0)}%';
 
     return Container(
@@ -591,14 +597,19 @@ class _NetCashFlowCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Net Cash Flow',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white.withValues(alpha: 0.8),
+              Expanded(
+                child: Text(
+                  'Net Cash Flow',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -608,6 +619,7 @@ class _NetCashFlowCard extends StatelessWidget {
                 ),
                 child: Text(
                   '− $pctStr',
+                  maxLines: 1,
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -619,26 +631,24 @@ class _NetCashFlowCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           // Amount
-          visible
-              ? Text(
-                  CurrencyFormatter.format(netCashFlow,
-                      symbol: currencySymbol),
-                  style: GoogleFonts.poppins(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                )
-              : Text(
-                  '$currencySymbol ••••••',
-                  style: GoogleFonts.poppins(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 2,
-                  ),
-                ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              visible
+                  ? CurrencyFormatter.format(netCashFlow,
+                      symbol: currencySymbol)
+                  : '$currencySymbol ••••••',
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.poppins(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: visible ? -0.5 : 2,
+              ),
+            ),
+          ),
           const SizedBox(height: 2),
           // Date range
           Text(
@@ -653,43 +663,60 @@ class _NetCashFlowCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Net Income',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.75),
+              Expanded(
+                child: Text(
+                  'Net Income',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.75),
+                  ),
                 ),
               ),
-              Row(
-                children: [
-                  Text(
-                    visible
-                        ? CurrencyFormatter.format(cashIn,
-                            symbol: currencySymbol)
-                        : '••••••',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '− 0%',
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        color: Colors.white.withValues(alpha: 0.85),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          visible
+                              ? CurrencyFormatter.format(cashIn,
+                                  symbol: currencySymbol)
+                              : '••••••',
+                          maxLines: 1,
+                          softWrap: false,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '− 0%',
+                        maxLines: 1,
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          color: Colors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -810,7 +837,8 @@ class _CashFlowBottomSheet extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: netCashFlow >= 0 ? AppColors.income : AppColors.expense,
+                    color:
+                        netCashFlow >= 0 ? AppColors.income : AppColors.expense,
                   ),
                 ),
               ],
@@ -860,8 +888,6 @@ class _SheetRow extends StatelessWidget {
     );
   }
 }
-
-
 
 // ─── Stats Grid ───────────────────────────────────────────────────────────────
 
@@ -989,7 +1015,8 @@ class _StatCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -997,18 +1024,23 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
-            child: Text(
-              visible
-                  ? CurrencyFormatter.format(amount, symbol: currencySymbol)
-                  : '••••••',
+            child: FittedBox(
               key: ValueKey(visible),
-              style: GoogleFonts.poppins(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                visible
+                    ? CurrencyFormatter.format(amount, symbol: currencySymbol)
+                    : '••••••',
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
+                ),
+                maxLines: 1,
+                softWrap: false,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -1030,14 +1062,20 @@ class _RecentTransactionsSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Recent Transactions',
-              style: GoogleFonts.poppins(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            Expanded(
+              child: Text(
+                'Recent Transactions',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
                 // Switch to Transactions tab via MainScaffold
@@ -1113,7 +1151,8 @@ class _EmptyTransactions extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 4),
@@ -1121,7 +1160,8 @@ class _EmptyTransactions extends StatelessWidget {
             'Add your first income or expense below',
             style: GoogleFonts.poppins(
               fontSize: 13,
-              color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
             ),
             textAlign: TextAlign.center,
           ),
@@ -1172,48 +1212,67 @@ class _TransactionTile extends StatelessWidget {
                           transaction.note!.trim().isNotEmpty)
                       ? transaction.note!
                       : transaction.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   CurrencyFormatter.relativeDate(transaction.date),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.white,
                   ),
                 ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                settings.balanceVisible
-                    ? CurrencyFormatter.formatWithSign(
-                        transaction.signedAmount,
-                        symbol: settings.currencySymbol,
-                      )
-                    : '••••',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: isIncome ? AppColors.income : AppColors.expense,
+          const SizedBox(width: 8),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 140),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    settings.balanceVisible
+                        ? CurrencyFormatter.formatWithSign(
+                            transaction.signedAmount,
+                            symbol: settings.currencySymbol,
+                          )
+                        : '••••',
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: isIncome ? AppColors.income : AppColors.expense,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                transaction.walletName,
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                const SizedBox(height: 2),
+                Text(
+                  transaction.walletName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: Theme.of(context).textTheme.bodySmall?.color ??
+                        Colors.white,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -1280,8 +1339,14 @@ class _AddTransactionSheet extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: isDark
-                              ? [const Color(0xFF1A6B3A), const Color(0xFF27AE60)]
-                              : [const Color(0xFF27AE60), const Color(0xFF2ECC71)],
+                              ? [
+                                  const Color(0xFF1A6B3A),
+                                  const Color(0xFF27AE60)
+                                ]
+                              : [
+                                  const Color(0xFF27AE60),
+                                  const Color(0xFF2ECC71)
+                                ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -1346,8 +1411,14 @@ class _AddTransactionSheet extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: isDark
-                              ? [const Color(0xFF7B1C1C), const Color(0xFFE74C3C)]
-                              : [const Color(0xFFE74C3C), const Color(0xFFFF6B6B)],
+                              ? [
+                                  const Color(0xFF7B1C1C),
+                                  const Color(0xFFE74C3C)
+                                ]
+                              : [
+                                  const Color(0xFFE74C3C),
+                                  const Color(0xFFFF6B6B)
+                                ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -1408,7 +1479,6 @@ class _AddTransactionSheet extends StatelessWidget {
   }
 }
 
-
 // ─── SMS Drafts Banner Card ────────────────────────────────────────────────────
 //
 // Shows on the dashboard whenever there are pending SMS-captured drafts.
@@ -1424,7 +1494,7 @@ class _SmsDraftsBannerCard extends StatefulWidget {
 }
 
 class _SmsDraftsBannerCardState extends State<_SmsDraftsBannerCard> {
-  bool _expanded = false;
+  bool _expanded = true;
 
   void _toggleExpand() => setState(() => _expanded = !_expanded);
 
@@ -1446,8 +1516,9 @@ class _SmsDraftsBannerCardState extends State<_SmsDraftsBannerCard> {
     final smsProvider = context.watch<SmsDraftProvider>();
     final pending = smsProvider.pendingDrafts;
 
-    // Banner only visible when SMS capture is on AND there are pending drafts.
-    if (!smsProvider.enabled || pending.isEmpty) return const SizedBox.shrink();
+    // Banner visible whenever there are pending drafts (even if capture was
+    // just toggled off — drafts already captured should still be reviewable).
+    if (pending.isEmpty) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? AppColors.darkSurface : Colors.white;
@@ -1460,15 +1531,11 @@ class _SmsDraftsBannerCardState extends State<_SmsDraftsBannerCard> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border(
-              left: BorderSide(color: AppColors.primary, width: 4),
-              top: BorderSide(color: borderColor),
-              right: BorderSide(color: borderColor),
-              bottom: BorderSide(color: borderColor),
-            ),
+            border: Border.all(color: borderColor),
             boxShadow: [
               BoxShadow(
                 color: AppColors.primary.withValues(alpha: 0.08),
@@ -1477,166 +1544,178 @@ class _SmsDraftsBannerCardState extends State<_SmsDraftsBannerCard> {
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Stack(
             children: [
-              // ── Header row ────────────────────────────────────────────────
-              InkWell(
-                onTap: _toggleExpand,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                  bottom: Radius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
-                  child: Row(
-                    children: [
-                      // Badge icon with count overlay
-                      Stack(
-                        clipBehavior: Clip.none,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ── Header row ────────────────────────────────────────────────
+                  InkWell(
+                    onTap: _toggleExpand,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                      bottom: Radius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      child: Row(
                         children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(Icons.sms_rounded,
-                                color: AppColors.primary, size: 20),
+                          // Badge icon with count overlay
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(Icons.sms_rounded,
+                                    color: AppColors.primary, size: 20),
+                              ),
+                              Positioned(
+                                right: -4,
+                                top: -4,
+                                child: Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.expense,
+                                    shape: BoxShape.circle,
+                                    border:
+                                        Border.all(color: cardColor, width: 2),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '${pending.length > 9 ? '9+' : pending.length}',
+                                    style: const TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          Positioned(
-                            right: -4,
-                            top: -4,
-                            child: Container(
-                              width: 18,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                color: AppColors.expense,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: cardColor, width: 2),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${pending.length > 9 ? '9+' : pending.length}',
-                                style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white),
-                              ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${pending.length} Pending Transaction${pending.length == 1 ? '' : 's'}',
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color),
+                                ),
+                                Text(
+                                  'Tap to review & save',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color,
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+                          AnimatedRotation(
+                            turns: _expanded ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(Icons.keyboard_arrow_down_rounded,
+                                size: 22,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color),
                           ),
                         ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${pending.length} SMS Transaction${pending.length == 1 ? '' : 's'}',
-                              style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.color),
-                            ),
-                            Text(
-                              'Tap to review & save',
+                    ),
+                  ),
+
+                  // ── Expandable draft list ─────────────────────────────────────
+                  AnimatedCrossFade(
+                    duration: const Duration(milliseconds: 250),
+                    firstCurve: Curves.easeOut,
+                    secondCurve: Curves.easeIn,
+                    crossFadeState: _expanded
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Divider(height: 1, thickness: 1, color: borderColor),
+                        ...previewDrafts.map((draft) => _MiniDraftTile(
+                              draft: draft,
+                              onTap: () => _openEditSheet(context, draft),
+                            )),
+                        if (pending.length > 3)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                            child: Text(
+                              '+ ${pending.length - 3} more drafts',
                               style: GoogleFonts.poppins(
                                 fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: Theme.of(context)
                                     .textTheme
                                     .bodySmall
                                     ?.color,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      AnimatedRotation(
-                        turns: _expanded ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(Icons.keyboard_arrow_down_rounded,
-                            size: 22,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── Expandable draft list ─────────────────────────────────────
-              AnimatedCrossFade(
-                duration: const Duration(milliseconds: 250),
-                firstCurve: Curves.easeOut,
-                secondCurve: Curves.easeIn,
-                crossFadeState: _expanded
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                firstChild: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Divider(height: 1, thickness: 1, color: borderColor),
-                    ...previewDrafts.map((draft) => _MiniDraftTile(
-                          draft: draft,
-                          onTap: () => _openEditSheet(context, draft),
-                        )),
-                    if (pending.length > 3)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                        child: Text(
-                          '+ ${pending.length - 3} more drafts',
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color,
                           ),
-                        ),
-                      ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 42,
-                        child: ElevatedButton.icon(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const SmsReviewInboxScreen(),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 42,
+                            child: ElevatedButton.icon(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SmsReviewInboxScreen(),
+                                ),
+                              ),
+                              icon: const Icon(Icons.inbox_rounded, size: 18),
+                              label: Text('View All ${pending.length} Drafts',
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
                             ),
                           ),
-                          icon: const Icon(Icons.inbox_rounded, size: 18),
-                          label: Text(
-                              'View All ${pending.length} Drafts',
-                              style: GoogleFonts.poppins(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                    secondChild: const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Container(width: 4, color: AppColors.primary),
                 ),
-                secondChild: const SizedBox.shrink(),
               ),
             ],
           ),
@@ -1669,8 +1748,7 @@ class _MiniDraftTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: borderColor, width: 1)),
         ),
@@ -1703,10 +1781,17 @@ class _MiniDraftTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                        fontSize: 13, fontWeight: FontWeight.w600),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
                   ),
                   Text(
                     '${draft.bank} · ${draft.category}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
@@ -1716,28 +1801,44 @@ class _MiniDraftTile extends StatelessWidget {
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  isWithdrawal
-                      ? '$symbol ${CurrencyFormatter.format(draft.amount)}'
-                      : '${isIncome ? '+' : '-'}$symbol ${CurrencyFormatter.format(draft.amount)}',
-                  style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: accent),
-                ),
-                Text(
-                  draft.transactionDate == null
-                      ? 'Unknown date'
-                      : CurrencyFormatter.shortDate(draft.transactionDate!),
-                  style: GoogleFonts.poppins(
-                    fontSize: 10,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
+            const SizedBox(width: 6),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      isWithdrawal
+                          ? CurrencyFormatter.format(draft.amount,
+                              symbol: symbol)
+                          : CurrencyFormatter.formatWithSign(
+                              isIncome ? draft.amount : -draft.amount,
+                              symbol: symbol,
+                            ),
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: accent),
+                    ),
                   ),
-                ),
-              ],
+                  Text(
+                    draft.transactionDate == null
+                        ? 'Unknown date'
+                        : CurrencyFormatter.shortDate(draft.transactionDate!),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(width: 6),
             const Icon(Icons.chevron_right_rounded,
@@ -1760,8 +1861,7 @@ class _DashboardDraftEditSheet extends StatefulWidget {
       _DashboardDraftEditSheetState();
 }
 
-class _DashboardDraftEditSheetState
-    extends State<_DashboardDraftEditSheet> {
+class _DashboardDraftEditSheetState extends State<_DashboardDraftEditSheet> {
   late final TextEditingController _titleCtrl;
   late final TextEditingController _amountCtrl;
   late TransactionType _type;
@@ -1777,8 +1877,8 @@ class _DashboardDraftEditSheetState
   void initState() {
     super.initState();
     _titleCtrl = TextEditingController(text: widget.draft.title);
-    _amountCtrl = TextEditingController(
-        text: widget.draft.amount.toStringAsFixed(2));
+    _amountCtrl =
+        TextEditingController(text: widget.draft.amount.toStringAsFixed(2));
     _type = widget.draft.txType;
     _kind = widget.draft.kind;
     _category = widget.draft.category;
@@ -1796,8 +1896,14 @@ class _DashboardDraftEditSheetState
   List<String> _categoryOptions() {
     const incomeNames = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
     const expenseNames = [
-      'Food', 'Transport', 'Bills', 'Health', 'Education',
-      'Entertainment', 'Shopping', 'Other',
+      'Food',
+      'Transport',
+      'Bills',
+      'Health',
+      'Education',
+      'Entertainment',
+      'Shopping',
+      'Other',
     ];
     final names = _type == TransactionType.income
         ? List<String>.from(incomeNames)
@@ -1826,8 +1932,7 @@ class _DashboardDraftEditSheetState
   }
 
   Future<void> _save() async {
-    final amount =
-        double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0;
+    final amount = double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0;
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Enter a valid amount.',
@@ -1919,8 +2024,9 @@ class _DashboardDraftEditSheetState
     final borderColor = isDark ? AppColors.darkDivider : Colors.grey.shade200;
     final symbol = context.watch<SettingsProvider>().currencySymbol;
     final wallets = context.watch<WalletProvider>().wallets;
-    final walletNames = wallets.map((w) => w.name).toList();
-    if (!walletNames.contains(_wallet)) walletNames.add(_wallet);
+    final walletNamesRaw = wallets.map((w) => w.name).toList();
+    if (!walletNamesRaw.contains(_wallet)) walletNamesRaw.add(_wallet);
+    final walletNames = walletNamesRaw.toSet().toList(); // deduplicate
     final isWithdrawal = _kind == DraftKind.withdrawal;
     final fromWallet = _walletById(wallets, _fromWalletId) ??
         SmsDraftProvider.bestBankWallet(wallets, widget.draft.bank);
@@ -1961,16 +2067,20 @@ class _DashboardDraftEditSheetState
                         children: [
                           Text('Review SMS Draft',
                               style: GoogleFonts.poppins(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700)),
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary,
+                              )),
                           Text(
                             'From ${widget.draft.bank} · ${widget.draft.transactionDate == null ? 'Unknown date' : CurrencyFormatter.shortDate(widget.draft.transactionDate!)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 12,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color,
                             ),
                           ),
                         ],
@@ -1983,60 +2093,29 @@ class _DashboardDraftEditSheetState
                   ],
                 ),
 
-                // Raw SMS snippet (privacy-redacted)
-                if (widget.draft.rawBody.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkSurface2
-                          : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: borderColor),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.sms_outlined,
-                            size: 14,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            widget.draft.rawBody,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.sourceCodePro(
-                              fontSize: 10,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                // Captured bank SMS (original content)
+                const SizedBox(height: 10),
+                SmsMessageCard(draft: widget.draft),
                 const SizedBox(height: 14),
 
                 // Amount display
                 Center(
-                  child: Text(
-                    '${isWithdrawal ? '' : _type == TransactionType.income ? '+' : '-'}$symbol ${CurrencyFormatter.format(double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? widget.draft.amount)}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: _kind == DraftKind.income
-                          ? AppColors.income
-                          : _kind == DraftKind.withdrawal
-                              ? AppColors.primary
-                              : AppColors.expense,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '${isWithdrawal ? '' : _type == TransactionType.income ? '+' : '-'}'
+                      '${CurrencyFormatter.format(double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? widget.draft.amount, symbol: symbol)}',
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: _kind == DraftKind.income
+                            ? AppColors.income
+                            : _kind == DraftKind.withdrawal
+                                ? AppColors.primary
+                                : AppColors.expense,
+                      ),
                     ),
                   ),
                 ),
@@ -2067,8 +2146,8 @@ class _DashboardDraftEditSheetState
                 TextField(
                   controller: _titleCtrl,
                   style: GoogleFonts.poppins(fontSize: 14),
-                  decoration: _inputDec(
-                      'Merchant / description', borderColor, isDark),
+                  decoration:
+                      _inputDec('Merchant / description', borderColor, isDark),
                 ),
                 const SizedBox(height: 14),
 
@@ -2082,14 +2161,12 @@ class _DashboardDraftEditSheetState
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d*'))
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
                   ],
                   style: GoogleFonts.poppins(fontSize: 14),
                   onChanged: (_) => setState(() {}),
-                  decoration:
-                      _inputDec('$symbol 0.00', borderColor, isDark)
-                          .copyWith(prefixText: '$symbol  '),
+                  decoration: _inputDec('$symbol 0.00', borderColor, isDark)
+                      .copyWith(prefixText: '$symbol  '),
                 ),
                 const SizedBox(height: 14),
 
@@ -2153,12 +2230,11 @@ class _DashboardDraftEditSheetState
                   DropdownButtonFormField<int>(
                     value: fromWallet?.id,
                     isExpanded: true,
-                    decoration:
-                        _inputDec('Bank wallet', borderColor, isDark),
+                    decoration: _inputDec('Bank wallet', borderColor, isDark),
                     style: GoogleFonts.poppins(fontSize: 14),
                     items: wallets
-                        .map((w) => DropdownMenuItem(
-                            value: w.id, child: Text(w.name)))
+                        .map((w) =>
+                            DropdownMenuItem(value: w.id, child: Text(w.name)))
                         .toList(),
                     onChanged: (v) => setState(() => _fromWalletId = v),
                   ),
@@ -2170,12 +2246,11 @@ class _DashboardDraftEditSheetState
                   DropdownButtonFormField<int>(
                     value: toWallet?.id,
                     isExpanded: true,
-                    decoration:
-                        _inputDec('Cash wallet', borderColor, isDark),
+                    decoration: _inputDec('Cash wallet', borderColor, isDark),
                     style: GoogleFonts.poppins(fontSize: 14),
                     items: wallets
-                        .map((w) => DropdownMenuItem(
-                            value: w.id, child: Text(w.name)))
+                        .map((w) =>
+                            DropdownMenuItem(value: w.id, child: Text(w.name)))
                         .toList(),
                     onChanged: (v) => setState(() => _toWalletId = v),
                   ),
@@ -2186,13 +2261,14 @@ class _DashboardDraftEditSheetState
                           fontSize: 12, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
-                    value: walletNames.contains(_wallet) ? _wallet : null,
+                    value: walletNames.contains(_wallet)
+                        ? _wallet
+                        : walletNames.firstOrNull,
                     isExpanded: true,
                     decoration: _inputDec('Wallet', borderColor, isDark),
                     style: GoogleFonts.poppins(fontSize: 14),
                     items: walletNames
-                        .map((w) =>
-                            DropdownMenuItem(value: w, child: Text(w)))
+                        .map((w) => DropdownMenuItem(value: w, child: Text(w)))
                         .toList(),
                     onChanged: (v) {
                       if (v != null) setState(() => _wallet = v);
@@ -2246,10 +2322,14 @@ class _DashboardDraftEditSheetState
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Text('Dismiss',
-                              style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600)),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Dismiss',
+                                maxLines: 1,
+                                softWrap: false,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 15, fontWeight: FontWeight.w600)),
+                          ),
                         ),
                       ),
                     ),
@@ -2272,10 +2352,15 @@ class _DashboardDraftEditSheetState
                                   width: 18,
                                   child: CircularProgressIndicator(
                                       color: Colors.white, strokeWidth: 2))
-                              : Text('Save Transaction',
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600)),
+                              : FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text('Save Transaction',
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600)),
+                                ),
                         ),
                       ),
                     ),
@@ -2309,9 +2394,8 @@ class _DashboardKindSelector extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
-              color: selected
-                  ? color.withValues(alpha: 0.14)
-                  : Colors.transparent,
+              color:
+                  selected ? color.withValues(alpha: 0.14) : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: selected
@@ -2324,14 +2408,21 @@ class _DashboardKindSelector extends StatelessWidget {
               children: [
                 Icon(icon, size: 16, color: color),
                 const SizedBox(width: 5),
-                Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: selected
-                          ? color
-                          : Theme.of(context).textTheme.bodySmall?.color),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: selected
+                              ? color
+                              : Theme.of(context).textTheme.bodySmall?.color),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -2350,14 +2441,14 @@ class _DashboardKindSelector extends StatelessWidget {
       ),
       child: Row(
         children: [
-          option(DraftKind.expense, 'Expense',
-              Icons.arrow_upward_rounded, AppColors.expense),
+          option(DraftKind.expense, 'Expense', Icons.arrow_upward_rounded,
+              AppColors.expense),
           const SizedBox(width: 4),
-          option(DraftKind.withdrawal, 'Withdraw',
-              Icons.swap_horiz_rounded, AppColors.primary),
+          option(DraftKind.withdrawal, 'Withdraw', Icons.swap_horiz_rounded,
+              AppColors.primary),
           const SizedBox(width: 4),
-          option(DraftKind.income, 'Income',
-              Icons.arrow_downward_rounded, AppColors.income),
+          option(DraftKind.income, 'Income', Icons.arrow_downward_rounded,
+              AppColors.income),
         ],
       ),
     );

@@ -121,7 +121,8 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
+        content: Text(msg,
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.expense,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -139,7 +140,9 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -147,7 +150,8 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -232,8 +236,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    disabledBackgroundColor:
-                        AppColors.primary.withOpacity(0.6),
+                    disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -284,9 +287,12 @@ class _FormLabel extends StatelessWidget {
   }
 }
 
-InputDecoration _inputDecoration(BuildContext context, String hint) => InputDecoration(
+InputDecoration _inputDecoration(BuildContext context, String hint) =>
+    InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+      hintStyle: GoogleFonts.poppins(
+          color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+          fontSize: 15),
       filled: true,
       fillColor: Theme.of(context).colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -324,7 +330,9 @@ class _TextInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      style: GoogleFonts.poppins(
+          fontSize: 15,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: _inputDecoration(context, hint),
       validator: validator,
     );
@@ -345,7 +353,9 @@ class _NumberInput extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      style: GoogleFonts.poppins(
+          fontSize: 15,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: _inputDecoration(context, hint),
       validator: required
           ? (v) => (v == null || v.trim().isEmpty) ? 'Enter an amount' : null
@@ -365,7 +375,9 @@ class _NoteInput extends StatelessWidget {
     return TextFormField(
       controller: controller,
       maxLines: 4,
-      style: GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+      style: GoogleFonts.poppins(
+          fontSize: 15,
+          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
       decoration: _inputDecoration(context, hint),
     );
   }
@@ -391,12 +403,20 @@ class _DateField extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.calendar_month_outlined,
-                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 20),
+                color: Theme.of(context).textTheme.bodyMedium?.color ??
+                    Colors.white,
+                size: 20),
             const SizedBox(width: 12),
-            Text(
-              DateFormat('d MMM yyyy').format(date),
-              style:
-                  GoogleFonts.poppins(fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+            Expanded(
+              child: Text(
+                DateFormat('d MMM yyyy').format(date),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white),
+              ),
             ),
           ],
         ),
@@ -425,7 +445,8 @@ class _CategoryDropdown extends StatelessWidget {
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (_) => GoalCategory.all
               .map((c) => _CatRow(cat: c, isSelected: true))
@@ -460,12 +481,17 @@ class _CatRow extends StatelessWidget {
           child: Icon(cat.icon, color: cat.color, size: 17),
         ),
         const SizedBox(width: 12),
-        Text(
-          cat.name,
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+        Expanded(
+          child: Text(
+            cat.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            ),
           ),
         ),
       ],
@@ -502,11 +528,14 @@ class _WalletDropdown extends StatelessWidget {
           hint: Text(
             'Select wallet (optional)',
             style: GoogleFonts.poppins(
-                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+                color: Theme.of(context).textTheme.bodySmall?.color ??
+                    Colors.white,
+                fontSize: 15),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           dropdownColor: Theme.of(context).colorScheme.surface,
           items: [
             DropdownMenuItem<String>(
@@ -514,7 +543,9 @@ class _WalletDropdown extends StatelessWidget {
               child: Text(
                 'None',
                 style: GoogleFonts.poppins(
-                    fontSize: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                    fontSize: 15,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.white),
               ),
             ),
             ...wallets.map((w) => DropdownMenuItem<String>(
@@ -535,11 +566,17 @@ class _WalletDropdown extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Text(
-                        w.name,
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                      Expanded(
+                        child: Text(
+                          w.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            color:
+                                Theme.of(context).textTheme.titleLarge?.color ??
+                                    Colors.white,
+                          ),
                         ),
                       ),
                     ],

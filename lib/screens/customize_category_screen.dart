@@ -42,7 +42,9 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -50,7 +52,8 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -76,41 +79,46 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                       color: _selectedColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(_selectedIcon,
-                        color: Colors.white, size: 28),
+                    child: Icon(_selectedIcon, color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.categoryName,
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          widget.categoryType == CategoryType.expense
-                              ? 'Expense'
-                              : 'Income',
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.categoryName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color:
+                                Theme.of(context).textTheme.titleLarge?.color ??
+                                    Colors.white,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            widget.categoryType == CategoryType.expense
+                                ? 'Expense'
+                                : 'Income',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -123,15 +131,15 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
               style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white,
               ),
             ),
             const SizedBox(height: 14),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 5,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
@@ -161,7 +169,8 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                       icon,
                       color: isSelected
                           ? AppColors.primary
-                          : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                          : Theme.of(context).textTheme.bodyMedium?.color ??
+                              Colors.white,
                       size: 22,
                     ),
                   ),
@@ -176,7 +185,8 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
               style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white,
               ),
             ),
             const SizedBox(height: 14),
@@ -195,9 +205,8 @@ class _CustomizeCategoryScreenState extends State<CustomizeCategoryScreen> {
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSelected
-                            ? AppColors.primary
-                            : Colors.transparent,
+                        color:
+                            isSelected ? AppColors.primary : Colors.transparent,
                         width: 2.5,
                       ),
                     ),

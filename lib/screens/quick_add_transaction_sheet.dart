@@ -85,7 +85,10 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
       if ('0123456789.'.contains(ch)) {
         cur += ch;
       } else {
-        if (cur.isNotEmpty) { tokens.add(cur); cur = ''; }
+        if (cur.isNotEmpty) {
+          tokens.add(cur);
+          cur = '';
+        }
         if (ch.trim().isNotEmpty) tokens.add(ch);
       }
     }
@@ -157,7 +160,8 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
           break;
         case '.':
           // only add dot if the last number segment doesn't already have one
-          final lastNum = RegExp(r'[0-9.]+$').firstMatch(_expression)?.group(0) ?? '';
+          final lastNum =
+              RegExp(r'[0-9.]+$').firstMatch(_expression)?.group(0) ?? '';
           if (!lastNum.contains('.')) _expression += '.';
           break;
         default:
@@ -212,7 +216,8 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
             content: Row(children: [
-              const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+              const Icon(Icons.check_circle_rounded,
+                  color: Colors.white, size: 18),
               const SizedBox(width: 10),
               Text(
                 '${widget.type == TransactionType.income ? 'Income' : 'Expense'} saved!',
@@ -221,7 +226,8 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
             ]),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             backgroundColor: AppColors.income,
             duration: const Duration(seconds: 2),
           ),
@@ -265,7 +271,8 @@ class _QuickAddSheetState extends State<_QuickAddSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).viewInsets.bottom;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isIncome = widget.type == TransactionType.income;
     final accentColor = isIncome ? AppColors.income : AppColors.expense;
@@ -390,7 +397,8 @@ class _CategoryStep extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Choose a category for this transaction',
-                      style: GoogleFonts.poppins(fontSize: 13, color: textSecondary),
+                      style: GoogleFonts.poppins(
+                          fontSize: 13, color: textSecondary),
                     ),
                   ],
                 ),
@@ -399,7 +407,8 @@ class _CategoryStep extends StatelessWidget {
               GestureDetector(
                 onTap: onCreateCategory,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: accentColor,
                     borderRadius: BorderRadius.circular(20),
@@ -439,8 +448,10 @@ class _CategoryStep extends StatelessWidget {
               style: GoogleFonts.poppins(fontSize: 14, color: textPrimary),
               decoration: InputDecoration(
                 hintText: 'Search categories',
-                hintStyle: GoogleFonts.poppins(fontSize: 14, color: textSecondary),
-                prefixIcon: Icon(Icons.search_rounded, color: textSecondary, size: 20),
+                hintStyle:
+                    GoogleFonts.poppins(fontSize: 14, color: textSecondary),
+                prefixIcon:
+                    Icon(Icons.search_rounded, color: textSecondary, size: 20),
                 border: InputBorder.none,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -456,7 +467,8 @@ class _CategoryStep extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 4, height: 18,
+                width: 4,
+                height: 18,
                 decoration: BoxDecoration(
                   color: accentColor,
                   borderRadius: BorderRadius.circular(2),
@@ -466,17 +478,24 @@ class _CategoryStep extends StatelessWidget {
               Text(
                 'ALL CATEGORIES',
                 style: GoogleFonts.poppins(
-                  fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
                   color: textSecondary,
                 ),
               ),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: accentColor, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                    color: accentColor,
+                    borderRadius: BorderRadius.circular(10)),
                 child: Text(
                   '${categories.length}',
-                  style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                  style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white),
                 ),
               ),
             ],
@@ -490,7 +509,8 @@ class _CategoryStep extends StatelessWidget {
               ? Center(
                   child: Text(
                     'No categories found',
-                    style: GoogleFonts.poppins(fontSize: 14, color: textSecondary),
+                    style:
+                        GoogleFonts.poppins(fontSize: 14, color: textSecondary),
                   ),
                 )
               : GridView.builder(
@@ -552,7 +572,8 @@ class _CategoryGridItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 52, height: 52,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
                 color: category.color.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(14),
@@ -568,7 +589,9 @@ class _CategoryGridItem extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: textPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
                 ),
               ),
             ),
@@ -633,12 +656,15 @@ class _AmountStep extends StatelessWidget {
                 onTap: onBack,
                 child: Row(
                   children: [
-                    Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: accentColor),
+                    Icon(Icons.arrow_back_ios_new_rounded,
+                        size: 16, color: accentColor),
                     const SizedBox(width: 4),
                     Text(
                       'Category',
                       style: GoogleFonts.poppins(
-                        fontSize: 13, fontWeight: FontWeight.w600, color: accentColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: accentColor,
                       ),
                     ),
                   ],
@@ -646,7 +672,8 @@ class _AmountStep extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: selectedCategory.color.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
@@ -654,12 +681,15 @@ class _AmountStep extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(selectedCategory.icon, size: 16, color: selectedCategory.color),
+                    Icon(selectedCategory.icon,
+                        size: 16, color: selectedCategory.color),
                     const SizedBox(width: 6),
                     Text(
                       selectedCategory.name,
                       style: GoogleFonts.poppins(
-                        fontSize: 13, fontWeight: FontWeight.w600, color: selectedCategory.color,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: selectedCategory.color,
                       ),
                     ),
                   ],
@@ -679,13 +709,19 @@ class _AmountStep extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 3, height: 16,
-                    decoration: BoxDecoration(color: accentColor, borderRadius: BorderRadius.circular(2)),
+                    width: 3,
+                    height: 16,
+                    decoration: BoxDecoration(
+                        color: accentColor,
+                        borderRadius: BorderRadius.circular(2)),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Select Account',
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: textPrimary),
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary),
                   ),
                 ],
               ),
@@ -693,7 +729,9 @@ class _AmountStep extends StatelessWidget {
               SizedBox(
                 height: 62,
                 child: wallets.isEmpty
-                    ? Text('No wallets available', style: GoogleFonts.poppins(fontSize: 13, color: textSecondary))
+                    ? Text('No wallets available',
+                        style: GoogleFonts.poppins(
+                            fontSize: 13, color: textSecondary))
                     : ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: wallets.length,
@@ -705,12 +743,17 @@ class _AmountStep extends StatelessWidget {
                             onTap: () => onWalletChanged(w.name),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
                               decoration: BoxDecoration(
-                                color: isSelected ? accentColor.withOpacity(0.12) : surfaceColor,
+                                color: isSelected
+                                    ? accentColor.withOpacity(0.12)
+                                    : surfaceColor,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelected ? accentColor : Theme.of(context).dividerColor,
+                                  color: isSelected
+                                      ? accentColor
+                                      : Theme.of(context).dividerColor,
                                   width: isSelected ? 1.5 : 1,
                                 ),
                               ),
@@ -724,21 +767,28 @@ class _AmountStep extends StatelessWidget {
                                       Text(
                                         w.name,
                                         style: GoogleFonts.poppins(
-                                          fontSize: 13, fontWeight: FontWeight.w600,
-                                          color: isSelected ? accentColor : textPrimary,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: isSelected
+                                              ? accentColor
+                                              : textPrimary,
                                         ),
                                       ),
                                       if (isSelected) ...[
                                         const SizedBox(width: 4),
-                                        Icon(Icons.check_circle_rounded, size: 14, color: accentColor),
+                                        Icon(Icons.check_circle_rounded,
+                                            size: 14, color: accentColor),
                                       ],
                                     ],
                                   ),
                                   Text(
-                                    CurrencyFormatter.format(w.balance, symbol: settings.currencySymbol),
+                                    CurrencyFormatter.format(w.balance,
+                                        symbol: settings.currencySymbol),
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
-                                      color: isSelected ? accentColor.withOpacity(0.8) : textSecondary,
+                                      color: isSelected
+                                          ? accentColor.withOpacity(0.8)
+                                          : textSecondary,
                                     ),
                                   ),
                                 ],
@@ -762,7 +812,8 @@ class _AmountStep extends StatelessWidget {
             decoration: BoxDecoration(
               color: surfaceColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: accentColor.withOpacity(0.4), width: 1.5),
+              border:
+                  Border.all(color: accentColor.withOpacity(0.4), width: 1.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -770,13 +821,19 @@ class _AmountStep extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      width: 3, height: 14,
-                      decoration: BoxDecoration(color: accentColor, borderRadius: BorderRadius.circular(2)),
+                      width: 3,
+                      height: 14,
+                      decoration: BoxDecoration(
+                          color: accentColor,
+                          borderRadius: BorderRadius.circular(2)),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Enter Amount',
-                      style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: textSecondary),
+                      style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: textSecondary),
                     ),
                   ],
                 ),
@@ -786,7 +843,10 @@ class _AmountStep extends StatelessWidget {
                   children: [
                     Text(
                       settings.currencySymbol,
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500, color: textSecondary),
+                      style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: textSecondary),
                     ),
                     const SizedBox(width: 6),
                     Flexible(
@@ -796,7 +856,10 @@ class _AmountStep extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
-                          fontSize: 34, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -1,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          color: textPrimary,
+                          letterSpacing: -1,
                         ),
                       ),
                     ),
@@ -812,7 +875,8 @@ class _AmountStep extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _Numpad(accentColor: accentColor, isDark: isDark, onKey: onKey),
+            child:
+                _Numpad(accentColor: accentColor, isDark: isDark, onKey: onKey),
           ),
         ),
 
@@ -833,11 +897,13 @@ class _AmountStep extends StatelessWidget {
                         backgroundColor: accentColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
                       ),
                       child: Text(
                         'Quick Save',
-                        style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700),
+                        style: GoogleFonts.poppins(
+                            fontSize: 15, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -852,11 +918,13 @@ class _AmountStep extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: accentColor,
                         side: BorderSide(color: accentColor, width: 1.5),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
                       ),
                       child: Text(
                         'Add More Details',
-                        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+                        style: GoogleFonts.poppins(
+                            fontSize: 14, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -877,7 +945,8 @@ class _Numpad extends StatelessWidget {
   final bool isDark;
   final ValueChanged<String> onKey;
 
-  const _Numpad({required this.accentColor, required this.isDark, required this.onKey});
+  const _Numpad(
+      {required this.accentColor, required this.isDark, required this.onKey});
 
   @override
   Widget build(BuildContext context) {
@@ -894,9 +963,9 @@ class _Numpad extends StatelessWidget {
 
     Widget buildKey(String label) {
       final isOperator = ['÷', '×', '-', '+'].contains(label);
-      final isBracket  = label == '(' || label == ')';
-      final isEquals   = label == '=';
-      final isClear    = label == 'C';
+      final isBracket = label == '(' || label == ')';
+      final isEquals = label == '=';
+      final isClear = label == 'C';
       final isBackspace = label == '⌫';
 
       Color bgColor;

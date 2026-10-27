@@ -48,9 +48,8 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
       final e = widget.editEntry!;
       _personController.text = e.personName;
       _amountController.text = e.amount.toStringAsFixed(0);
-      _accumulatedController.text = e.accumulatedAmount > 0 
-          ? e.accumulatedAmount.toStringAsFixed(0) 
-          : '';
+      _accumulatedController.text =
+          e.accumulatedAmount > 0 ? e.accumulatedAmount.toStringAsFixed(0) : '';
       _noteController.text = e.note ?? '';
       _type = e.type;
       _date = e.date;
@@ -103,11 +102,11 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
       _showSnack('Enter a valid amount');
       return;
     }
-    
+
     final accumulatedAmount = _accumulatedController.text.trim().isNotEmpty
         ? (double.tryParse(_accumulatedController.text.trim()) ?? 0.0)
         : 0.0;
-        
+
     if (accumulatedAmount > amount) {
       _showSnack('Accumulated amount cannot exceed total amount');
       return;
@@ -159,7 +158,8 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
+        content: Text(msg,
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.expense,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -177,7 +177,9 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -185,7 +187,8 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -210,7 +213,9 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
               TextFormField(
                 controller: _personController,
                 style: GoogleFonts.poppins(
-                    fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+                    fontSize: 15,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white),
                 decoration: _inputDecoration(context, 'Nimal Perera'),
                 validator: (v) => (v == null || v.trim().isEmpty)
                     ? 'Enter person name'
@@ -226,13 +231,15 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 style: GoogleFonts.poppins(
-                    fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+                    fontSize: 15,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white),
                 decoration: _inputDecoration(context, '5,000'),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Enter amount' : null,
               ),
               const SizedBox(height: 20),
-              
+
               // Accumulated Amount
               const _FormLabel('Accumulated Amount (Rs.) - Optional'),
               const SizedBox(height: 8),
@@ -241,8 +248,11 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 style: GoogleFonts.poppins(
-                    fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
-                decoration: _inputDecoration(context, 'e.g. 1,000 (Already paid)'),
+                    fontSize: 15,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white),
+                decoration:
+                    _inputDecoration(context, 'e.g. 1,000 (Already paid)'),
               ),
               const SizedBox(height: 20),
 
@@ -282,7 +292,9 @@ class _AddLendBorrowScreenState extends State<AddLendBorrowScreen> {
                 controller: _noteController,
                 maxLines: 3,
                 style: GoogleFonts.poppins(
-                    fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+                    fontSize: 15,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white),
                 decoration: _inputDecoration(context, 'Lunch and transport'),
               ),
               const SizedBox(height: 20),
@@ -383,7 +395,8 @@ class _TypeToggle extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: selected == LendBorrowType.lent
                         ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                        : Theme.of(context).textTheme.bodyMedium?.color ??
+                            Colors.white,
                   ),
                 ),
               ),
@@ -408,7 +421,8 @@ class _TypeToggle extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: selected == LendBorrowType.borrowed
                         ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                        : Theme.of(context).textTheme.bodyMedium?.color ??
+                            Colors.white,
                   ),
                 ),
               ),
@@ -443,7 +457,8 @@ class _StatusDropdown extends StatelessWidget {
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           dropdownColor: Theme.of(context).colorScheme.surface,
           items: statuses
               .map((s) => DropdownMenuItem<LendBorrowStatus>(
@@ -457,9 +472,18 @@ class _StatusDropdown extends StatelessWidget {
                               color: s.color, shape: BoxShape.circle),
                         ),
                         const SizedBox(width: 10),
-                        Text(s.label,
-                            style: GoogleFonts.poppins(
-                                fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
+                        Expanded(
+                          child: Text(s.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color ??
+                                      Colors.white)),
+                        ),
                       ],
                     ),
                   ))
@@ -501,18 +525,24 @@ class _WalletDropdown extends StatelessWidget {
           isExpanded: true,
           hint: Text(
             'Select wallet',
-            style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+            style: GoogleFonts.poppins(
+                color: Theme.of(context).textTheme.bodySmall?.color ??
+                    Colors.white,
+                fontSize: 15),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           dropdownColor: Theme.of(context).colorScheme.surface,
           items: [
             DropdownMenuItem<String>(
               value: null,
               child: Text('None',
                   style: GoogleFonts.poppins(
-                      fontSize: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
+                      fontSize: 15,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white)),
             ),
             ...wallets.map((w) => DropdownMenuItem<String>(
                   value: w.name,
@@ -531,9 +561,18 @@ class _WalletDropdown extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(w.name,
-                        style: GoogleFonts.poppins(
-                            fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white)),
+                    Expanded(
+                      child: Text(w.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.color ??
+                                  Colors.white)),
+                    ),
                   ]),
                 ))
           ],
@@ -563,9 +602,12 @@ class _FormLabel extends StatelessWidget {
   }
 }
 
-InputDecoration _inputDecoration(BuildContext context, String hint) => InputDecoration(
+InputDecoration _inputDecoration(BuildContext context, String hint) =>
+    InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 15),
+      hintStyle: GoogleFonts.poppins(
+          color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+          fontSize: 15),
       filled: true,
       fillColor: Theme.of(context).colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -611,13 +653,17 @@ class _DateField extends StatelessWidget {
         child: Row(
           children: [
             Icon(Icons.calendar_month_outlined,
-                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white, size: 18),
+                color: Theme.of(context).textTheme.bodyMedium?.color ??
+                    Colors.white,
+                size: 18),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 DateFormat('d MMM yyyy').format(date),
                 style: GoogleFonts.poppins(
-                    fontSize: 13, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+                    fontSize: 13,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),
             ),

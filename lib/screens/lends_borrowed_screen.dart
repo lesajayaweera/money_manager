@@ -240,6 +240,8 @@ class _SummaryCards extends StatelessWidget {
                     children: [
                       Text(
                         'You Will Receive',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: AppColors.income,
@@ -247,13 +249,19 @@ class _SummaryCards extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        CurrencyFormatter.format(provider.totalToReceive,
-                            symbol: settings.currencySymbol),
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.income,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          CurrencyFormatter.format(provider.totalToReceive,
+                              symbol: settings.currencySymbol),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.income,
+                          ),
                         ),
                       ),
                     ],
@@ -292,6 +300,8 @@ class _SummaryCards extends StatelessWidget {
                     children: [
                       Text(
                         'You Need to Pay',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: AppColors.expense,
@@ -299,13 +309,19 @@ class _SummaryCards extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        CurrencyFormatter.format(provider.totalToPay,
-                            symbol: settings.currencySymbol),
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.expense,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          CurrencyFormatter.format(provider.totalToPay,
+                              symbol: settings.currencySymbol),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.expense,
+                          ),
                         ),
                       ),
                     ],
@@ -444,6 +460,8 @@ class _EntryTile extends StatelessWidget {
                 children: [
                   Text(
                     entry.personName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -454,6 +472,8 @@ class _EntryTile extends StatelessWidget {
                   Text(
                     CurrencyFormatter.format(entry.amount,
                         symbol: settings.currencySymbol),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -461,6 +481,8 @@ class _EntryTile extends StatelessWidget {
                   ),
                   Text(
                     'Due: ${CurrencyFormatter.shortDate(entry.dueDate)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,

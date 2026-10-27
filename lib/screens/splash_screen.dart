@@ -281,7 +281,7 @@ class _WalletIllustration extends StatelessWidget {
               width: 160,
               height: 110,
               decoration: BoxDecoration(
-                color: const Color(0xFF5543C8),
+                color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -299,9 +299,9 @@ class _WalletIllustration extends StatelessWidget {
             child: Container(
               width: 160,
               height: 50,
-              decoration: const BoxDecoration(
-                color: Color(0xFF6655DC),
-                borderRadius: BorderRadius.vertical(
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
               ),
@@ -330,7 +330,7 @@ class _WalletIllustration extends StatelessWidget {
                 width: 90,
                 height: 55,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50),
+                  color: AppColors.income,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -363,7 +363,7 @@ class _WalletIllustration extends StatelessWidget {
                 width: 90,
                 height: 55,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF66BB6A),
+                  color: AppColors.incomeLight,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -377,7 +377,7 @@ class _WalletIllustration extends StatelessWidget {
                   child: Text(
                     '\$',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.income,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),

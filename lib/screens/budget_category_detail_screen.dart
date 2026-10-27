@@ -54,8 +54,8 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
         ? 0.0
         : (spentAmount / category.allocatedAmount).clamp(0.0, 1.0);
     final isOver = spentAmount > category.allocatedAmount;
-    final leftAmount = (category.allocatedAmount - spentAmount)
-        .clamp(0.0, double.infinity);
+    final leftAmount =
+        (category.allocatedAmount - spentAmount).clamp(0.0, double.infinity);
 
     // Get transactions for this category in this month
     final allTx = context.watch<TransactionProvider>().allTransactions;
@@ -111,26 +111,32 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
                 child: Icon(icon, color: Colors.white, size: 28),
               ),
               const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category.categoryName,
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: textPrimary,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category.categoryName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    monthYear,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: textSub,
+                    const SizedBox(height: 2),
+                    Text(
+                      monthYear,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: textSub,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -191,7 +197,8 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
                       child: Container(
                         height: 12,
                         decoration: BoxDecoration(
-                          color: color, // The image shows orange, which matches category color for Food
+                          color:
+                              color, // The image shows orange, which matches category color for Food
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
@@ -202,26 +209,34 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _AmountItem(
-                      label: 'Budget',
-                      amount: category.allocatedAmount,
-                      amountColor: AppColors.primary,
-                      symbol: symbol,
-                      textSub: textSub,
+                    Expanded(
+                      child: _AmountItem(
+                        label: 'Budget',
+                        amount: category.allocatedAmount,
+                        amountColor: AppColors.primary,
+                        symbol: symbol,
+                        textSub: textSub,
+                      ),
                     ),
-                    _AmountItem(
-                      label: 'Spent',
-                      amount: spentAmount,
-                      amountColor: AppColors.expense,
-                      symbol: symbol,
-                      textSub: textSub,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _AmountItem(
+                        label: 'Spent',
+                        amount: spentAmount,
+                        amountColor: AppColors.expense,
+                        symbol: symbol,
+                        textSub: textSub,
+                      ),
                     ),
-                    _AmountItem(
-                      label: 'Left',
-                      amount: leftAmount,
-                      amountColor: AppColors.income,
-                      symbol: symbol,
-                      textSub: textSub,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _AmountItem(
+                        label: 'Left',
+                        amount: leftAmount,
+                        amountColor: AppColors.income,
+                        symbol: symbol,
+                        textSub: textSub,
+                      ),
                     ),
                   ],
                 ),
@@ -265,7 +280,8 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const TransactionHistoryScreen(),
+                            builder: (context) =>
+                                const TransactionHistoryScreen(),
                           ),
                         );
                       },
@@ -274,7 +290,7 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF6C5CE7), // AppColors.primary
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -335,7 +351,9 @@ class BudgetCategoryDetailScreen extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.spending.withOpacity(0.15) : AppColors.spendingLight,
+                    color: isDark
+                        ? AppColors.spending.withOpacity(0.15)
+                        : AppColors.spendingLight,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.lightbulb_outline_rounded,
@@ -402,6 +420,8 @@ class _AmountItem extends StatelessWidget {
       children: [
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -409,12 +429,18 @@ class _AmountItem extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          CurrencyFormatter.format(amount, symbol: symbol),
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: amountColor,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            CurrencyFormatter.format(amount, symbol: symbol),
+            maxLines: 1,
+            softWrap: false,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: amountColor,
+            ),
           ),
         ),
       ],
@@ -449,8 +475,8 @@ class _TransactionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryProvider = context.watch<CategoryProvider>();
-    final appCat = categoryProvider.findByName(
-        transaction.category, CategoryType.expense);
+    final appCat =
+        categoryProvider.findByName(transaction.category, CategoryType.expense);
     final meta = appCat != null
         ? BudgetCategoryMeta.fromAppCategory(appCat)
         : BudgetCategoryMeta.findByName(transaction.category);
@@ -487,6 +513,8 @@ class _TransactionItem extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '${_formatDate(transaction.date)} • ${transaction.walletName ?? 'Cash'}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   color: textSub,
@@ -496,12 +524,21 @@ class _TransactionItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          '${isExpense ? '-' : '+'}${CurrencyFormatter.format(transaction.amount, symbol: symbol)}',
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: isExpense ? AppColors.expense : AppColors.income,
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 120),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${isExpense ? '-' : '+'}${CurrencyFormatter.format(transaction.amount, symbol: symbol)}',
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isExpense ? AppColors.expense : AppColors.income,
+              ),
+            ),
           ),
         ),
       ],

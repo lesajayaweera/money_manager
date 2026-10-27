@@ -162,6 +162,8 @@ class _GoalsSummaryCard extends StatelessWidget {
               children: [
                 Text(
                   'Total Saved',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     color: Colors.white.withOpacity(0.8),
@@ -169,14 +171,20 @@ class _GoalsSummaryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  CurrencyFormatter.format(provider.totalSaved,
-                      symbol: settings.currencySymbol),
-                  style: GoogleFonts.poppins(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    CurrencyFormatter.format(provider.totalSaved,
+                        symbol: settings.currencySymbol),
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ),
               ],
@@ -190,27 +198,37 @@ class _GoalsSummaryCard extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 16),
           ),
           // Active goals
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Active Goals',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(0.8),
-                  fontWeight: FontWeight.w500,
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Active Goals',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.8),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${provider.activeGoalCount}',
-                style: GoogleFonts.poppins(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                const SizedBox(height: 8),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${provider.activeGoalCount}',
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(width: 12),
           // Goal icon decoration
@@ -290,6 +308,8 @@ class _GoalCard extends StatelessWidget {
                 children: [
                   Text(
                     goal.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -297,12 +317,18 @@ class _GoalCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 3),
-                  Text(
-                    '${CurrencyFormatter.format(goal.savedAmount, symbol: settings.currencySymbol)} of '
-                    '${CurrencyFormatter.format(goal.targetAmount, symbol: settings.currencySymbol)}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${CurrencyFormatter.format(goal.savedAmount, symbol: settings.currencySymbol)} of '
+                      '${CurrencyFormatter.format(goal.targetAmount, symbol: settings.currencySymbol)}',
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -318,6 +344,8 @@ class _GoalCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(
                     'Target Date: ${CurrencyFormatter.shortDate(goal.targetDate)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       color: AppColors.primary,

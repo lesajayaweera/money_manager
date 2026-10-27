@@ -13,7 +13,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 13;
+  static const int _dbVersion = 14;
   static const String _tableName = 'transactions';
   static const String _draftsTable = 'sms_drafts';
 
@@ -157,14 +157,16 @@ class DatabaseService {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       try {
-        await db.execute('ALTER TABLE $_tableName ADD COLUMN title TEXT NOT NULL DEFAULT ""');
+        await db.execute(
+            'ALTER TABLE $_tableName ADD COLUMN title TEXT NOT NULL DEFAULT ""');
       } catch (e) {
         // Ignore if column already exists
       }
     }
     if (oldVersion < 3) {
       try {
-        await db.execute('ALTER TABLE $_tableName ADD COLUMN created_at TEXT NOT NULL DEFAULT ""');
+        await db.execute(
+            'ALTER TABLE $_tableName ADD COLUMN created_at TEXT NOT NULL DEFAULT ""');
       } catch (e) {
         // Ignore if column already exists
       }
@@ -245,14 +247,16 @@ class DatabaseService {
     }
     if (oldVersion < 7) {
       try {
-        await db.execute('ALTER TABLE $_tableName ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
+        await db.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
       } catch (e) {
         // Ignore if column already exists
       }
     }
     if (oldVersion < 8) {
       try {
-        await db.execute('ALTER TABLE goals ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
+        await db.execute(
+            'ALTER TABLE goals ADD COLUMN wallet_name TEXT NOT NULL DEFAULT ""');
       } catch (e) {
         // Ignore if column already exists
       }
@@ -319,6 +323,13 @@ class DatabaseService {
         );
       } catch (_) {}
     }
+    if (oldVersion < 14) {
+      try {
+        await db.execute(
+          'ALTER TABLE $_draftsTable ADD COLUMN original_body TEXT NOT NULL DEFAULT \'\'',
+        );
+      } catch (_) {}
+    }
   }
 
   Future<void> _createSmsDraftsTable(Database db) async {
@@ -328,6 +339,7 @@ class DatabaseService {
         sender TEXT NOT NULL,
         bank TEXT NOT NULL,
         raw_body TEXT NOT NULL,
+        original_body TEXT NOT NULL DEFAULT '',
         title TEXT NOT NULL DEFAULT '',
         amount REAL NOT NULL DEFAULT 0,
         tx_type TEXT NOT NULL,
@@ -366,7 +378,6 @@ class DatabaseService {
     }
   }
 
-
   Future<void> _seedSampleData(Database db) async {
     final now = DateTime.now();
     // Seed sample wallets
@@ -404,7 +415,8 @@ class DatabaseService {
         'amount': 300.0,
         'type': 'expense',
         'category': 'Transport',
-        'date': DateTime(now.year, now.month, now.day - 1 < 1 ? 1 : now.day - 1).toIso8601String(),
+        'date': DateTime(now.year, now.month, now.day - 1 < 1 ? 1 : now.day - 1)
+            .toIso8601String(),
         'note': 'Auto rickshaw',
         'created_at': DateTime.now().toIso8601String(),
       },
@@ -451,7 +463,8 @@ class DatabaseService {
 
   Future<void> deleteTransactionsByLendBorrowId(int lendBorrowId) async {
     final db = await database;
-    await db.delete(_tableName, where: 'lend_borrow_id = ?', whereArgs: [lendBorrowId]);
+    await db.delete(_tableName,
+        where: 'lend_borrow_id = ?', whereArgs: [lendBorrowId]);
   }
 
   Future<void> clearAllTransactions() async {
@@ -473,7 +486,8 @@ class DatabaseService {
   Future<void> clearAllWallets() async {
     final db = await database;
     await db.delete('wallets', where: 'name != ?', whereArgs: ['Cash']);
-    await db.rawUpdate('UPDATE wallets SET balance = 0 WHERE name = ?', ['Cash']);
+    await db
+        .rawUpdate('UPDATE wallets SET balance = 0 WHERE name = ?', ['Cash']);
     await db.delete('wallet_transfers');
   }
 
@@ -667,12 +681,14 @@ class DatabaseService {
   Future<int> insertGoal(GoalModel goal) async {
     final db = await database;
     final map = goal.toMap();
-    return db.insert('goals', map, conflictAlgorithm: ConflictAlgorithm.replace);
+    return db.insert('goals', map,
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<int> updateGoal(GoalModel goal) async {
     final db = await database;
-    return db.update('goals', goal.toMap(), where: 'id = ?', whereArgs: [goal.id]);
+    return db
+        .update('goals', goal.toMap(), where: 'id = ?', whereArgs: [goal.id]);
   }
 
   Future<int> deleteGoal(int id) async {
@@ -843,8 +859,8 @@ class DatabaseService {
 
   Future<void> deleteBudget(int id) async {
     final db = await database;
-    await db.delete('budget_categories',
-        where: 'budget_id = ?', whereArgs: [id]);
+    await db
+        .delete('budget_categories', where: 'budget_id = ?', whereArgs: [id]);
     await db.delete('budgets', where: 'id = ?', whereArgs: [id]);
   }
 
@@ -854,8 +870,8 @@ class DatabaseService {
     final List<BudgetModel> result = [];
     for (final row in budgetRows) {
       final id = row['id'] as int;
-      final catRows = await db.query('budget_categories',
-          where: 'budget_id = ?', whereArgs: [id]);
+      final catRows = await db
+          .query('budget_categories', where: 'budget_id = ?', whereArgs: [id]);
       final cats = catRows.map(BudgetCategoryAllocation.fromMap).toList();
       result.add(BudgetModel.fromMap(row, cats));
     }
@@ -877,8 +893,8 @@ class DatabaseService {
     if (budgetRows.isEmpty) return null;
     final row = budgetRows.first;
     final id = row['id'] as int;
-    final catRows = await db.query('budget_categories',
-        where: 'budget_id = ?', whereArgs: [id]);
+    final catRows = await db
+        .query('budget_categories', where: 'budget_id = ?', whereArgs: [id]);
     final cats = catRows.map(BudgetCategoryAllocation.fromMap).toList();
     return BudgetModel.fromMap(row, cats);
   }
@@ -899,13 +915,12 @@ class DatabaseService {
     // BUG 4 FIX: order by id DESC (creation order), not start_date DESC.
     // A budget with an older start_date (e.g. a historical entry) should not
     // displace a more recently created budget.
-    final budgetRows = await db.query('budgets',
-        orderBy: 'id DESC', limit: 1);
+    final budgetRows = await db.query('budgets', orderBy: 'id DESC', limit: 1);
     if (budgetRows.isEmpty) return null;
     final row = budgetRows.first;
     final id = row['id'] as int;
-    final catRows = await db.query('budget_categories',
-        where: 'budget_id = ?', whereArgs: [id]);
+    final catRows = await db
+        .query('budget_categories', where: 'budget_id = ?', whereArgs: [id]);
     final cats = catRows.map(BudgetCategoryAllocation.fromMap).toList();
     return BudgetModel.fromMap(row, cats);
   }
@@ -932,6 +947,23 @@ class DatabaseService {
         where: 'id = ?', whereArgs: [draft.id]);
   }
 
+  /// Fills in the original SMS body for an existing draft captured before
+  /// original bodies were stored. Does nothing when already populated.
+  Future<void> backfillOriginalBody(
+      String dedupKey, String originalBody) async {
+    if (originalBody.isEmpty) return;
+    final db = await database;
+    await db.update(
+      _draftsTable,
+      {
+        'original_body': originalBody,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: "dedup_key = ? AND (original_body IS NULL OR original_body = '')",
+      whereArgs: [dedupKey],
+    );
+  }
+
   Future<void> markDraftStatus(int id, SmsDraftStatus status) async {
     final db = await database;
     await db.update(
@@ -947,7 +979,8 @@ class DatabaseService {
     final rows = status == null
         ? await db.query(_draftsTable, orderBy: 'created_at DESC')
         : await db.query(_draftsTable,
-            where: 'status = ?', whereArgs: [status.name],
+            where: 'status = ?',
+            whereArgs: [status.name],
             orderBy: 'created_at DESC');
     return rows.map(SmsDraftModel.fromMap).toList();
   }

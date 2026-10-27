@@ -34,18 +34,24 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         title: Text(
           'Remove Category',
           style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
         ),
         content: Text(
           'Are you sure you want to remove "${_category.name}"? This cannot be undone.',
-          style:
-              GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel',
-                style: GoogleFonts.poppins(color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white)),
+                style: GoogleFonts.poppins(
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -95,7 +101,9 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -103,14 +111,16 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.more_vert_rounded,
-                color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+                color: Theme.of(context).textTheme.bodyMedium?.color ??
+                    Colors.white),
             onPressed: () => _showMoreMenu(),
           ),
         ],
@@ -138,34 +148,48 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     child: Icon(_category.icon, color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            _category.name,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _category.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color ??
+                                      Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          _TypeBadge(isExpense: isExpense),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _category.isDefault
-                            ? 'Default Category'
-                            : 'Custom Category',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                            const SizedBox(width: 8),
+                            _TypeBadge(isExpense: isExpense),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          _category.isDefault
+                              ? 'Default Category'
+                              : 'Custom Category',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -332,8 +356,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
               },
             ),
             ListTile(
-              leading:
-                  Icon(Icons.palette_rounded, color: AppColors.primary),
+              leading: Icon(Icons.palette_rounded, color: AppColors.primary),
               title: Text('Customize Icon & Color',
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               onTap: () {
@@ -406,27 +429,45 @@ class _DetailRow extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Theme.of(context).textTheme.titleLarge?.color ??
+                      Colors.white,
+                ),
               ),
             ),
-            Row(
-              children: [
-                Text(
-                  value,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: valueColor ?? Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
-                    fontWeight: FontWeight.w500,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: valueColor ??
+                            Theme.of(context).textTheme.bodyMedium?.color ??
+                            Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded,
-                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 18),
-              ],
+                  const SizedBox(width: 4),
+                  Icon(Icons.chevron_right_rounded,
+                      color: Theme.of(context).textTheme.bodySmall?.color ??
+                          Colors.white,
+                      size: 18),
+                ],
+              ),
             ),
           ],
         ),
@@ -453,7 +494,8 @@ class _IconColorRow extends StatelessWidget {
               'Icon & Color',
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white,
               ),
             ),
             Row(
@@ -461,7 +503,9 @@ class _IconColorRow extends StatelessWidget {
                 CircleAvatar(backgroundColor: color, radius: 10),
                 const SizedBox(width: 6),
                 Icon(Icons.chevron_right_rounded,
-                    color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 18),
+                    color: Theme.of(context).textTheme.bodySmall?.color ??
+                        Colors.white,
+                    size: 18),
               ],
             ),
           ],
@@ -470,8 +514,6 @@ class _IconColorRow extends StatelessWidget {
     );
   }
 }
-
-
 
 class _Divider extends StatelessWidget {
   @override
@@ -484,5 +526,3 @@ class _Divider extends StatelessWidget {
         endIndent: 16);
   }
 }
-
-

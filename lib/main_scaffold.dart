@@ -97,47 +97,55 @@ class MainScaffoldState extends State<MainScaffold> {
               final item = entry.value;
               final isActive = _currentIndex == index;
 
-              return GestureDetector(
-                onTap: () => setState(() => _currentIndex = index),
-                behavior: HitTestBehavior.opaque,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? AppColors.primary.withOpacity(0.1)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(
-                          isActive ? item.activeIcon : item.icon,
-                          key: ValueKey(isActive),
-                          color: isActive
-                              ? AppColors.primary
-                              : Theme.of(context).textTheme.bodySmall?.color,
-                          size: 22,
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _currentIndex = index),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? AppColors.primary.withOpacity(0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: Icon(
+                            isActive ? item.activeIcon : item.icon,
+                            key: ValueKey(isActive),
+                            color: isActive
+                                ? AppColors.primary
+                                : Theme.of(context).textTheme.bodySmall?.color,
+                            size: 22,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        item.label,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: isActive
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                          color: isActive
-                              ? AppColors.primary
-                              : Theme.of(context).textTheme.bodySmall?.color,
+                        const SizedBox(height: 3),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            item.label,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight:
+                                  isActive ? FontWeight.w600 : FontWeight.w400,
+                              color: isActive
+                                  ? AppColors.primary
+                                  : Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall?.color,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );

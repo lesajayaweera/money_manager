@@ -159,18 +159,21 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
                           children: [
-                            _FilterChip(label: 'All',
+                            _FilterChip(
+                                label: 'All',
                                 selected: _filter == null,
                                 onTap: () => setState(() => _filter = null)),
                             for (final b in banks) ...[
                               const SizedBox(width: 8),
-                              _FilterChip(label: b,
+                              _FilterChip(
+                                  label: b,
                                   selected: _filter == b,
                                   onTap: () => setState(() => _filter = b)),
                             ],
                             if (_items.any((m) => !m.isBank)) ...[
                               const SizedBox(width: 8),
-                              _FilterChip(label: 'Other',
+                              _FilterChip(
+                                  label: 'Other',
                                   selected: _filter == 'other',
                                   muted: true,
                                   onTap: () =>
@@ -187,7 +190,8 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
                           : RefreshIndicator(
                               onRefresh: _load,
                               child: ListView.separated(
-                                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 4, 20, 24),
                                 itemCount: visible.length,
                                 separatorBuilder: (_, __) =>
                                     const SizedBox(height: 10),
@@ -195,9 +199,11 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
                                   final item = visible[index];
                                   return _MessageTile(
                                     item: item,
-                                    alreadyDraft: item.result?.matched == true &&
+                                    alreadyDraft: item.result?.matched ==
+                                            true &&
                                         item.result!.dedupKey.isNotEmpty &&
-                                        draftKeys.contains(item.result!.dedupKey),
+                                        draftKeys
+                                            .contains(item.result!.dedupKey),
                                     onTap: () =>
                                         _showDetails(context, item, provider),
                                   );
@@ -218,6 +224,8 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
@@ -282,7 +290,8 @@ class _SmsMessagesScreenState extends State<SmsMessagesScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                _StatusChip(label: status.label,
+                _StatusChip(
+                    label: status.label,
                     color: status.color,
                     dimmed: !item.isBank),
                 const SizedBox(height: 14),
@@ -332,8 +341,7 @@ class _Status {
       return const _Status('Filtered out', AppColors.textHint, dimmed: true);
     }
     if (r == null) {
-      return const _Status(
-          'Skipped · Not recognised', AppColors.textSecondary);
+      return const _Status('Skipped · Not recognised', AppColors.textSecondary);
     }
     if (r.matched) {
       final alreadyDraft = r.dedupKey.isNotEmpty &&
@@ -387,9 +395,7 @@ class _FilterChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? (muted
-                  ? AppColors.textHint
-                  : AppColors.primary)
+              ? (muted ? AppColors.textHint : AppColors.primary)
               : (isDark ? AppColors.darkSurface : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -416,7 +422,8 @@ class _StatusChip extends StatelessWidget {
   final Color color;
   final bool dimmed;
 
-  const _StatusChip({required this.label, required this.color, this.dimmed = false});
+  const _StatusChip(
+      {required this.label, required this.color, this.dimmed = false});
 
   @override
   Widget build(BuildContext context) {
@@ -507,10 +514,8 @@ class _MessageTile extends StatelessWidget {
                           style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color),
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color),
                         ),
                       ],
                     ),
@@ -649,8 +654,7 @@ class _EmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.sms_rounded,
-                size: 48,
-                color: Theme.of(context).textTheme.bodySmall?.color),
+                size: 48, color: Theme.of(context).textTheme.bodySmall?.color),
             const SizedBox(height: 12),
             Text('No messages found',
                 textAlign: TextAlign.center,

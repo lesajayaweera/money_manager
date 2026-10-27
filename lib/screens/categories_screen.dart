@@ -68,9 +68,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   Widget build(BuildContext context) {
     final provider = context.watch<CategoryProvider>();
     final isExpense = _currentType == CategoryType.expense;
-    final allCats = isExpense
-        ? provider.expenseCategories
-        : provider.incomeCategories;
+    final allCats =
+        isExpense ? provider.expenseCategories : provider.incomeCategories;
     final displayCats = _filtered(allCats);
 
     return Scaffold(
@@ -129,7 +128,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           fontWeight: FontWeight.w500,
                           color: selected
                               ? Colors.white
-                              : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                              : Theme.of(context).textTheme.bodyMedium?.color ??
+                                  Colors.white,
                         ),
                       ),
                     ),
@@ -212,7 +212,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       elevation: 0,
       scrolledUnderElevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+        icon: Icon(Icons.arrow_back,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
@@ -227,10 +229,13 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       bottom: TabBar(
         controller: _tabController,
         labelColor: AppColors.primary,
-        unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
+        unselectedLabelColor:
+            Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey,
         indicatorColor: AppColors.primary,
-        labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14),
-        unselectedLabelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w400, fontSize: 14),
+        labelStyle:
+            GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 14),
+        unselectedLabelStyle:
+            GoogleFonts.poppins(fontWeight: FontWeight.w400, fontSize: 14),
         tabs: const [
           Tab(text: 'Expense'),
           Tab(text: 'Income'),
@@ -239,7 +244,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       actions: [
         IconButton(
           icon: Icon(Icons.more_vert_rounded,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           onPressed: () {},
         ),
       ],
@@ -254,9 +260,7 @@ class _SearchBar extends StatelessWidget {
   final String hint;
   final ValueChanged<String> onChanged;
   const _SearchBar(
-      {required this.controller,
-      required this.hint,
-      required this.onChanged});
+      {required this.controller, required this.hint, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -269,13 +273,20 @@ class _SearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+        style: GoogleFonts.poppins(
+            fontSize: 14,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              GoogleFonts.poppins(fontSize: 14, color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+          hintStyle: GoogleFonts.poppins(
+              fontSize: 14,
+              color:
+                  Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
           prefixIcon: Icon(Icons.search_rounded,
-              color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+              color:
+                  Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+              size: 20),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
@@ -296,8 +307,7 @@ class _CategoryTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 1),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(0),
@@ -323,12 +333,17 @@ class _CategoryTile extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  Text(
-                    category.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                  Expanded(
+                    child: Text(
+                      category.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).textTheme.titleLarge?.color ??
+                            Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -337,10 +352,11 @@ class _CategoryTile extends StatelessWidget {
               ),
             ),
 
-
             const SizedBox(width: 8),
             Icon(Icons.chevron_right_rounded,
-                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
+                color: Theme.of(context).textTheme.bodySmall?.color ??
+                    Colors.white,
+                size: 20),
           ],
         ),
       ),
@@ -359,7 +375,9 @@ class _Tag extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDefault
             ? AppColors.income.withValues(alpha: 0.12)
-            : Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F5),
+            : Theme.of(context).brightness == Brightness.dark
+                ? AppColors.darkSurface2
+                : const Color(0xFFF0F0F5),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -390,7 +408,9 @@ class _EmptyState extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkPrimarySurface
+                  : AppColors.primarySurface,
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.category_outlined,
@@ -402,7 +422,8 @@ class _EmptyState extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             ),
           ),
           const SizedBox(height: 6),
@@ -412,7 +433,8 @@ class _EmptyState extends StatelessWidget {
                 : 'Add your first income category',
             style: GoogleFonts.poppins(
               fontSize: 13,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
             ),
           ),
         ],

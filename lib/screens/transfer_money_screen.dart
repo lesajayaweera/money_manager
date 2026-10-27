@@ -113,12 +113,16 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
     final wallets = context.read<WalletProvider>().wallets;
     final result = await showModalBottomSheet<WalletModel>(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _WalletPickerSheet(
-        wallets: wallets,
-        excludeId: isFrom ? _toWallet?.id : _fromWallet?.id,
-        currencySymbol:
-            context.read<SettingsProvider>().currencySymbol,
+      builder: (_) => SingleChildScrollView(
+        child: _WalletPickerSheet(
+          wallets: wallets,
+          excludeId: isFrom ? _toWallet?.id : _fromWallet?.id,
+          currencySymbol:
+              context.read<SettingsProvider>().currencySymbol,
+        ),
       ),
     );
     if (result != null) {
@@ -172,7 +176,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark
                   ? AppColors.darkPrimarySurface
-                  : const Color(0xFFF0EFFD),
+                  : AppColors.primarySurface,
               borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
@@ -212,6 +216,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                               children: [
                                 Text(
                                   _fromWallet?.name ?? 'Select',
+                                  maxLines: 1,
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -223,6 +228,8 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   Text(
                                     CurrencyFormatter.format(fromBal,
                                         symbol: sym),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -281,6 +288,7 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                               children: [
                                 Text(
                                   _toWallet?.name ?? 'Select',
+                                  maxLines: 1,
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -293,6 +301,9 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                                   Text(
                                     CurrencyFormatter.format(toBal,
                                         symbol: sym),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.end,
                                     style: GoogleFonts.poppins(
                                       fontSize: 11,
                                       color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -351,6 +362,8 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   Expanded(
                     child: Text(
                       _fromWallet?.name ?? 'Select wallet',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: _fromWallet != null
@@ -360,11 +373,19 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     ),
                   ),
                   if (_fromWallet != null)
-                    Text(
-                      CurrencyFormatter.format(fromBal, symbol: sym),
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          CurrencyFormatter.format(fromBal, symbol: sym),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   const SizedBox(width: 8),
@@ -403,6 +424,8 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                   Expanded(
                     child: Text(
                       _toWallet?.name ?? 'Select wallet',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: _toWallet != null
@@ -412,11 +435,19 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                     ),
                   ),
                   if (_toWallet != null)
-                    Text(
-                      CurrencyFormatter.format(toBal, symbol: sym),
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          CurrencyFormatter.format(toBal, symbol: sym),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   const SizedBox(width: 8),
@@ -565,11 +596,15 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
               Icon(Icons.info_outline_rounded,
                   size: 15, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
               const SizedBox(width: 6),
-              Text(
-                'Transfers do not affect total balance.',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              Expanded(
+                child: Text(
+                  'Transfers do not affect total balance.',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -648,10 +683,13 @@ class _TransferMoneyScreenState extends State<TransferMoneyScreen> {
                         color: Colors.white, strokeWidth: 2),
                   )
                 : const Icon(Icons.send_rounded, size: 18),
-            label: Text(
-              'Confirm Transfer',
-              style: GoogleFonts.poppins(
-                  fontSize: 16, fontWeight: FontWeight.w700),
+            label: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'Confirm Transfer',
+                style: GoogleFonts.poppins(
+                    fontSize: 16, fontWeight: FontWeight.w700),
+              ),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -765,6 +803,8 @@ class _AfterTransferRow extends StatelessWidget {
             children: [
               Text(
                 wallet.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -773,6 +813,8 @@ class _AfterTransferRow extends StatelessWidget {
               ),
               Text(
                 CurrencyFormatter.format(originalBalance, symbol: sym),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
@@ -784,14 +826,22 @@ class _AfterTransferRow extends StatelessWidget {
         Icon(Icons.arrow_forward_rounded,
             color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 16),
         const SizedBox(width: 8),
-        Text(
-          isDecrease
-              ? '${CurrencyFormatter.format(originalBalance, symbol: sym)} - Amount'
-              : '${CurrencyFormatter.format(originalBalance, symbol: sym)} + Amount',
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: isDecrease ? AppColors.expense : AppColors.income,
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text(
+              isDecrease
+                  ? '${CurrencyFormatter.format(originalBalance, symbol: sym)} - Amount'
+                  : '${CurrencyFormatter.format(originalBalance, symbol: sym)} + Amount',
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isDecrease ? AppColors.expense : AppColors.income,
+              ),
+            ),
           ),
         ),
       ],
@@ -871,6 +921,8 @@ class _WalletPickerSheet extends StatelessWidget {
                     ),
                     title: Text(
                       wallet.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -880,6 +932,8 @@ class _WalletPickerSheet extends StatelessWidget {
                     subtitle: Text(
                       CurrencyFormatter.format(wallet.balance,
                           symbol: currencySymbol),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,

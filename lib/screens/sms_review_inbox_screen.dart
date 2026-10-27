@@ -12,6 +12,7 @@ import '../providers/settings_provider.dart';
 import '../providers/sms_draft_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
+import '../widgets/sms_message_card.dart';
 
 /// Review inbox: every captured bank SMS appears here as an editable draft.
 /// Nothing becomes a real transaction until the user taps Save.
@@ -65,16 +66,14 @@ class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
                           style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context).textTheme.bodySmall?.color),
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color),
                         ),
                       ),
                       _SaveAllButton(onSaved: () async {
-                        final smsProvider =
-                            context.read<SmsDraftProvider>();
-                        final txProvider =
-                            context.read<TransactionProvider>();
-                        final walletProvider =
-                            context.read<WalletProvider>();
+                        final smsProvider = context.read<SmsDraftProvider>();
+                        final txProvider = context.read<TransactionProvider>();
+                        final walletProvider = context.read<WalletProvider>();
                         final messenger = ScaffoldMessenger.of(context);
                         var count = 0;
                         var transfers = 0;
@@ -92,7 +91,8 @@ class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
                                 toId: to.id!,
                                 amount: d.amount,
                                 date: d.transactionDate ?? DateTime.now(),
-                                note: 'Auto-captured from ${d.bank} SMS (withdrawal)',
+                                note:
+                                    'Auto-captured from ${d.bank} SMS (withdrawal)',
                               );
                               transfers++;
                             } else {
@@ -101,8 +101,8 @@ class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
                                   .copyWith(walletName: from?.name ?? 'Cash'));
                             }
                           } else {
-                            await txProvider.addTransaction(
-                                smsProvider.toTransaction(d));
+                            await txProvider
+                                .addTransaction(smsProvider.toTransaction(d));
                           }
                           await smsProvider.markSaved(d.id!);
                           count++;
@@ -136,7 +136,8 @@ class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
     );
   }
 
-  Future<void> _confirmClear(BuildContext context, SmsDraftProvider provider) async {
+  Future<void> _confirmClear(
+      BuildContext context, SmsDraftProvider provider) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -169,7 +170,8 @@ class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: _DraftEditSheet(draft: draft),
       ),
     );
@@ -263,11 +265,18 @@ class _DraftTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Text('${draft.bank} · ${draft.category}',
+                      Expanded(
+                        child: Text(
+                          '${draft.bank} · ${draft.category}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context).textTheme.bodySmall?.color)),
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -279,8 +288,14 @@ class _DraftTile extends StatelessWidget {
               children: [
                 Text(
                   isWithdrawal
-                      ? '$symbol ${CurrencyFormatter.format(draft.amount)}'
-                      : '${isIncome ? '+' : '-'}$symbol ${CurrencyFormatter.format(draft.amount)}',
+                      ? CurrencyFormatter.format(draft.amount, symbol: symbol)
+                      : CurrencyFormatter.formatWithSign(
+                          isIncome ? draft.amount : -draft.amount,
+                          symbol: symbol,
+                        ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
                   style: GoogleFonts.poppins(
                       fontSize: 14, fontWeight: FontWeight.w700, color: accent),
                 ),
@@ -297,7 +312,8 @@ class _DraftTile extends StatelessWidget {
               ],
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textHint),
+            const Icon(Icons.chevron_right_rounded,
+                size: 20, color: AppColors.textHint),
           ],
         ),
       ),
@@ -368,10 +384,12 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
   }
 
   Future<void> _save() async {
-    final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+    final amount =
+        double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Enter a valid amount.', style: GoogleFonts.poppins(fontSize: 13)),
+        content: Text('Enter a valid amount.',
+            style: GoogleFonts.poppins(fontSize: 13)),
         backgroundColor: AppColors.expense,
       ));
       return;
@@ -413,8 +431,7 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
         toId: to.id!,
         amount: amount,
         date: _date ?? DateTime.now(),
-        note:
-            'Auto-captured from ${widget.draft.bank} SMS (withdrawal)',
+        note: 'Auto-captured from ${widget.draft.bank} SMS (withdrawal)',
       );
       await provider.markSaved(widget.draft.id!);
     } else {
@@ -448,8 +465,9 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
     final borderColor = isDark ? AppColors.darkDivider : Colors.grey.shade200;
     final symbol = context.watch<SettingsProvider>().currencySymbol;
     final wallets = context.watch<WalletProvider>().wallets;
-    final walletNames =
-        wallets.map((w) => w.name).toList()..add(_wallet);
+    final walletNamesRaw = wallets.map((w) => w.name).toList();
+    if (!walletNamesRaw.contains(_wallet)) walletNamesRaw.add(_wallet);
+    final walletNames = walletNamesRaw.toSet().toList(); // deduplicate
     final isWithdrawal = _kind == DraftKind.withdrawal;
     final fromWallet = _walletById(wallets, _fromWalletId) ??
         SmsDraftProvider.bestBankWallet(wallets, widget.draft.bank);
@@ -489,7 +507,8 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                         style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: Theme.of(context).textTheme.titleLarge?.color)),
+                            color:
+                                Theme.of(context).textTheme.titleLarge?.color)),
                     IconButton(
                       icon: const Icon(Icons.close_rounded),
                       onPressed: () => Navigator.pop(context),
@@ -497,6 +516,9 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                   ],
                 ),
                 const SizedBox(height: 8),
+
+                SmsMessageCard(draft: widget.draft),
+                const SizedBox(height: 16),
 
                 // Kind selector
                 _KindSelector(
@@ -520,7 +542,8 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                 TextField(
                   controller: _titleController,
                   style: GoogleFonts.poppins(fontSize: 14),
-                  decoration: _inputDecoration('Merchant / description', borderColor, isDark),
+                  decoration: _inputDecoration(
+                      'Merchant / description', borderColor, isDark),
                 ),
                 const SizedBox(height: 14),
 
@@ -534,8 +557,9 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
                   ],
                   style: GoogleFonts.poppins(fontSize: 14),
-                  decoration: _inputDecoration('$symbol 0.00', borderColor, isDark)
-                      .copyWith(prefixText: '$symbol  '),
+                  decoration:
+                      _inputDecoration('$symbol 0.00', borderColor, isDark)
+                          .copyWith(prefixText: '$symbol  '),
                 ),
                 const SizedBox(height: 14),
 
@@ -560,7 +584,8 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                   DropdownButtonFormField<int>(
                     value: fromWallet?.id,
                     isExpanded: true,
-                    decoration: _inputDecoration('Bank wallet', borderColor, isDark),
+                    decoration:
+                        _inputDecoration('Bank wallet', borderColor, isDark),
                     style: GoogleFonts.poppins(fontSize: 14),
                     items: wallets
                         .map((w) =>
@@ -574,7 +599,8 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                   DropdownButtonFormField<int>(
                     value: toWallet?.id,
                     isExpanded: true,
-                    decoration: _inputDecoration('Cash wallet', borderColor, isDark),
+                    decoration:
+                        _inputDecoration('Cash wallet', borderColor, isDark),
                     style: GoogleFonts.poppins(fontSize: 14),
                     items: wallets
                         .map((w) =>
@@ -586,7 +612,9 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                   _Label('Wallet'),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
-                    value: walletNames.contains(_wallet) ? _wallet : null,
+                    value: walletNames.contains(_wallet)
+                        ? _wallet
+                        : walletNames.firstOrNull,
                     isExpanded: true,
                     decoration: _inputDecoration('Wallet', borderColor, isDark),
                     style: GoogleFonts.poppins(fontSize: 14),
@@ -605,8 +633,8 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
                 GestureDetector(
                   onTap: _pickDate,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 14),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: borderColor),
@@ -763,13 +791,20 @@ class _KindButton extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: color),
             const SizedBox(width: 6),
-            Text(label,
-                style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: selected
-                        ? color
-                        : Theme.of(context).textTheme.bodySmall?.color)),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(label,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: selected
+                            ? color
+                            : Theme.of(context).textTheme.bodySmall?.color)),
+              ),
+            ),
           ],
         ),
       ),
@@ -814,7 +849,9 @@ class _Chip extends StatelessWidget {
             style: GoogleFonts.poppins(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: selected ? AppColors.primary : Theme.of(context).textTheme.bodySmall?.color)),
+                color: selected
+                    ? AppColors.primary
+                    : Theme.of(context).textTheme.bodySmall?.color)),
       ),
     );
   }
@@ -836,7 +873,9 @@ class _SaveAllButton extends StatelessWidget {
         ),
         child: Text('Save all',
             style: GoogleFonts.poppins(
-                fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary)),
       ),
     );
   }
@@ -856,7 +895,9 @@ class _EmptyState extends StatelessWidget {
           children: [
             Icon(Icons.inbox_rounded,
                 size: 56,
-                color: enabled ? AppColors.primary.withOpacity(0.4) : AppColors.textHint),
+                color: enabled
+                    ? AppColors.primary.withOpacity(0.4)
+                    : AppColors.textHint),
             const SizedBox(height: 16),
             Text(
               enabled ? 'No drafts yet' : 'Auto Capture is off',
@@ -887,7 +928,8 @@ InputDecoration _inputDecoration(String hint, Color borderColor, bool isDark) {
   return InputDecoration(
     hintText: hint,
     hintStyle: GoogleFonts.poppins(
-        fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.textHint),
+        fontSize: 14,
+        color: isDark ? AppColors.darkTextHint : AppColors.textHint),
     filled: true,
     fillColor: isDark ? AppColors.darkSurface : Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

@@ -17,7 +17,8 @@ class TransactionDetailScreen extends StatefulWidget {
   const TransactionDetailScreen({super.key, required this.transaction});
 
   @override
-  State<TransactionDetailScreen> createState() => _TransactionDetailScreenState();
+  State<TransactionDetailScreen> createState() =>
+      _TransactionDetailScreenState();
 }
 
 class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
@@ -32,6 +33,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   void _showOptions() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -57,7 +60,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkPrimarySurface : AppColors.primarySurface,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkPrimarySurface
+                        : AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(Icons.edit_outlined,
@@ -99,8 +104,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 ),
                 title: Text('Delete Transaction',
                     style: GoogleFonts.poppins(
-                        color: AppColors.expense,
-                        fontWeight: FontWeight.w500)),
+                        color: AppColors.expense, fontWeight: FontWeight.w500)),
                 onTap: () async {
                   Navigator.pop(context);
                   final confirm = await showDialog<bool>(
@@ -109,8 +113,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                       title: Text('Delete Transaction',
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
-                      content: Text('Are you sure you want to delete this transaction?',
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.w700)),
+                      content: Text(
+                          'Are you sure you want to delete this transaction?',
                           style: GoogleFonts.poppins()),
                       actions: [
                         TextButton(
@@ -119,7 +125,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, true),
                           child: Text('Delete',
-                              style: GoogleFonts.poppins(color: AppColors.expense)),
+                              style: GoogleFonts.poppins(
+                                  color: AppColors.expense)),
                         ),
                       ],
                     ),
@@ -160,7 +167,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
           onPressed: () => Navigator.pop(context, true),
         ),
         title: Text(
@@ -168,14 +177,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.more_vert_rounded,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white),
             onPressed: _showOptions,
           ),
         ],
@@ -213,21 +224,30 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   const SizedBox(height: 16),
                   Text(
                     _tx.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.titleLarge?.color ??
+                          Colors.white,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    CurrencyFormatter.formatWithSign(_tx.signedAmount,
-                        symbol: settings.currencySymbol),
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: _tx.isIncome ? AppColors.income : AppColors.expense,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      CurrencyFormatter.formatWithSign(_tx.signedAmount,
+                          symbol: settings.currencySymbol),
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.poppins(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        color:
+                            _tx.isIncome ? AppColors.income : AppColors.expense,
+                      ),
                     ),
                   ),
                 ],
@@ -296,13 +316,17 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white),
+          Icon(icon,
+              size: 20,
+              color: Theme.of(context).textTheme.bodyMedium?.color ??
+                  Colors.white),
           const SizedBox(width: 12),
           Text(
             label,
             style: GoogleFonts.poppins(
               fontSize: 15,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -313,7 +337,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               textAlign: TextAlign.right,
               style: GoogleFonts.poppins(
                 fontSize: 15,
-                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white,
                 fontWeight: FontWeight.w600,
               ),
             ),

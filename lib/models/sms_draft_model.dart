@@ -12,6 +12,7 @@ class SmsDraftModel {
   final String sender;
   final String bank;
   final String rawBody;
+  final String originalBody;
   final String title;
   final double amount;
   final TransactionType txType;
@@ -28,6 +29,7 @@ class SmsDraftModel {
     required this.sender,
     required this.bank,
     required this.rawBody,
+    this.originalBody = '',
     required this.title,
     required this.amount,
     required this.txType,
@@ -48,6 +50,7 @@ class SmsDraftModel {
     String? sender,
     String? bank,
     String? rawBody,
+    String? originalBody,
     String? title,
     double? amount,
     TransactionType? txType,
@@ -64,6 +67,7 @@ class SmsDraftModel {
       sender: sender ?? this.sender,
       bank: bank ?? this.bank,
       rawBody: rawBody ?? this.rawBody,
+      originalBody: originalBody ?? this.originalBody,
       title: title ?? this.title,
       amount: amount ?? this.amount,
       txType: txType ?? this.txType,
@@ -83,6 +87,7 @@ class SmsDraftModel {
       'sender': sender,
       'bank': bank,
       'raw_body': rawBody,
+      'original_body': originalBody,
       'title': title,
       'amount': amount,
       'tx_type': txType.name,
@@ -103,6 +108,7 @@ class SmsDraftModel {
       sender: map['sender'] as String,
       bank: map['bank'] as String,
       rawBody: map['raw_body'] as String,
+      originalBody: map['original_body'] as String? ?? '',
       title: map['title'] as String? ?? '',
       amount: (map['amount'] as num?)?.toDouble() ?? 0,
       txType: TransactionType.values.firstWhere(
@@ -123,7 +129,8 @@ class SmsDraftModel {
         orElse: () => SmsDraftStatus.draft,
       ),
       dedupKey: map['dedup_key'] as String,
-      createdAt: DateTime.tryParse(map['created_at'] as String) ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(map['created_at'] as String) ?? DateTime.now(),
     );
   }
 }

@@ -36,13 +36,11 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
   double get _income =>
       double.tryParse(_incomeController.text.replaceAll(',', '')) ?? 0;
 
-  double get _totalAllocated =>
-      _allocations.fold(0, (s, a) => s + a.amount);
+  double get _totalAllocated => _allocations.fold(0, (s, a) => s + a.amount);
 
   double get _unallocated => _income - _totalAllocated;
 
-  double get _categoryTotal =>
-      _sumByType(AllocationType.category);
+  double get _categoryTotal => _sumByType(AllocationType.category);
   double get _savingsTotal => _sumByType(AllocationType.savingsGoal);
   double get _loanTotal => _sumByType(AllocationType.loan);
   double get _creditCardTotal => _sumByType(AllocationType.creditCard);
@@ -148,6 +146,7 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
     final result = await showModalBottomSheet<SalaryAllocation>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _AddAllocationSheet(
         existing: editing,
@@ -230,13 +229,16 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
                 ),
 
                 // Copy from previous month (only for new plans)
-                if (widget.existing == null) ...[  
+                if (widget.existing == null) ...[
                   const SizedBox(height: 8),
                   _CopyFromPreviousButton(
                     isDark: isDark,
                     hasCopied: _hasCopiedFromPrev,
-                    hasPreviousPlan: context.read<SalaryPlanProvider>().previousPlan(
-                      _periodStart.year, _periodStart.month) != null,
+                    hasPreviousPlan: context
+                            .read<SalaryPlanProvider>()
+                            .previousPlan(
+                                _periodStart.year, _periodStart.month) !=
+                        null,
                     onCopy: _copyFromPrevious,
                   ),
                 ],
@@ -274,9 +276,8 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
                   children: [
                     _SectionLabel('Allocations'),
                     GestureDetector(
-                      onTap: _income > 0
-                          ? () => _showAddAllocationSheet()
-                          : null,
+                      onTap:
+                          _income > 0 ? () => _showAddAllocationSheet() : null,
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
@@ -333,8 +334,7 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios_new_rounded,
-            size: 20,
-            color: Theme.of(context).textTheme.titleLarge?.color),
+            size: 20, color: Theme.of(context).textTheme.titleLarge?.color),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -423,7 +423,9 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkPrimarySurface : AppColors.primary.withOpacity(0.06),
+        color: isDark
+            ? AppColors.darkPrimarySurface
+            : AppColors.primary.withOpacity(0.06),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isDark
@@ -457,7 +459,6 @@ class _SummaryCard extends StatelessWidget {
               color: unallocated < 0 ? AppColors.expense : remainingColor,
             ),
           ),
-
           if (income > 0) ...[
             const SizedBox(height: 4),
             // Progress bar
@@ -478,11 +479,9 @@ class _SummaryCard extends StatelessWidget {
               ),
             ),
           ],
-
           const SizedBox(height: 16),
           const Divider(height: 1),
           const SizedBox(height: 14),
-
           _SummaryRow(
             label: 'Total Allocated',
             value: categoryTotal + savingsTotal + loanTotal + creditCardTotal,
@@ -608,9 +607,7 @@ class _EmptyAllocations extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            hasIncome
-                ? 'No allocations yet'
-                : 'Enter income first',
+            hasIncome ? 'No allocations yet' : 'Enter income first',
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -839,9 +836,7 @@ class _BottomButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   const _BottomButton(
-      {required this.isSaving,
-      required this.label,
-      required this.onPressed});
+      {required this.isSaving, required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -867,8 +862,8 @@ class _BottomButton extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 0,
             disabledBackgroundColor: AppColors.income.withOpacity(0.6),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
           child: isSaving
               ? const SizedBox(
@@ -1069,8 +1064,10 @@ class _AddAllocationSheetState extends State<_AddAllocationSheet> {
         double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
 
     setState(() {
-      _nameError = name.isEmpty 
-          ? (_selectedType == AllocationType.category ? 'Select a category' : 'Enter a name') 
+      _nameError = name.isEmpty
+          ? (_selectedType == AllocationType.category
+              ? 'Select a category'
+              : 'Enter a name')
           : null;
       _amountError = amount <= 0
           ? 'Enter a valid amount'
@@ -1102,224 +1099,228 @@ class _AddAllocationSheetState extends State<_AddAllocationSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkDivider : Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          Text(
-            widget.existing != null ? 'Edit Allocation' : 'Add Allocation',
-            style: GoogleFonts.poppins(
-                fontSize: 18, fontWeight: FontWeight.w700),
-          ),
-
-          // Remaining indicator
-          const SizedBox(height: 4),
-          Text(
-            '${CurrencyFormatter.format(widget.unallocated, symbol: symbol)} remaining to allocate',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: widget.unallocated <= 0
-                  ? AppColors.income
-                  : Theme.of(context).textTheme.bodySmall?.color,
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ── Type Selector ──────────────────────────────────────────────
-          Text('Destination',
-              style: GoogleFonts.poppins(
-                  fontSize: 13, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
-          _TypeSelector(
-            selected: _selectedType,
-            onChanged: (t) {
-              setState(() {
-                _selectedType = t;
-                _nameController.clear();
-                _selectedCategory = null;
-                _nameError = null;
-              });
-            },
-          ),
-
-          const SizedBox(height: 18),
-
-          // ── Hint for type ─────────────────────────────────────────────
-          _TypeHint(type: _selectedType),
-          const SizedBox(height: 14),
-
-          // ── Name ──────────────────────────────────────────────────────
-          Text(_namePlaceholder,
-              style: GoogleFonts.poppins(
-                  fontSize: 13, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          if (_selectedType == AllocationType.category)
-            _buildCategoryDropdown(isDark)
-          else
-            TextField(
-              controller: _nameController,
-              style: GoogleFonts.poppins(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: _nameHint,
-                hintStyle: GoogleFonts.poppins(
-                    color: isDark ? AppColors.darkTextHint : AppColors.textHint,
-                    fontSize: 14),
-                errorText: _nameError,
-                filled: true,
-                fillColor:
-                    isDark ? AppColors.darkBackground : Colors.grey.shade50,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: isDark ? AppColors.darkDivider : Colors.grey.shade200,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: isDark ? AppColors.darkDivider : Colors.grey.shade200,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      BorderSide(color: AppColors.primary, width: 1.5),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkDivider : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
 
-          const SizedBox(height: 14),
-
-          // ── Amount ────────────────────────────────────────────────────
-          Text('Amount',
+            Text(
+              widget.existing != null ? 'Edit Allocation' : 'Add Allocation',
               style: GoogleFonts.poppins(
-                  fontSize: 13, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d*'))
-                  ],
-                  style: GoogleFonts.poppins(fontSize: 14),
-                  decoration: InputDecoration(
-                    prefixText: '$symbol  ',
-                    prefixStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary),
-                    hintText: '0',
-                    errorText: _amountError,
-                    filled: true,
-                    fillColor: isDark
-                        ? AppColors.darkBackground
-                        : Colors.grey.shade50,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: isDark
-                            ? AppColors.darkDivider
-                            : Colors.grey.shade200,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: isDark
-                            ? AppColors.darkDivider
-                            : Colors.grey.shade200,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                          color: AppColors.primary, width: 1.5),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              // Quick fill remaining
-              if (widget.unallocated > 0)
-                OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _amountController.text =
-                          widget.unallocated.toStringAsFixed(0);
-                    });
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: BorderSide(color: AppColors.primary),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 12),
-                  ),
-                  child: Text('All',
-                      style: GoogleFonts.poppins(
-                          fontSize: 12, fontWeight: FontWeight.w600)),
-                ),
-            ],
-          ),
+                  fontSize: 18, fontWeight: FontWeight.w700),
+            ),
 
-          const SizedBox(height: 20),
-
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: _submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _selectedType.color,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+            // Remaining indicator
+            const SizedBox(height: 4),
+            Text(
+              '${CurrencyFormatter.format(widget.unallocated, symbol: symbol)} remaining to allocate',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: widget.unallocated <= 0
+                    ? AppColors.income
+                    : Theme.of(context).textTheme.bodySmall?.color,
               ),
-              child: Text(
-                widget.existing != null ? 'Update' : 'Add',
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── Type Selector ──────────────────────────────────────────────
+            Text('Destination',
                 style: GoogleFonts.poppins(
-                    fontSize: 15, fontWeight: FontWeight.w700),
+                    fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            _TypeSelector(
+              selected: _selectedType,
+              onChanged: (t) {
+                setState(() {
+                  _selectedType = t;
+                  _nameController.clear();
+                  _selectedCategory = null;
+                  _nameError = null;
+                });
+              },
+            ),
+
+            const SizedBox(height: 18),
+
+            // ── Hint for type ─────────────────────────────────────────────
+            _TypeHint(type: _selectedType),
+            const SizedBox(height: 14),
+
+            // ── Name ──────────────────────────────────────────────────────
+            Text(_namePlaceholder,
+                style: GoogleFonts.poppins(
+                    fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            if (_selectedType == AllocationType.category)
+              _buildCategoryDropdown(isDark)
+            else
+              TextField(
+                controller: _nameController,
+                style: GoogleFonts.poppins(fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: _nameHint,
+                  hintStyle: GoogleFonts.poppins(
+                      color:
+                          isDark ? AppColors.darkTextHint : AppColors.textHint,
+                      fontSize: 14),
+                  errorText: _nameError,
+                  filled: true,
+                  fillColor:
+                      isDark ? AppColors.darkBackground : Colors.grey.shade50,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color:
+                          isDark ? AppColors.darkDivider : Colors.grey.shade200,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color:
+                          isDark ? AppColors.darkDivider : Colors.grey.shade200,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        BorderSide(color: AppColors.primary, width: 1.5),
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 14),
+
+            // ── Amount ────────────────────────────────────────────────────
+            Text('Amount',
+                style: GoogleFonts.poppins(
+                    fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _amountController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
+                    ],
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    decoration: InputDecoration(
+                      prefixText: '$symbol  ',
+                      prefixStyle: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary),
+                      hintText: '0',
+                      errorText: _amountError,
+                      filled: true,
+                      fillColor: isDark
+                          ? AppColors.darkBackground
+                          : Colors.grey.shade50,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? AppColors.darkDivider
+                              : Colors.grey.shade200,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? AppColors.darkDivider
+                              : Colors.grey.shade200,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            BorderSide(color: AppColors.primary, width: 1.5),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Quick fill remaining
+                if (widget.unallocated > 0)
+                  OutlinedButton(
+                    onPressed: () {
+                      setState(() {
+                        _amountController.text =
+                            widget.unallocated.toStringAsFixed(0);
+                      });
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 12),
+                    ),
+                    child: Text('All',
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, fontWeight: FontWeight.w600)),
+                  ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _selectedType.color,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(
+                  widget.existing != null ? 'Update' : 'Add',
+                  style: GoogleFonts.poppins(
+                      fontSize: 15, fontWeight: FontWeight.w700),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCategoryDropdown(bool isDark) {
-    final expenseCategories = context.watch<CategoryProvider>().categoriesForType(CategoryType.expense);
+    final expenseCategories = context
+        .watch<CategoryProvider>()
+        .categoriesForType(CategoryType.expense);
     final safeValue = expenseCategories.any((c) => c.name == _selectedCategory)
         ? _selectedCategory
         : null;
@@ -1355,9 +1356,13 @@ class _AddAllocationSheetState extends State<_AddAllocationSheet> {
                     children: [
                       Icon(cat.icon, color: cat.color, size: 18),
                       const SizedBox(width: 10),
-                      Text(
-                        cat.name,
-                        style: GoogleFonts.poppins(fontSize: 14),
+                      Expanded(
+                        child: Text(
+                          cat.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(fontSize: 14),
+                        ),
                       ),
                     ],
                   ),
@@ -1447,9 +1452,7 @@ class _TypeChip extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   const _TypeChip(
-      {required this.type,
-      required this.isSelected,
-      required this.onTap});
+      {required this.type, required this.isSelected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1458,8 +1461,7 @@ class _TypeChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
               ? type.color
@@ -1589,13 +1591,9 @@ class _CopyFromPreviousButton extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              hasCopied
-                  ? Icons.check_circle_rounded
-                  : Icons.copy_all_rounded,
+              hasCopied ? Icons.check_circle_rounded : Icons.copy_all_rounded,
               size: 16,
-              color: hasCopied
-                  ? AppColors.income
-                  : AppColors.primary,
+              color: hasCopied ? AppColors.income : AppColors.primary,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -1614,8 +1612,7 @@ class _CopyFromPreviousButton extends StatelessWidget {
             ),
             if (!hasCopied)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(6),

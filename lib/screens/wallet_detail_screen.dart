@@ -105,16 +105,16 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
     final settings = context.watch<SettingsProvider>();
     final txProvider = context.watch<TransactionProvider>();
     final walletProvider = context.watch<WalletProvider>();
-    
+
     // Convert transfers to TransactionModel for unified display
     final mappedTransfers = _transfersList.map((t) {
       final isIncome = t.toWalletId == _wallet.id;
       final otherWalletId = isIncome ? t.fromWalletId : t.toWalletId;
       final otherWallet = walletProvider.findById(otherWalletId);
-      final title = isIncome 
-          ? 'Transfer from ${otherWallet?.name ?? 'Wallet'}' 
+      final title = isIncome
+          ? 'Transfer from ${otherWallet?.name ?? 'Wallet'}'
           : 'Transfer to ${otherWallet?.name ?? 'Wallet'}';
-      
+
       return TransactionModel(
         id: -(t.id ?? 999999), // Dummy negative id
         title: title,
@@ -128,13 +128,10 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
     }).toList();
 
     // Combine standard recent transactions with transfers
-    final combinedTxs = [
-      ...txProvider.allTransactions,
-      ...mappedTransfers
-    ];
+    final combinedTxs = [...txProvider.allTransactions, ...mappedTransfers];
     // Sort combined by date descending
     combinedTxs.sort((a, b) => b.date.compareTo(a.date));
-    
+
     final recentTxs = combinedTxs.take(5).toList();
 
     return Scaffold(
@@ -145,7 +142,9 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_rounded,
-              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 20),
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -153,7 +152,8 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -162,7 +162,9 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
             icon: Stack(
               children: [
                 Icon(Icons.notifications_outlined,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white, size: 26),
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
+                    size: 26),
                 Positioned(
                   right: 0,
                   top: 0,
@@ -221,14 +223,23 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              _wallet.name,
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                            Expanded(
+                              child: Text(
+                                _wallet.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color ??
+                                      Colors.white,
+                                ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             // Status badge
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -265,20 +276,34 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                         const SizedBox(height: 2),
                         Text(
                           _wallet.type.displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: 13,
-                            color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color ??
+                                    Colors.white,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          CurrencyFormatter.format(_wallet.balance,
-                              symbol: settings.currencySymbol),
-                          style: GoogleFonts.poppins(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-                            letterSpacing: -0.5,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            CurrencyFormatter.format(_wallet.balance,
+                                symbol: settings.currencySymbol),
+                            maxLines: 1,
+                            softWrap: false,
+                            style: GoogleFonts.poppins(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.color ??
+                                  Colors.white,
+                              letterSpacing: -0.5,
+                            ),
                           ),
                         ),
                       ],
@@ -337,7 +362,8 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 GestureDetector(
@@ -370,7 +396,8 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                     'No transactions yet',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
                     ),
                   ),
                 ),
@@ -392,8 +419,8 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: recentTxs.length,
-                  separatorBuilder: (_, __) => const Divider(
-                      height: 1, indent: 70, endIndent: 16),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, indent: 70, endIndent: 16),
                   itemBuilder: (context, index) {
                     return _TxTile(
                       tx: recentTxs[index],
@@ -423,11 +450,16 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
               child: ElevatedButton.icon(
                 onPressed: _openTransfer,
                 icon: const Icon(Icons.swap_horiz_rounded, size: 20),
-                label: Text(
-                  'Transfer Money',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Transfer Money',
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -446,11 +478,16 @@ class _WalletDetailScreenState extends State<WalletDetailScreen> {
               child: OutlinedButton.icon(
                 onPressed: _openEdit,
                 icon: const Icon(Icons.edit_outlined, size: 18),
-                label: Text(
-                  'Edit Wallet',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Edit Wallet',
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
@@ -519,21 +556,28 @@ class _StatMiniCard extends StatelessWidget {
             label,
             style: GoogleFonts.poppins(
               fontSize: 10,
-              color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white,
+              ),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -553,8 +597,11 @@ class _TxTile extends StatelessWidget {
     final isIncome = tx.isIncome;
     final walletProvider = context.watch<WalletProvider>();
     final isTransfer = tx.category == 'Transfer';
-    final matchingWallets = walletProvider.wallets.where((w) => w.name == tx.walletName);
-    final transferWallet = (isTransfer && matchingWallets.isNotEmpty) ? matchingWallets.first : null;
+    final matchingWallets =
+        walletProvider.wallets.where((w) => w.name == tx.walletName);
+    final transferWallet = (isTransfer && matchingWallets.isNotEmpty)
+        ? matchingWallets.first
+        : null;
 
     final IconData iconData;
     final Color iconColor;
@@ -595,7 +642,8 @@ class _TxTile extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -603,7 +651,8 @@ class _TxTile extends StatelessWidget {
                   CurrencyFormatter.relativeDate(tx.date),
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.white,
                   ),
                 ),
               ],
@@ -626,7 +675,8 @@ class _TxTile extends StatelessWidget {
                 tx.walletName,
                 style: GoogleFonts.poppins(
                   fontSize: 11,
-                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+                  color: Theme.of(context).textTheme.bodySmall?.color ??
+                      Colors.white,
                 ),
               ),
             ],

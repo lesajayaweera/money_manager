@@ -57,6 +57,7 @@ class _OtnScreenState extends State<OtnScreen>
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => Padding(
         padding: EdgeInsets.only(
@@ -69,7 +70,6 @@ class _OtnScreenState extends State<OtnScreen>
       ),
     );
   }
-
 
   Future<void> _deleteEntry(WorkLogEntry entry) async {
     final confirmed = await showDialog<bool>(
@@ -135,8 +135,7 @@ class _OtnScreenState extends State<OtnScreen>
                 ),
                 _DailyLogTab(
                   stats: provider.statsForMonth(_month.year, _month.month),
-                  entries:
-                      provider.entriesForMonth(_month.year, _month.month),
+                  entries: provider.entriesForMonth(_month.year, _month.month),
                   month: _month,
                   onEdit: (e) => _openAdd(existing: e),
                   onDelete: _deleteEntry,
@@ -165,21 +164,25 @@ class _OtnScreenState extends State<OtnScreen>
     }
   }
 
-  SliverAppBar _buildSliverAppBar(
-      BuildContext context, OtnProvider provider) {
+  SliverAppBar _buildSliverAppBar(BuildContext context, OtnProvider provider) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final symbol = context.watch<SettingsProvider>().currencySymbol;
     final stats = provider.statsForMonth(_month.year, _month.month);
     final s = provider.settings;
     final basic = s.basicSalary;
     final ot = stats.otHours * s.overtimeRatePerHour;
-    final totalAllowances = s.allowances.fold<double>(0, (sum, a) => sum + a.amount);
-    final epfBase = basic + s.allowances.where((a) => a.epfEligible).fold<double>(0, (sum, a) => sum + a.amount);
+    final totalAllowances =
+        s.allowances.fold<double>(0, (sum, a) => sum + a.amount);
+    final epfBase = basic +
+        s.allowances
+            .where((a) => a.epfEligible)
+            .fold<double>(0, (sum, a) => sum + a.amount);
     final gross = basic + ot + totalAllowances;
     final processing = s.processing;
     final ebf1 = epfBase * (s.epfRate / 100);
     final etf = epfBase * (s.etfRate / 100);
-    final customDeductionsTotal = s.deductions.fold<double>(0, (sum, d) => sum + d.amount);
+    final customDeductionsTotal =
+        s.deductions.fold<double>(0, (sum, d) => sum + d.amount);
     final netPay = gross - processing - ebf1 - etf - customDeductionsTotal;
 
     return SliverAppBar(
@@ -191,8 +194,7 @@ class _OtnScreenState extends State<OtnScreen>
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios_new_rounded,
-            size: 20,
-            color: Theme.of(context).textTheme.titleLarge?.color),
+            size: 20, color: Theme.of(context).textTheme.titleLarge?.color),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Column(
@@ -200,6 +202,8 @@ class _OtnScreenState extends State<OtnScreen>
         children: [
           Text(
             'OT & Salary Tracker',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -209,6 +213,8 @@ class _OtnScreenState extends State<OtnScreen>
           if (netPay > 0)
             Text(
               'Est. net: $symbol ${_fmtNum(netPay)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 color: Theme.of(context).textTheme.bodySmall?.color,
@@ -247,28 +253,22 @@ class _OtnScreenState extends State<OtnScreen>
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final m = _months[i];
-          final isActive =
-              m.year == _month.year && m.month == _month.month;
+          final isActive = m.year == _month.year && m.month == _month.month;
           return GestureDetector(
             onTap: () => setState(() => _month = m),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
               decoration: BoxDecoration(
                 color: isActive
                     ? AppColors.primary
-                    : (isDark
-                        ? AppColors.darkSurface
-                        : Colors.white),
+                    : (isDark ? AppColors.darkSurface : Colors.white),
                 borderRadius: BorderRadius.circular(50),
                 border: Border.all(
                   color: isActive
                       ? AppColors.primary
-                      : (isDark
-                          ? AppColors.darkDivider
-                          : Colors.grey.shade300),
+                      : (isDark ? AppColors.darkDivider : Colors.grey.shade300),
                   width: 1.5,
                 ),
                 boxShadow: isActive
@@ -325,23 +325,26 @@ class _OtnScreenState extends State<OtnScreen>
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color:
-                          isActive ? AppColors.primary : Colors.transparent,
+                      color: isActive ? AppColors.primary : Colors.transparent,
                       width: 2.5,
                     ),
                   ),
                 ),
-                child: Text(
-                  labels[i],
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isActive
-                        ? AppColors.primary
-                        : (isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    labels[i],
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isActive
+                          ? AppColors.primary
+                          : (isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary),
+                    ),
                   ),
                 ),
               ),
@@ -374,14 +377,10 @@ class _DashboardTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
-    final isCurrentMonth =
-        month.year == now.year && month.month == now.month;
-    final daysInMonth =
-        DateUtils.getDaysInMonth(month.year, month.month);
-    final loggedDays = stats.workedDays +
-        stats.leaveDays +
-        stats.noPayDays +
-        stats.holidays;
+    final isCurrentMonth = month.year == now.year && month.month == now.month;
+    final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
+    final loggedDays =
+        stats.workedDays + stats.leaveDays + stats.noPayDays + stats.holidays;
     final unlogged = daysInMonth - loggedDays;
 
     return SingleChildScrollView(
@@ -430,8 +429,7 @@ class _DashboardTab extends StatelessWidget {
 
           // ── 5. Daily Hours Bar Chart ────────────────────────────────────
           if (stats.workedEntries.isNotEmpty)
-            _WorkedPopulationsCard(
-                stats: stats, isDark: isDark),
+            _WorkedPopulationsCard(stats: stats, isDark: isDark),
         ],
       ),
     );
@@ -459,8 +457,9 @@ class _HeroStatsCard extends StatelessWidget {
     required this.isDark,
   });
 
-  String _fmtHours(double h) =>
-      h == h.truncateToDouble() ? '${h.toStringAsFixed(0)}h' : '${h.toStringAsFixed(1)}h';
+  String _fmtHours(double h) => h == h.truncateToDouble()
+      ? '${h.toStringAsFixed(0)}h'
+      : '${h.toStringAsFixed(1)}h';
 
   @override
   Widget build(BuildContext context) {
@@ -483,6 +482,8 @@ class _HeroStatsCard extends StatelessWidget {
         children: [
           Text(
             DateFormat('MMMM yyyy').format(month),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -492,6 +493,8 @@ class _HeroStatsCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             '$loggedDays of $daysInMonth days logged · $unlogged unlogged',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
               fontSize: 12,
               color: Theme.of(context).textTheme.bodySmall?.color,
@@ -510,9 +513,7 @@ class _HeroStatsCard extends StatelessWidget {
                   ),
                 ),
                 VerticalDivider(
-                  color: isDark
-                      ? AppColors.darkDivider
-                      : Colors.grey.shade200,
+                  color: isDark ? AppColors.darkDivider : Colors.grey.shade200,
                   thickness: 1,
                   width: 40,
                 ),
@@ -551,18 +552,25 @@ class _BigStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            fontSize: 36,
-            fontWeight: FontWeight.w800,
-            color: Theme.of(context).textTheme.titleLarge?.color,
-            height: 1.1,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            maxLines: 1,
+            softWrap: false,
+            style: GoogleFonts.poppins(
+              fontSize: 36,
+              fontWeight: FontWeight.w800,
+              color: Theme.of(context).textTheme.titleLarge?.color,
+              height: 1.1,
+            ),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.poppins(
             fontSize: 12,
             color: Theme.of(context).textTheme.bodySmall?.color,
@@ -607,8 +615,7 @@ class _TodayCard extends StatelessWidget {
     final weekday = DateFormat('EEE').format(now);
     final day = now.day;
     final hasEntry = entry != null;
-    final isWorked =
-        hasEntry && entry.status == WorkStatus.worked;
+    final isWorked = hasEntry && entry.status == WorkStatus.worked;
 
     final statusColor = hasEntry ? entry.status.color : AppColors.textHint;
     final statusLabel = hasEntry ? entry.status.label : 'Not logged';
@@ -635,89 +642,103 @@ class _TodayCard extends StatelessWidget {
         child: Row(
           children: [
             // Date chip
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkSurface2
-                            : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'TODAY  $weekday $day',
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              Theme.of(context).textTheme.bodySmall?.color,
-                          letterSpacing: 0.3,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurface2
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'TODAY  $weekday $day',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                            letterSpacing: 0.3,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              shape: BoxShape.circle,
-                            ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            statusLabel,
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: statusColor,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  statusLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text(
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
                       isWorked
                           ? '${_fmtTime(entry?.inTime)}  →  ${_fmtTime(entry?.outTime)}'
                           : '--:--  →  --:--',
+                      maxLines: 1,
+                      softWrap: false,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color:
-                            Theme.of(context).textTheme.titleLarge?.color,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-            const Spacer(),
-            Text(
-              hasEntry ? 'Tap to edit' : 'Tap to log',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                hasEntry ? 'Tap to edit' : 'Tap to log',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
               ),
             ),
             const SizedBox(width: 2),
@@ -742,14 +763,12 @@ class _DayBreakdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = stats.workedDays +
-        stats.leaveDays +
-        stats.noPayDays +
-        stats.holidays;
+    final total =
+        stats.workedDays + stats.leaveDays + stats.noPayDays + stats.holidays;
 
     final segments = [
       _Segment(count: stats.workedDays, color: AppColors.primary),
-      _Segment(count: stats.leaveDays, color: const Color(0xFFFDAA3D)),
+      _Segment(count: stats.leaveDays, color: AppColors.spending),
       _Segment(count: stats.noPayDays, color: AppColors.expense),
       _Segment(count: stats.holidays, color: AppColors.budget),
     ];
@@ -787,9 +806,8 @@ class _DayBreakdownCard extends StatelessWidget {
               height: 10,
               child: total == 0
                   ? Container(
-                      color: isDark
-                          ? AppColors.darkDivider
-                          : Colors.grey.shade200,
+                      color:
+                          isDark ? AppColors.darkDivider : Colors.grey.shade200,
                     )
                   : Row(
                       children: segments
@@ -819,7 +837,7 @@ class _DayBreakdownCard extends StatelessWidget {
               ),
               Expanded(
                 child: _LegendItem(
-                  color: const Color(0xFFFDAA3D),
+                  color: AppColors.spending,
                   label: 'Leave',
                   count: stats.leaveDays,
                 ),
@@ -915,11 +933,9 @@ class _HoursSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = [
-      _HourRow(
-          label: 'Total worked hours', value: _fmtH(stats.totalHours)),
+      _HourRow(label: 'Total worked hours', value: _fmtH(stats.totalHours)),
       _HourRow(label: 'Total OT hours', value: _fmtH(stats.otHours)),
-      _HourRow(
-          label: 'Avg per worked day', value: _fmtH(stats.averagePerDay)),
+      _HourRow(label: 'Avg per worked day', value: _fmtH(stats.averagePerDay)),
       _HourRow(
           label: 'Standard day',
           value: '${stats.standardHoursPerDay}h',
@@ -962,7 +978,8 @@ class _HourRow {
   final String label;
   final String value;
   final bool isLast;
-  const _HourRow({required this.label, required this.value, this.isLast = false});
+  const _HourRow(
+      {required this.label, required this.value, this.isLast = false});
 }
 
 class _HourRowWidget extends StatelessWidget {
@@ -1053,7 +1070,8 @@ class _WorkedPopulationsCard extends StatelessWidget {
           Text(
             'Daily Hours',
             style: GoogleFonts.poppins(
-                fontSize: 14, fontWeight: FontWeight.w700,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.titleLarge?.color),
           ),
           const SizedBox(height: 14),
@@ -1215,7 +1233,8 @@ class _LogSummaryHeader extends StatelessWidget {
               color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.work_rounded, color: Colors.white, size: 24),
+            child:
+                const Icon(Icons.work_rounded, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 14),
           Column(
@@ -1421,7 +1440,8 @@ class _PayPreviewTab extends StatelessWidget {
     final ot = stats.otHours * settings.overtimeRatePerHour;
 
     // Sum all allowances
-    final totalAllowances = settings.allowances.fold<double>(0, (sum, a) => sum + a.amount);
+    final totalAllowances =
+        settings.allowances.fold<double>(0, (sum, a) => sum + a.amount);
 
     // EPF base = basic + EPF-eligible allowances
     final epfBase = basic +
@@ -1500,13 +1520,19 @@ class _PayPreviewTab extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 14),
-                Text(
-                  CurrencyFormatter.format(netPay, symbol: symbol),
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    height: 1.1,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    CurrencyFormatter.format(netPay, symbol: symbol),
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      height: 1.1,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1547,8 +1573,7 @@ class _PayPreviewTab extends StatelessWidget {
             rows: [
               _Row('Basic Salary', basic, symbol,
                   color: Theme.of(context).textTheme.titleLarge?.color),
-              _Row('Overtime (${_fmtHours(stats.otHours)}h × rate)', ot,
-                  symbol,
+              _Row('Overtime (${_fmtHours(stats.otHours)}h × rate)', ot, symbol,
                   color: AppColors.primary),
               ...allowanceRows,
             ],
@@ -1566,7 +1591,8 @@ class _PayPreviewTab extends StatelessWidget {
             title: 'Deductions',
             rows: [
               if (processing > 0)
-                _Row('Processing', processing, symbol, color: AppColors.expense),
+                _Row('Processing', processing, symbol,
+                    color: AppColors.expense),
               _Row(
                 'EPF (${settings.epfRate.toStringAsFixed(0)}% of base)',
                 ebf1,
@@ -1644,11 +1670,16 @@ class _SectionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                    fontSize: 14, fontWeight: FontWeight.w700,
-                    color: Theme.of(context).textTheme.titleLarge?.color),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).textTheme.titleLarge?.color),
+                ),
               ),
             ],
           ),
@@ -1657,25 +1688,32 @@ class _SectionCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
                       r.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color),
+                          color: Theme.of(context).textTheme.bodyMedium?.color),
                     ),
                   ),
-                  Text(
-                    CurrencyFormatter.format(r.amount, symbol: symbol),
-                    style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: r.color),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        CurrencyFormatter.format(r.amount, symbol: symbol),
+                        maxLines: 1,
+                        softWrap: false,
+                        style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: r.color),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1684,20 +1722,33 @@ class _SectionCard extends StatelessWidget {
               height: 20,
               color: isDark ? AppColors.darkDivider : Colors.grey.shade100),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                totalLabel,
-                style: GoogleFonts.poppins(
-                    fontSize: 13, fontWeight: FontWeight.w700,
-                    color: Theme.of(context).textTheme.titleLarge?.color),
+              Expanded(
+                child: Text(
+                  totalLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).textTheme.titleLarge?.color),
+                ),
               ),
-              Text(
-                CurrencyFormatter.format(total, symbol: symbol),
-                style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: totalColor ?? AppColors.primary),
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    CurrencyFormatter.format(total, symbol: symbol),
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: totalColor ?? AppColors.primary),
+                  ),
+                ),
               ),
             ],
           ),

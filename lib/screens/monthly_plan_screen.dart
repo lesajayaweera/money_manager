@@ -104,8 +104,7 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios_new_rounded,
-            size: 20,
-            color: Theme.of(context).textTheme.titleLarge?.color),
+            size: 20, color: Theme.of(context).textTheme.titleLarge?.color),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
@@ -145,10 +144,12 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (_) => Padding(
+      builder: (_) => SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -169,16 +170,24 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
                 style: GoogleFonts.poppins(
                     fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
-            _infoRow(Icons.attach_money_rounded, AppColors.income,
+            _infoRow(
+                Icons.attach_money_rounded,
+                AppColors.income,
                 'Enter money available',
                 'Type your salary or total available money for the month.'),
-            _infoRow(Icons.pie_chart_rounded, AppColors.primary,
+            _infoRow(
+                Icons.pie_chart_rounded,
+                AppColors.primary,
                 'Allocate every rupee',
                 'Assign amounts to expenses, savings goals, loans, and credit cards until the Unallocated counter reaches zero.'),
-            _infoRow(Icons.sync_rounded, AppColors.budget,
+            _infoRow(
+                Icons.sync_rounded,
+                AppColors.budget,
                 'Auto-syncs to Budget',
                 'Expense allocations are written as budget limits — the Budget screen reflects them automatically.'),
-            _infoRow(Icons.show_chart_rounded, AppColors.spending,
+            _infoRow(
+                Icons.show_chart_rounded,
+                AppColors.spending,
                 'Track planned vs actual',
                 'As you spend during the month, see actual vs planned per category in real time.'),
           ],
@@ -213,8 +222,7 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
                 Text(subtitle,
                     style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color:
-                            Theme.of(context).textTheme.bodySmall?.color)),
+                        color: Theme.of(context).textTheme.bodySmall?.color)),
               ],
             ),
           )
@@ -242,10 +250,15 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (_) => _AllocationBreakdownSheet(plan: plan),
+      builder: (_) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        child: _AllocationBreakdownSheet(plan: plan),
+      ),
     );
   }
 }
@@ -439,8 +452,10 @@ class _PlanCardState extends State<_PlanCard> {
         plan.monthlyIncome > 0 ? plan.totalAllocated / plan.monthlyIncome : 0.0;
 
     // Category allocations only — those sync to budget
-    final categoryAllocs =
-        plan.byType(AllocationType.category).where((a) => a.amount > 0).toList();
+    final categoryAllocs = plan
+        .byType(AllocationType.category)
+        .where((a) => a.amount > 0)
+        .toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -474,13 +489,13 @@ class _PlanCardState extends State<_PlanCard> {
                         children: [
                           Text(
                             plan.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.color,
+                              color:
+                                  Theme.of(context).textTheme.titleLarge?.color,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -488,10 +503,8 @@ class _PlanCardState extends State<_PlanCard> {
                             CurrencyFormatter.monthYear(plan.periodStart),
                             style: GoogleFonts.poppins(
                               fontSize: 12,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color,
                             ),
                           ),
                         ],
@@ -502,8 +515,7 @@ class _PlanCardState extends State<_PlanCard> {
                     PopupMenuButton<String>(
                       icon: Icon(
                         Icons.more_vert_rounded,
-                        color:
-                            Theme.of(context).textTheme.bodySmall?.color,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                         size: 20,
                       ),
                       color: isDark ? AppColors.darkSurface2 : Colors.white,
@@ -532,8 +544,7 @@ class _PlanCardState extends State<_PlanCard> {
                             const SizedBox(width: 8),
                             Text('Delete',
                                 style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: AppColors.expense)),
+                                    fontSize: 13, color: AppColors.expense)),
                           ]),
                         ),
                       ],
@@ -545,20 +556,32 @@ class _PlanCardState extends State<_PlanCard> {
 
                 // ── Income + allocation progress ─────────────────────────
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Available',
-                        style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color)),
-                    Text(
-                      CurrencyFormatter.format(plan.monthlyIncome,
-                          symbol: symbol),
-                      style: GoogleFonts.poppins(
-                          fontSize: 13, fontWeight: FontWeight.w600),
+                    Expanded(
+                      child: Text('Available',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.color)),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          CurrencyFormatter.format(plan.monthlyIncome,
+                              symbol: symbol),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: GoogleFonts.poppins(
+                              fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -583,57 +606,83 @@ class _PlanCardState extends State<_PlanCard> {
                 // Allocation + unallocated row
                 Row(
                   children: [
-                    _MiniChip(
-                      icon: AllocationType.category.icon,
-                      color: AllocationType.category.color,
-                      label: CurrencyFormatter.formatCompact(
-                          plan.categoryTotal,
-                          symbol: symbol),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: _MiniChip(
+                          icon: AllocationType.category.icon,
+                          color: AllocationType.category.color,
+                          label: CurrencyFormatter.formatCompact(
+                              plan.categoryTotal,
+                              symbol: symbol),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 6),
-                    _MiniChip(
-                      icon: AllocationType.savingsGoal.icon,
-                      color: AllocationType.savingsGoal.color,
-                      label: CurrencyFormatter.formatCompact(
-                          plan.savingsTotal,
-                          symbol: symbol),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: _MiniChip(
+                          icon: AllocationType.savingsGoal.icon,
+                          color: AllocationType.savingsGoal.color,
+                          label: CurrencyFormatter.formatCompact(
+                              plan.savingsTotal,
+                              symbol: symbol),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 6),
-                    _MiniChip(
-                      icon: AllocationType.loan.icon,
-                      color: AllocationType.loan.color,
-                      label: CurrencyFormatter.formatCompact(
-                          plan.loanTotal, symbol: symbol),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: _MiniChip(
+                          icon: AllocationType.loan.icon,
+                          color: AllocationType.loan.color,
+                          label: CurrencyFormatter.formatCompact(plan.loanTotal,
+                              symbol: symbol),
+                        ),
+                      ),
                     ),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          unallocated >= 0
-                              ? CurrencyFormatter.format(unallocated,
-                                  symbol: symbol)
-                              : '-${CurrencyFormatter.format(unallocated.abs(), symbol: symbol)}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: unallocated < 0
-                                ? AppColors.expense
-                                : isComplete
-                                    ? AppColors.income
-                                    : AppColors.primary,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              unallocated >= 0
+                                  ? CurrencyFormatter.format(unallocated,
+                                      symbol: symbol)
+                                  : '-${CurrencyFormatter.format(unallocated.abs(), symbol: symbol)}',
+                              maxLines: 1,
+                              softWrap: false,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: unallocated < 0
+                                    ? AppColors.expense
+                                    : isComplete
+                                        ? AppColors.income
+                                        : AppColors.primary,
+                              ),
+                            ),
                           ),
-                        ),
-                        Text(
-                          'left to plan',
-                          style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color),
-                        ),
-                      ],
+                          Text(
+                            'left to plan',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -648,34 +697,39 @@ class _PlanCardState extends State<_PlanCard> {
                           : Colors.grey.shade100),
                   const SizedBox(height: 14),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Spending Tracker',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color:
-                              Theme.of(context).textTheme.titleLarge?.color,
+                      Expanded(
+                        child: Text(
+                          'Spending Tracker',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color:
+                                Theme.of(context).textTheme.titleLarge?.color,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       if (_loadingActual)
                         SizedBox(
                           width: 14,
                           height: 14,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primary),
+                              strokeWidth: 2, color: AppColors.primary),
                         )
                       else
-                        Text(
-                          'Actual vs Planned',
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color,
+                        Flexible(
+                          child: Text(
+                            'Actual vs Planned',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color,
+                            ),
                           ),
                         ),
                     ],
@@ -697,47 +751,61 @@ class _PlanCardState extends State<_PlanCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                alloc.name,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.color,
+                              Expanded(
+                                child: Text(
+                                  alloc.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.color,
+                                  ),
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  Text(
-                                    CurrencyFormatter.formatCompact(actual,
-                                        symbol: symbol),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: isOver
-                                          ? AppColors.expense
-                                          : Theme.of(context)
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerRight,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        CurrencyFormatter.formatCompact(actual,
+                                            symbol: symbol),
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: isOver
+                                              ? AppColors.expense
+                                              : Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.color,
+                                        ),
+                                      ),
+                                      Text(
+                                        ' / ${CurrencyFormatter.formatCompact(planned, symbol: symbol)}',
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 11,
+                                          color: Theme.of(context)
                                               .textTheme
-                                              .titleLarge
+                                              .bodySmall
                                               ?.color,
-                                    ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    ' / ${CurrencyFormatter.formatCompact(planned, symbol: symbol)}',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.color,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -772,6 +840,8 @@ class _PlanCardState extends State<_PlanCard> {
                             isOver
                                 ? '${CurrencyFormatter.formatCompact(remaining.abs(), symbol: symbol)} over budget'
                                 : '${CurrencyFormatter.formatCompact(remaining, symbol: symbol)} remaining',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               color: isOver
@@ -780,9 +850,8 @@ class _PlanCardState extends State<_PlanCard> {
                                       .textTheme
                                       .bodySmall
                                       ?.color,
-                              fontWeight: isOver
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                              fontWeight:
+                                  isOver ? FontWeight.w600 : FontWeight.w400,
                             ),
                           ),
                         ],
@@ -793,8 +862,8 @@ class _PlanCardState extends State<_PlanCard> {
                   // Total actual row
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: isDark
                           ? AppColors.darkBackground
@@ -802,28 +871,38 @@ class _PlanCardState extends State<_PlanCard> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Total Spent',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color,
+                        Expanded(
+                          child: Text(
+                            'Total Spent',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall?.color,
+                            ),
                           ),
                         ),
-                        Text(
-                          CurrencyFormatter.format(_totalActualSpent,
-                              symbol: symbol),
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: _totalActualSpent > plan.categoryTotal
-                                ? AppColors.expense
-                                : AppColors.income,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              CurrencyFormatter.format(_totalActualSpent,
+                                  symbol: symbol),
+                              maxLines: 1,
+                              softWrap: false,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _totalActualSpent > plan.categoryTotal
+                                    ? AppColors.expense
+                                    : AppColors.income,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -886,9 +965,7 @@ class _MiniChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(label,
               style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: color)),
+                  fontSize: 10, fontWeight: FontWeight.w600, color: color)),
         ],
       ),
     );
@@ -906,55 +983,65 @@ class _AllocationBreakdownSheet extends StatelessWidget {
     final symbol = context.watch<SettingsProvider>().currencySymbol;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkDivider : Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkDivider : Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 16),
-          Text(plan.name,
-              style: GoogleFonts.poppins(
-                  fontSize: 18, fontWeight: FontWeight.w700)),
-          Text(CurrencyFormatter.monthYear(plan.periodStart),
-              style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color:
-                      Theme.of(context).textTheme.bodySmall?.color)),
-          const SizedBox(height: 20),
-          for (final type in AllocationType.values)
-            _TypeSection(type: type, plan: plan, symbol: symbol),
-          const Divider(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Left to Plan',
+        ),
+        const SizedBox(height: 16),
+        Text(plan.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style:
+                GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(CurrencyFormatter.monthYear(plan.periodStart),
+            style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodySmall?.color)),
+        const SizedBox(height: 20),
+        for (final type in AllocationType.values)
+          _TypeSection(type: type, plan: plan, symbol: symbol),
+        const Divider(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: Text('Left to Plan',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                       fontSize: 14, fontWeight: FontWeight.w600)),
-              Text(
-                CurrencyFormatter.format(plan.unallocated, symbol: symbol),
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: plan.unallocated <= 0
-                      ? AppColors.income
-                      : AppColors.spending,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  CurrencyFormatter.format(plan.unallocated, symbol: symbol),
+                  maxLines: 1,
+                  softWrap: false,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: plan.unallocated <= 0
+                        ? AppColors.income
+                        : AppColors.spending,
+                  ),
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -996,10 +1083,7 @@ class _TypeSection extends StatelessWidget {
                 Text(item.name,
                     style: GoogleFonts.poppins(
                         fontSize: 13,
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.color)),
+                        color: Theme.of(context).textTheme.bodyMedium?.color)),
                 Text(
                   CurrencyFormatter.format(item.amount, symbol: symbol),
                   style: GoogleFonts.poppins(

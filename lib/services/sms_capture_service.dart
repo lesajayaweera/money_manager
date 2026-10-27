@@ -105,6 +105,31 @@ class SmsCaptureService {
     }
   }
 
+  /// All SMS from any sender, newest first, capped at [limit], with no
+  /// whitelist filter. Used by the manual message picker so the user can
+  /// browse their entire inbox and select specific messages to analyse.
+  /// Requires READ_SMS.
+  static Future<List<Map<String, dynamic>>> getAllRecentMessages({
+    DateTime? since,
+    int limit = 500,
+  }) async {
+    try {
+      final result = await _channel.invokeListMethod<Map<dynamic, dynamic>>(
+        'getRecentMessages',
+        {
+          'since': (since ?? DateTime.now().subtract(const Duration(days: 60)))
+              .millisecondsSinceEpoch,
+          'limit': limit,
+          'ignoreWhitelist': true,
+        },
+      );
+      if (result == null) return [];
+      return result.map((e) => e.cast<String, dynamic>()).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   /// Recent SMS from the whole inbox (any sender), newest first, capped at
   /// [limit]. Used by the message-view screen to show bank messages plus the
   /// senders that are filtered out. Requires READ_SMS.

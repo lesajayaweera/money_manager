@@ -103,7 +103,18 @@ Hotline:94112462462''';
       expect(redacted.contains('19398.97'), isFalse);
       expect(redacted.contains('3293123858'), isFalse);
       expect(redacted.contains('94112462462'), isFalse);
-      expect(redacted.contains('[redacted]'), isTrue);
+      expect(redacted.contains('[REDACTED]'), isTrue);
+    });
+
+    test('keeps the exact original body alongside the redacted version', () {
+      final result = SmsParser.parse(
+        sender: 'HNB',
+        body: hnbReceipt,
+        receivedAt: DateTime(2026, 9, 9, 13, 11),
+      );
+      expect(result.originalBody, hnbReceipt);
+      expect(result.originalBody.contains('1540***8254'), isTrue);
+      expect(result.redactedBody.contains('1540***8254'), isFalse);
     });
   });
 
@@ -147,7 +158,7 @@ Hotline:94112462462''';
       expect(result.matched, isTrue);
       expect(result.amount, 1500.00);
       expect(result.type, TransactionType.expense);
-      expect(result.title, 'HNB');
+      expect(result.title, 'ABC Store today');
     });
 
     test('treats salary credit as income', () {
@@ -199,6 +210,20 @@ Hotline:94112462462''';
       expect(SmsParser.bankNameForSender('HNB'), 'HNB');
       expect(SmsParser.isKnownBankSender('abc-notabank'), isFalse);
       expect(SmsParser.bankNameForSender(''), isNull);
+    });
+  });
+
+  group('Manual analysis', () {
+    test('parses an unknown sender without the whitelist gate', () {
+      final result = SmsParser.parseIgnoringWhitelist(
+        sender: 'MOM',
+        body: 'Paid Rs 750.00 to ABC Store today.',
+        receivedAt: DateTime(2026, 9, 9, 13, 11),
+      );
+      expect(result.matched, isTrue);
+      expect(result.bank, 'MOM');
+      expect(result.amount, 750.00);
+      expect(result.originalBody, contains('ABC Store'));
     });
   });
 

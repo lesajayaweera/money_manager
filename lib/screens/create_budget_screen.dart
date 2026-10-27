@@ -45,8 +45,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     super.didChangeDependencies();
 
     // Use all expense categories from CategoryProvider.
-    final allExpense =
-        context.watch<CategoryProvider>().expenseCategories;
+    final allExpense = context.watch<CategoryProvider>().expenseCategories;
 
     if (!_allocationsInitialized) {
       _allocationsInitialized = true;
@@ -67,9 +66,11 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       // preserving any amounts the user has already entered.
       final currentNames = allExpense.map((c) => c.name).toSet();
       // Remove categories that no longer exist.
-      final toRemove = _allocations.keys.where((k) => !currentNames.contains(k)).toList();
+      final toRemove =
+          _allocations.keys.where((k) => !currentNames.contains(k)).toList();
       // Add newly created categories with a default of 0.
-      final toAdd = allExpense.where((c) => !_allocations.containsKey(c.name)).toList();
+      final toAdd =
+          allExpense.where((c) => !_allocations.containsKey(c.name)).toList();
       if (toRemove.isNotEmpty || toAdd.isNotEmpty) {
         // Defer the mutation + setState to after the current build frame to
         // avoid a re-entrant build triggered by context.watch inside
@@ -100,8 +101,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   double get _totalBudget =>
       double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
 
-  double get _totalAllocated =>
-      _allocations.values.fold(0, (s, v) => s + v);
+  double get _totalAllocated => _allocations.values.fold(0, (s, v) => s + v);
 
   void _next() {
     if (_step == 0) {
@@ -126,8 +126,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
 
   /// True if the user has entered any allocations (i.e. there is unsaved work
   /// on step 2 or beyond that would be lost on a back-navigate).
-  bool get _hasAllocations => _allocationsInitialized &&
-      _allocations.values.any((v) => v > 0);
+  bool get _hasAllocations =>
+      _allocationsInitialized && _allocations.values.any((v) => v > 0);
 
   void _back() {
     if (_step > 0) setState(() => _step--);
@@ -138,8 +138,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   /// has been entered yet.
   Future<void> _confirmBack({bool toParent = false}) async {
     // Only warn if on step 2/3 and there is actual data to lose.
-    final needsConfirm = (_step >= 1 && _hasAllocations) ||
-        (_step == 2 && _hasAllocations);
+    final needsConfirm =
+        (_step >= 1 && _hasAllocations) || (_step == 2 && _hasAllocations);
     if (!needsConfirm) {
       if (toParent) {
         Navigator.pop(context);
@@ -191,8 +191,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                   toParent
                       ? 'Going back will discard all the budget\nand category allocations you entered.'
                       : 'Going back will discard the category\nallocations you entered on this step.',
-                  style:
-                      GoogleFonts.poppins(fontSize: 13, color: textSub),
+                  style: GoogleFonts.poppins(fontSize: 13, color: textSub),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -205,8 +204,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
-                          side: BorderSide(
-                              color: textSub.withValues(alpha: 0.3)),
+                          side:
+                              BorderSide(color: textSub.withValues(alpha: 0.3)),
                         ),
                         child: Text('Keep editing',
                             style: GoogleFonts.poppins(
@@ -300,14 +299,16 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const Icon(Icons.check_circle_rounded,
+                color: Colors.white, size: 20),
             const SizedBox(width: 10),
             Text('Budget saved!', style: GoogleFonts.poppins(fontSize: 14)),
           ]),
           backgroundColor: AppColors.income,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -335,8 +336,10 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     final settings = context.watch<SettingsProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = Theme.of(context).scaffoldBackgroundColor;
-    final textPrimary = Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
     return Scaffold(
       backgroundColor: bg,
@@ -451,10 +454,13 @@ class _Step1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final dividerColor = Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
@@ -518,7 +524,8 @@ class _Step1 extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: amountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: false),
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     style: GoogleFonts.poppins(
                       fontSize: 16,
@@ -529,7 +536,8 @@ class _Step1 extends StatelessWidget {
                       hintText: '0',
                       hintStyle: GoogleFonts.poppins(color: textSub),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
                     ),
                   ),
                 ),
@@ -590,7 +598,8 @@ class _Step1 extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(Icons.keyboard_arrow_down_rounded, color: textSub, size: 22),
+                  Icon(Icons.keyboard_arrow_down_rounded,
+                      color: textSub, size: 22),
                 ],
               ),
             ),
@@ -633,10 +642,13 @@ class _Step2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final dividerColor = Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
     final pct = totalBudget == 0 ? 0.0 : (_totalAllocated / totalBudget * 100);
     final isOverBudget = _totalAllocated > totalBudget;
 
@@ -667,8 +679,8 @@ class _Step2 extends StatelessWidget {
                 Builder(builder: (ctx) {
                   final allocatedCount =
                       allocations.values.where((v) => v > 0).length;
-                  final unallocated =
-                      (totalBudget - _totalAllocated).clamp(0.0, double.infinity);
+                  final unallocated = (totalBudget - _totalAllocated)
+                      .clamp(0.0, double.infinity);
                   return Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
@@ -702,6 +714,8 @@ class _Step2 extends StatelessWidget {
                                 : allocatedCount == 0
                                     ? 'No categories allocated yet'
                                     : '$allocatedCount ${allocatedCount == 1 ? 'category' : 'categories'} allocated',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -712,12 +726,20 @@ class _Step2 extends StatelessWidget {
                           ),
                         ),
                         if (!isOverBudget)
-                          Text(
-                            '${CurrencyFormatter.format(unallocated, symbol: currencySymbol)} left',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                '${CurrencyFormatter.format(unallocated, symbol: currencySymbol)} left',
+                                maxLines: 1,
+                                softWrap: false,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
                             ),
                           ),
                       ],
@@ -810,6 +832,8 @@ class _Step2 extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         meta.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.poppins(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
@@ -817,28 +841,42 @@ class _Step2 extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     // Amount
-                                    Text(
-                                      CurrencyFormatter.format(amount,
-                                          symbol: currencySymbol),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: amount > 0
-                                            ? textPrimary
-                                            : textSub,
+                                    Flexible(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          CurrencyFormatter.format(amount,
+                                              symbol: currencySymbol),
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: amount > 0
+                                                ? textPrimary
+                                                : textSub,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     SizedBox(
-                                      width: 44,
-                                      child: Text(
-                                        '${catPct.toStringAsFixed(1)}%',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 12,
-                                          color: textSub,
+                                      width: 48,
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          '${catPct.toStringAsFixed(1)}%',
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            color: textSub,
+                                          ),
                                         ),
-                                        textAlign: TextAlign.end,
                                       ),
                                     ),
                                     const SizedBox(width: 6),
@@ -872,10 +910,12 @@ class _Step2 extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: surfaceColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.primary.withOpacity(0.35)),
+                      border: Border.all(
+                          color: AppColors.primary.withOpacity(0.35)),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(isDark ? 0.12 : 0.06),
+                          color: AppColors.primary
+                              .withOpacity(isDark ? 0.12 : 0.06),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -900,6 +940,8 @@ class _Step2 extends StatelessWidget {
                         Expanded(
                           child: Text(
                             'Manage Categories',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -921,7 +963,8 @@ class _Step2 extends StatelessWidget {
 
                 // Total budget footer card
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
                     color: isOverBudget
                         ? AppColors.expense.withValues(alpha: 0.06)
@@ -950,31 +993,45 @@ class _Step2 extends StatelessWidget {
                                 color: textPrimary,
                               ),
                             ),
-                            if (isOverBudget) ...
-                              [
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Over by ${CurrencyFormatter.format(_totalAllocated - totalBudget, symbol: currencySymbol)}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.expense,
-                                  ),
+                            if (isOverBudget) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                'Over by ${CurrencyFormatter.format(_totalAllocated - totalBudget, symbol: currencySymbol)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.expense,
                                 ),
-                              ],
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                      Text(
-                        CurrencyFormatter.format(totalBudget, symbol: currencySymbol),
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: isOverBudget ? AppColors.expense : AppColors.income,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            CurrencyFormatter.format(totalBudget,
+                                symbol: currencySymbol),
+                            maxLines: 1,
+                            softWrap: false,
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: isOverBudget
+                                  ? AppColors.expense
+                                  : AppColors.income,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           if (isOverBudget)
                             Padding(
@@ -986,9 +1043,8 @@ class _Step2 extends StatelessWidget {
                               ),
                             ),
                           Text(
-                            isOverBudget
-                                ? '${pct.toStringAsFixed(0)}%'
-                                : '${pct.toStringAsFixed(0)}%',
+                            '${pct.toStringAsFixed(0)}%',
+                            maxLines: 1,
                             style: GoogleFonts.poppins(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -1020,16 +1076,20 @@ class _Step2 extends StatelessWidget {
     );
   }
 
-  void _showAmountDialog(BuildContext context, BudgetCategoryMeta meta, double current) {
+  void _showAmountDialog(
+      BuildContext context, BudgetCategoryMeta meta, double current) {
     final ctrl = TextEditingController(
       text: current > 0 ? current.toStringAsFixed(0) : '',
     );
-    final textPrimary = Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
     // Max this category can hold = total budget minus all OTHER categories' allocations.
     final otherAllocated = _totalAllocated - current;
-    final available = (totalBudget - otherAllocated).clamp(0.0, double.infinity);
+    final available =
+        (totalBudget - otherAllocated).clamp(0.0, double.infinity);
 
     showDialog(
       context: context,
@@ -1040,7 +1100,9 @@ class _Step2 extends StatelessWidget {
           final remaining = available - entered;
 
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            scrollable: true,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             backgroundColor: Theme.of(context).colorScheme.surface,
             title: Row(
               children: [
@@ -1073,7 +1135,8 @@ class _Step2 extends StatelessWidget {
               children: [
                 // Available budget chip
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: isOver
                         ? AppColors.expense.withValues(alpha: 0.08)
@@ -1104,7 +1167,8 @@ class _Step2 extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isOver ? AppColors.expense : AppColors.income,
+                            color:
+                                isOver ? AppColors.expense : AppColors.income,
                           ),
                         ),
                       ),
@@ -1116,7 +1180,8 @@ class _Step2 extends StatelessWidget {
                 TextField(
                   controller: ctrl,
                   autofocus: true,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: false),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   style: GoogleFonts.poppins(
                     fontSize: 18,
@@ -1137,7 +1202,8 @@ class _Step2 extends StatelessWidget {
                         : null,
                     errorStyle: GoogleFonts.poppins(fontSize: 11),
                     errorMaxLines: 2,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
@@ -1156,11 +1222,13 @@ class _Step2 extends StatelessWidget {
                     ),
                     focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.expense, width: 2),
+                      borderSide:
+                          BorderSide(color: AppColors.expense, width: 2),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.expense, width: 1.5),
+                      borderSide:
+                          BorderSide(color: AppColors.expense, width: 1.5),
                     ),
                   ),
                 ),
@@ -1189,19 +1257,21 @@ class _Step2 extends StatelessWidget {
                   child: Text(
                     'Clear',
                     style: GoogleFonts.poppins(
-                        color: AppColors.expense,
-                        fontWeight: FontWeight.w600),
+                        color: AppColors.expense, fontWeight: FontWeight.w600),
                   ),
                 ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text('Cancel', style: GoogleFonts.poppins(color: textSub)),
+                child:
+                    Text('Cancel', style: GoogleFonts.poppins(color: textSub)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isOver ? Colors.grey.shade400 : AppColors.primary,
+                  backgroundColor:
+                      isOver ? Colors.grey.shade400 : AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
                 ),
                 onPressed: isOver
@@ -1211,7 +1281,8 @@ class _Step2 extends StatelessWidget {
                         onAllocationChanged(meta.name, val);
                         Navigator.pop(ctx);
                       },
-                child: Text('Set', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                child: Text('Set',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
               ),
             ],
           );
@@ -1249,10 +1320,13 @@ class _Step3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final textPrimary =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final dividerColor = Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
     final allocatedCats = allocations.entries.where((e) => e.value > 0).length;
 
     return Column(
@@ -1299,7 +1373,8 @@ class _Step3 extends StatelessWidget {
                     children: [
                       _ReviewRow(
                         label: 'Monthly Budget',
-                        value: CurrencyFormatter.format(totalBudget, symbol: currencySymbol),
+                        value: CurrencyFormatter.format(totalBudget,
+                            symbol: currencySymbol),
                         valueColor: textPrimary,
                         dividerColor: dividerColor,
                         isFirst: true,
@@ -1318,7 +1393,8 @@ class _Step3 extends StatelessWidget {
                       ),
                       _ReviewRow(
                         label: 'Total Allocation',
-                        value: CurrencyFormatter.format(totalAllocated, symbol: currencySymbol),
+                        value: CurrencyFormatter.format(totalAllocated,
+                            symbol: currencySymbol),
                         valueColor: AppColors.income,
                         dividerColor: dividerColor,
                         isLast: true,
@@ -1365,7 +1441,8 @@ class _ReviewRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
     return Column(
       children: [
@@ -1377,15 +1454,26 @@ class _ReviewRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(fontSize: 14, color: textSub),
                 ),
               ),
-              Text(
-                value,
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: valueColor,
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: valueColor,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -1414,9 +1502,12 @@ class _BottomButtonRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? Theme.of(context).colorScheme.surface : Colors.white;
-    final dividerColor = Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final surfaceColor =
+        isDark ? Theme.of(context).colorScheme.surface : Colors.white;
+    final dividerColor =
+        Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
@@ -1433,7 +1524,8 @@ class _BottomButtonRow extends StatelessWidget {
                 onPressed: onBack,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
                   side: BorderSide(color: dividerColor, width: 1.5),
                 ),
                 child: Text(
@@ -1482,7 +1574,8 @@ class _PrimaryButton extends StatelessWidget {
           backgroundColor: btnColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           elevation: 0,
         ),
         child: Text(
@@ -1532,11 +1625,11 @@ class _WalletIllustration extends StatelessWidget {
             width: 130,
             height: 100,
             decoration: BoxDecoration(
-              color: const Color(0xFF6C5CE7),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6C5CE7).withOpacity(0.35),
+                  color: AppColors.primary.withOpacity(0.35),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -1549,9 +1642,10 @@ class _WalletIllustration extends StatelessWidget {
             child: Container(
               width: 130,
               height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFF7C6CEF),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(18)),
               ),
             ),
           ),
@@ -1578,11 +1672,15 @@ class _WalletIllustration extends StatelessWidget {
                 width: 70,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50),
+                  color: AppColors.income,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(
-                  child: Text('\$', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: Text('\$',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -1597,11 +1695,15 @@ class _WalletIllustration extends StatelessWidget {
                 width: 70,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF66BB6A),
+                  color: AppColors.income.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(
-                  child: Text('\$', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: Text('\$',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -1694,11 +1796,11 @@ class _ReviewIllustration extends StatelessWidget {
             width: 110,
             height: 130,
             decoration: BoxDecoration(
-              color: const Color(0xFF00B894),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF00B894).withOpacity(0.3),
+                  color: AppColors.primary.withOpacity(0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -1712,8 +1814,9 @@ class _ReviewIllustration extends StatelessWidget {
               width: 44,
               height: 18,
               decoration: BoxDecoration(
-                color: const Color(0xFF00B894).withOpacity(0.8),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                color: AppColors.primaryLight.withOpacity(0.8),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(8)),
               ),
             ),
           ),
@@ -1757,7 +1860,8 @@ class _ReviewIllustration extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.gps_fixed_rounded, color: Colors.white, size: 26),
+              child: const Icon(Icons.gps_fixed_rounded,
+                  color: Colors.white, size: 26),
             ),
           ),
         ],
@@ -1775,7 +1879,9 @@ class _CheckRow extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          checked ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+          checked
+              ? Icons.check_circle_rounded
+              : Icons.radio_button_unchecked_rounded,
           color: checked ? AppColors.income : Colors.grey,
           size: 14,
         ),

@@ -42,10 +42,9 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
       _inTime = e.inTime != null ? _parseTime(e.inTime!) : null;
       _outTime = e.outTime != null ? _parseTime(e.outTime!) : null;
       _status = e.status;
-      _hoursController.text =
-          e.hours == e.hours.truncateToDouble()
-              ? e.hours.toStringAsFixed(0)
-              : e.hours.toString();
+      _hoursController.text = e.hours == e.hours.truncateToDouble()
+          ? e.hours.toStringAsFixed(0)
+          : e.hours.toString();
     } else {
       final now = DateTime.now();
       _month = DateTime(now.year, now.month);
@@ -72,7 +71,8 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
     super.dispose();
   }
 
-  double get _hours => double.tryParse(_hoursController.text.replaceAll(',', '')) ?? 0;
+  double get _hours =>
+      double.tryParse(_hoursController.text.replaceAll(',', '')) ?? 0;
 
   void _recalcDaysInMonth() {
     setState(() {
@@ -188,12 +188,8 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
       year: _month.year,
       month: _month.month,
       day: _day,
-      inTime: _isWorked && _inTime != null
-          ? _fmt(_inTime!)
-          : null,
-      outTime: _isWorked && _outTime != null
-          ? _fmt(_outTime!)
-          : null,
+      inTime: _isWorked && _inTime != null ? _fmt(_inTime!) : null,
+      outTime: _isWorked && _outTime != null ? _fmt(_outTime!) : null,
       hours: _isWorked ? _hours : 0,
       status: _status,
     );
@@ -276,7 +272,6 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
                       selected: _status,
                       onChanged: (s) => setState(() => _status = s),
                     ),
-
                     const SizedBox(height: 20),
                     _SectionLabel('Date'),
                     const SizedBox(height: 8),
@@ -284,13 +279,11 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
                       onTap: _pickMonthAndDay,
                       child: _TileRow(
                         icon: Icons.calendar_today_rounded,
-                        text: DateFormat(
-                                'EEE, d MMMM yyyy')
+                        text: DateFormat('EEE, d MMMM yyyy')
                             .format(DateTime(_month.year, _month.month, _day)),
                         isDark: isDark,
                       ),
                     ),
-
                     if (_isWorked) ...[
                       const SizedBox(height: 20),
                       _SectionLabel('In / Out time'),
@@ -324,7 +317,6 @@ class _AddWorkLogScreenState extends State<AddWorkLogScreen> {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 20),
                       _SectionLabel('Hours worked'),
                       const SizedBox(height: 8),
@@ -412,7 +404,8 @@ class _TileRow extends StatelessWidget {
   final String text;
   final bool isDark;
 
-  const _TileRow({required this.icon, required this.text, required this.isDark});
+  const _TileRow(
+      {required this.icon, required this.text, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -432,6 +425,8 @@ class _TileRow extends StatelessWidget {
           Expanded(
             child: Text(
               text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
@@ -464,8 +459,7 @@ class _StatusSelector extends StatelessWidget {
           onTap: () => onChanged(s),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isSelected
                   ? s.color
@@ -484,10 +478,7 @@ class _StatusSelector extends StatelessWidget {
                     size: 16,
                     color: isSelected
                         ? Colors.white
-                        : Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.color),
+                        : Theme.of(context).textTheme.bodySmall?.color),
                 const SizedBox(width: 6),
                 Text(
                   s.label,

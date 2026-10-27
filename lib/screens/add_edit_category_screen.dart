@@ -36,8 +36,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     _type = widget.editCategory?.type ?? widget.initialType;
     _selectedIcon =
         widget.editCategory?.icon ?? AppCategory.availableIcons.first;
-    _selectedColor =
-        widget.editCategory?.color ?? Colors.white ?? AppCategory.availableColors.first;
+    _selectedColor = widget.editCategory?.color ??
+        Colors.white ??
+        AppCategory.availableColors.first;
 
     if (widget.editCategory != null) {
       final e = widget.editCategory!;
@@ -103,7 +104,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+          icon: Icon(Icons.arrow_back,
+              color: Theme.of(context).textTheme.titleLarge?.color ??
+                  Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -111,7 +114,8 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
           ),
         ),
         centerTitle: true,
@@ -130,8 +134,8 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     width: 120,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark 
-                          ? AppColors.darkPrimarySurface 
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.darkPrimarySurface
                           : AppColors.primarySurface,
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -147,10 +151,14 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                         Text(
                           previewName,
                           textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+                            color:
+                                Theme.of(context).textTheme.titleLarge?.color ??
+                                    Colors.white,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -180,7 +188,8 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     'Preview',
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+                      color: Theme.of(context).textTheme.bodyMedium?.color ??
+                          Colors.white,
                     ),
                   ),
                 ],
@@ -191,134 +200,156 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    // Category Name
-                    const _FormLabel('Category Name'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _nameCtrl,
-                      onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.poppins(
-                          fontSize: 15, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
-                      decoration: _inputDecor('e.g. Pet Care'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Enter a category name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 18),
+                  // Category Name
+                  const _FormLabel('Category Name'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _nameCtrl,
+                    onChanged: (_) => setState(() {}),
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: Theme.of(context).textTheme.titleLarge?.color ??
+                            Colors.white),
+                    decoration: _inputDecor('e.g. Pet Care'),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Enter a category name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 18),
 
-                    // Type toggle
-                    const _FormLabel('Type'),
-                    const SizedBox(height: 8),
-                    _TypeToggle(
-                      selected: _type,
-                      onChanged: (t) => setState(() => _type = t),
-                    ),
-                    const SizedBox(height: 18),
+                  // Type toggle
+                  const _FormLabel('Type'),
+                  const SizedBox(height: 8),
+                  _TypeToggle(
+                    selected: _type,
+                    onChanged: (t) => setState(() => _type = t),
+                  ),
+                  const SizedBox(height: 18),
 
-
-
-                    // Icon picker
-                    const _FormLabel('Icon'),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _openCustomize(),
-                      child: _PickerField(
-                        child: Row(
-                          children: [
-                            Icon(_selectedIcon,
-                                color: _selectedColor, size: 22),
-                            const SizedBox(width: 10),
-                            Text(
+                  // Icon picker
+                  const _FormLabel('Icon'),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _openCustomize(),
+                    child: _PickerField(
+                      child: Row(
+                        children: [
+                          Icon(_selectedIcon, color: _selectedColor, size: 22),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
                               'Choose icon',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
                                   fontSize: 14,
-                                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white),
+                                  color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color ??
+                                      Colors.white),
                             ),
-                            const Spacer(),
-                            Icon(Icons.chevron_right_rounded,
-                                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
-                          ],
-                        ),
+                          ),
+                          Icon(Icons.chevron_right_rounded,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.color ??
+                                  Colors.white,
+                              size: 20),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 18),
+                  ),
+                  const SizedBox(height: 18),
 
-                    // Color picker
-                    const _FormLabel('Color'),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _openCustomize(),
-                      child: _PickerField(
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                                backgroundColor: _selectedColor, radius: 12),
-                            const SizedBox(width: 10),
-                            Text(
+                  // Color picker
+                  const _FormLabel('Color'),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _openCustomize(),
+                    child: _PickerField(
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                              backgroundColor: _selectedColor, radius: 12),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
                               '#${_selectedColor.toARGB32().toRadixString(16).toUpperCase().substring(2)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
                                   fontSize: 14,
-                                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
+                                  color: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.color ??
+                                      Colors.white),
                             ),
-                            const Spacer(),
-                            Icon(Icons.keyboard_arrow_down_rounded,
-                                color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, size: 20),
-                          ],
-                        ),
+                          ),
+                          Icon(Icons.keyboard_arrow_down_rounded,
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.color ??
+                                  Colors.white,
+                              size: 20),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 18),
+                  ),
+                  const SizedBox(height: 18),
 
+                  // Note
+                  const _FormLabel('Note (Optional)'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _noteCtrl,
+                    maxLines: 3,
+                    style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Theme.of(context).textTheme.titleLarge?.color ??
+                            Colors.white),
+                    decoration: _inputDecor('Add a note...'),
+                  ),
+                  const SizedBox(height: 28),
 
-
-                    // Note
-                    const _FormLabel('Note (Optional)'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _noteCtrl,
-                      maxLines: 3,
-                      style: GoogleFonts.poppins(
-                          fontSize: 14, color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white),
-                      decoration: _inputDecor('Add a note...'),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // Save button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _isSaving ? null : _save,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
-                        ),
-                        child: _isSaving
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.white),
-                              )
-                            : Text(
-                                'Save Category',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                  // Save button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _isSaving ? null : _save,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.5, color: Colors.white),
+                            )
+                          : Text(
+                              'Save Category',
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
                               ),
-                      ),
+                            ),
                     ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ],
           ),
         ),
@@ -351,7 +382,8 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   InputDecoration _inputDecor(String hint) => InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
-            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white, fontSize: 14),
+            color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.white,
+            fontSize: 14),
         filled: true,
         fillColor: Theme.of(context).colorScheme.surface,
         contentPadding:
@@ -366,8 +398,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide:
-              BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -402,8 +433,7 @@ class _PickerField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
@@ -426,7 +456,9 @@ class _TypeToggle extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? AppColors.darkSurface2
-            : Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface2 : const Color(0xFFF0F0F5),
+            : Theme.of(context).brightness == Brightness.dark
+                ? AppColors.darkSurface2
+                : const Color(0xFFF0F0F5),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -452,9 +484,7 @@ class _ToggleBtn extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
   const _ToggleBtn(
-      {required this.label,
-      required this.isActive,
-      required this.onTap});
+      {required this.label, required this.isActive, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -474,7 +504,10 @@ class _ToggleBtn extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: isActive ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
+              color: isActive
+                  ? Colors.white
+                  : Theme.of(context).textTheme.bodyMedium?.color ??
+                      Colors.white,
             ),
           ),
         ),
@@ -482,5 +515,3 @@ class _ToggleBtn extends StatelessWidget {
     );
   }
 }
-
-

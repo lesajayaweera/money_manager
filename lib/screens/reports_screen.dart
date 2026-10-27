@@ -53,6 +53,15 @@ class _ReportsScreenState extends State<ReportsScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    Widget tab(String label) {
+      return Tab(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(label, maxLines: 1, softWrap: false),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -62,7 +71,8 @@ class _ReportsScreenState extends State<ReportsScreen>
         leading: IconButton(
           icon: Icon(
             Icons.menu_rounded,
-            color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
             size: 26,
           ),
           onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
@@ -87,7 +97,7 @@ class _ReportsScreenState extends State<ReportsScreen>
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
                     ? AppColors.darkSurface2
-                    : const Color(0xFFEEECFD),
+                    : AppColors.primarySurface,
                 borderRadius: BorderRadius.circular(22),
               ),
               child: TabBar(
@@ -102,16 +112,17 @@ class _ReportsScreenState extends State<ReportsScreen>
                     Theme.of(context).textTheme.bodyMedium?.color ??
                         Colors.white,
                 dividerColor: Colors.transparent,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 4),
                 labelStyle: GoogleFonts.poppins(
                     fontSize: 14, fontWeight: FontWeight.w600),
                 unselectedLabelStyle: GoogleFonts.poppins(
                     fontSize: 14, fontWeight: FontWeight.w500),
                 tabs: [
-                  const Tab(text: 'Overview'),
-                  const Tab(text: 'Categories'),
-                  const Tab(text: 'Daily'),
-                  const Tab(text: 'Budget'),
-                  const Tab(text: 'Insights'),
+                  tab('Overview'),
+                  tab('Categories'),
+                  tab('Daily'),
+                  tab('Budget'),
+                  tab('Insights'),
                 ],
               ),
             ),
@@ -1473,18 +1484,18 @@ class _WalletPieSection extends StatelessWidget {
     required this.currencySymbol,
   });
 
-  static const List<Color> _walletColors = [
-    Color(0xFF0984E3), // Blue
-    Color(0xFF00B894), // Green
-    Color(0xFF6C5CE7), // Indigo
-    Color(0xFFFDAA3D), // Orange
-    Color(0xFFE84393), // Pink
-    Color(0xFF00CEC9), // Teal
-    Color(0xFFFF7675), // Red
-    Color(0xFFFDCB6E), // Yellow
-    Color(0xFFE17055), // Burnt Orange
-    Color(0xFFA29BFE), // Light Purple
-  ];
+  static List<Color> get _walletColors => [
+        AppColors.primary, // Theme primary
+        AppColors.income, // Green
+        AppColors.budget, // Blue
+        AppColors.spending, // Orange
+        const Color(0xFFE84393), // Pink
+        const Color(0xFF00CEC9), // Teal
+        const Color(0xFFFF7675), // Red
+        const Color(0xFFFDCB6E), // Yellow
+        const Color(0xFFE17055), // Burnt Orange
+        const Color(0xFFA29BFE), // Light Purple
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -1659,18 +1670,18 @@ class _PieSection extends StatelessWidget {
     this.isExpense = true,
   });
 
-  static const List<Color> _colors = [
-    Color(0xFF6C5CE7), // Indigo
-    Color(0xFF00B894), // Green
-    Color(0xFFFDAA3D), // Yellow/Orange
-    Color(0xFF0984E3), // Blue
-    Color(0xFFE84393), // Pink
-    Color(0xFF00CEC9), // Teal
-    Color(0xFFFF7675), // Light Red
-    Color(0xFFFDCB6E), // Light Yellow
-    Color(0xFFE17055), // Burnt Orange
-    Color(0xFFA29BFE), // Light Purple
-  ];
+  static List<Color> get _colors => [
+        AppColors.primary, // Theme primary
+        AppColors.income, // Green
+        AppColors.spending, // Orange
+        AppColors.budget, // Blue
+        const Color(0xFFE84393), // Pink
+        const Color(0xFF00CEC9), // Teal
+        const Color(0xFFFF7675), // Light Red
+        const Color(0xFFFDCB6E), // Light Yellow
+        const Color(0xFFE17055), // Burnt Orange
+        const Color(0xFFA29BFE), // Light Purple
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -2514,89 +2525,97 @@ class _HasBudgetView extends StatelessWidget {
                       },
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(icon, color: Colors.white, size: 24),
                           ),
-                          child: Icon(icon, color: Colors.white, size: 24),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    cat.categoryName,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: textPrimary,
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '${(pct * 100).toInt()}%',
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        cat.categoryName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.poppins(
-                                          fontSize: 14,
+                                          fontSize: 15,
                                           fontWeight: FontWeight.w700,
                                           color: textPrimary,
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
-                                      Icon(Icons.chevron_right_rounded,
-                                          color: textSub, size: 18),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${CurrencyFormatter.format(catSpent, symbol: symbol)} / ${CurrencyFormatter.format(cat.allocatedAmount, symbol: symbol)}',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: textSub,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Stack(
-                                children: [
-                                  Container(
-                                    height: 4,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: dividerColor,
-                                      borderRadius: BorderRadius.circular(4),
                                     ),
+                                    const SizedBox(width: 8),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${(pct * 100).toInt()}%',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: textPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(Icons.chevron_right_rounded,
+                                            color: textSub, size: 18),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${CurrencyFormatter.format(catSpent, symbol: symbol)} / ${CurrencyFormatter.format(cat.allocatedAmount, symbol: symbol)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: textSub,
                                   ),
-                                  FractionallySizedBox(
-                                    widthFactor: pct,
-                                    child: Container(
+                                ),
+                                const SizedBox(height: 8),
+                                Stack(
+                                  children: [
+                                    Container(
                                       height: 4,
+                                      width: double.infinity,
                                       decoration: BoxDecoration(
-                                        color: color,
+                                        color: dividerColor,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    FractionallySizedBox(
+                                      widthFactor: pct,
+                                      child: Container(
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          color: color,
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
+                  );
                 }),
               ],
             ),
@@ -2679,7 +2698,8 @@ class _InsightsTab extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textPrimary =
         Theme.of(context).textTheme.titleLarge?.color ?? Colors.white;
-    final textSub = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
+    final textSub =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
     final surfaceColor = Theme.of(context).colorScheme.surface;
     final dividerColor =
         Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
@@ -2741,8 +2761,7 @@ class _InsightsTab extends StatelessWidget {
                 ? AppColors.primary.withValues(alpha: 0.12)
                 : AppColors.primarySurface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2)),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [
@@ -2908,6 +2927,8 @@ class _SummaryRow extends StatelessWidget {
       children: [
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -2915,12 +2936,18 @@ class _SummaryRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          amount,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: amountColor,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            amount,
+            maxLines: 1,
+            softWrap: false,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: amountColor,
+            ),
           ),
         ),
       ],

@@ -230,6 +230,8 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                 Text(
                   '${DateFormat('MMM yyyy').format(_monthA)}  vs  '
                   '${DateFormat('MMM yyyy').format(_monthB)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(fontSize: 12, color: textSub),
                 ),
                 const SizedBox(height: 20),
@@ -434,15 +436,19 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                         color: netA >= 0 ? AppColors.income : AppColors.expense,
                         size: 22),
                     const SizedBox(width: 8),
-                    Text(
-                      'Net Savings',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: textPrimary,
+                    Expanded(
+                      child: Text(
+                        'Net Savings',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textPrimary,
+                        ),
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     changeBadge(netChange),
                   ],
                 ),
@@ -493,6 +499,8 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                 Text(
                   '${DateFormat('MMM yyyy').format(_monthA)}  vs  '
                   '${DateFormat('MMM yyyy').format(_monthB)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(fontSize: 12, color: textSub),
                 ),
                 const SizedBox(height: 16),
@@ -525,6 +533,8 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                               Expanded(
                                 child: Text(
                                   cat,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -532,6 +542,7 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                                   ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               changeBadge(catChange, invert: true),
                             ],
                           ),
@@ -556,6 +567,8 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                                     Text(
                                       '${DateFormat('MMM').format(_monthA)}: '
                                       '${CurrencyFormatter.format(aVal, symbol: symbol)}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
                                           fontSize: 11, color: textSub),
                                     ),
@@ -582,6 +595,8 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                                     Text(
                                       '${DateFormat('MMM').format(_monthB)}: '
                                       '${CurrencyFormatter.format(bVal, symbol: symbol)}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
                                           fontSize: 11, color: textSub),
                                     ),
@@ -650,6 +665,8 @@ class _MonthSelectorCard extends StatelessWidget {
           children: [
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -662,12 +679,20 @@ class _MonthSelectorCard extends StatelessWidget {
                 Icon(Icons.calendar_month_rounded,
                     color: AppColors.primary, size: 18),
                 const SizedBox(width: 6),
-                Text(
-                  DateFormat('MMM yyyy').format(month),
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: textPrimary,
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      DateFormat('MMM yyyy').format(month),
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -762,15 +787,19 @@ class _MetricCard extends StatelessWidget {
             children: [
               Icon(Icons.circle, color: color, size: 10),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: textSub,
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: textSub,
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 6),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -791,32 +820,48 @@ class _MetricCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            CurrencyFormatter.format(valueA, symbol: symbol),
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: color,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              CurrencyFormatter.format(valueA, symbol: symbol),
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
             ),
           ),
           const SizedBox(height: 2),
           Text(
             monthALabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(fontSize: 10, color: textSub),
           ),
           const SizedBox(height: 8),
           Container(height: 1, color: dividerColor),
           const SizedBox(height: 8),
-          Text(
-            CurrencyFormatter.format(valueB, symbol: symbol),
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: textSub,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              CurrencyFormatter.format(valueB, symbol: symbol),
+              maxLines: 1,
+              softWrap: false,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: textSub,
+              ),
             ),
           ),
           Text(
             monthBLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(fontSize: 10, color: textSub),
           ),
         ],
@@ -848,15 +893,23 @@ class _NetRow extends StatelessWidget {
       children: [
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.poppins(fontSize: 11, color: textSub),
         ),
         const SizedBox(height: 4),
-        Text(
-          CurrencyFormatter.formatWithSign(amount, symbol: symbol),
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: color,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            CurrencyFormatter.formatWithSign(amount, symbol: symbol),
+            maxLines: 1,
+            softWrap: false,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
         ),
       ],
