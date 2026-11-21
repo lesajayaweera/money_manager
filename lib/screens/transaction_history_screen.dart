@@ -100,13 +100,12 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                   final fromW = walletProvider.findById(t.fromWalletId);
                   final toW = walletProvider.findById(t.toWalletId);
 
-                  final baseTitleOut = (t.note != null && t.note!.isNotEmpty)
-                      ? t.note!
-                      : 'Transfer to ${toW?.name ?? '?'}';
+                  final transferNote = TransactionModel.displayNote(t.note);
+                  final baseTitleOut =
+                      transferNote ?? 'Transfer to ${toW?.name ?? '?'}';
 
-                  final baseTitleIn = (t.note != null && t.note!.isNotEmpty)
-                      ? t.note!
-                      : 'Transfer from ${fromW?.name ?? '?'}';
+                  final baseTitleIn =
+                      transferNote ?? 'Transfer from ${fromW?.name ?? '?'}';
 
                   final outTx = TransactionModel(
                     id: -(t.id ?? 999999) * 2,
@@ -535,10 +534,7 @@ class _TxTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (transaction.note != null &&
-                            transaction.note!.trim().isNotEmpty)
-                        ? transaction.note!
-                        : transaction.title,
+                    transaction.displayTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(

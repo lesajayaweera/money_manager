@@ -638,7 +638,7 @@ class _TxTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  tx.note?.isNotEmpty == true ? tx.note! : tx.title,
+                  tx.displayTitle,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

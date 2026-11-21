@@ -31,6 +31,20 @@ class TransactionModel {
 
   double get signedAmount => isIncome ? amount : -amount;
 
+  /// Headline shown in transaction lists: the note (user description) when
+  /// present, otherwise the title. Legacy SMS notes ("Auto-captured from …")
+  /// are skipped so old captures show their merchant/bank instead.
+  String get displayTitle => displayNote(note) ?? title;
+
+  /// Returns [note] if it is a meaningful description, or null when it is
+  /// empty or a legacy "Auto-captured from … SMS" placeholder.
+  static String? displayNote(String? note) {
+    final n = note?.trim();
+    if (n == null || n.isEmpty) return null;
+    if (n.toLowerCase().startsWith('auto-captured from')) return null;
+    return n;
+  }
+
   Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,

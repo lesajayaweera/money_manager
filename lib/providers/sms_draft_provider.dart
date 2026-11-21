@@ -535,8 +535,32 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
       category: draft.category,
       date: draft.transactionDate ?? DateTime.now(),
       walletName: draft.walletName,
-      note: 'Auto-captured from ${draft.bank} SMS',
+      note: describe(draft),
     );
+  }
+
+  /// Human-readable description for a saved draft, shown as the transaction's
+  /// headline in lists (e.g. "KEELLS SUPER", "Payment via HNB",
+  /// "ATM withdrawal · Kandy"). Uses the merchant when the parser found one
+  /// instead of a generic "Auto-captured" label.
+  static String describe(SmsDraftModel draft) {
+    final bank = draft.bank.trim();
+    final title = draft.title.trim();
+    final hasMerchant = title.isNotEmpty &&
+        title.toLowerCase() != bank.toLowerCase();
+
+    if (draft.isWithdrawal) {
+      return hasMerchant ? 'ATM withdrawal · $title' : 'ATM withdrawal ($bank)';
+    }
+    if (hasMerchant) return title;
+    if (draft.txType == TransactionType.income) {
+      return draft.category == 'Salary'
+          ? 'Salary credited ($bank)'
+          : 'Received via $bank';
+    }
+    return draft.category == 'Other'
+        ? 'Payment via $bank'
+        : '${draft.category} via $bank';
   }
 
   /// Best-guess wallet whose name matches a bank (used to prefill wallet

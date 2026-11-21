@@ -1208,10 +1208,7 @@ class _TransactionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  (transaction.note != null &&
-                          transaction.note!.trim().isNotEmpty)
-                      ? transaction.note!
-                      : transaction.title,
+                  transaction.displayTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
@@ -1979,7 +1976,7 @@ class _DashboardDraftEditSheetState extends State<_DashboardDraftEditSheet> {
         toId: to.id!,
         amount: amount,
         date: _date ?? DateTime.now(),
-        note: 'Auto-captured from ${widget.draft.bank} SMS (withdrawal)',
+        note: SmsDraftProvider.describe(updated),
       );
       await smsProvider.markSaved(widget.draft.id!);
     } else {

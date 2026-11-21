@@ -91,8 +91,7 @@ class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
                                 toId: to.id!,
                                 amount: d.amount,
                                 date: d.transactionDate ?? DateTime.now(),
-                                note:
-                                    'Auto-captured from ${d.bank} SMS (withdrawal)',
+                                note: SmsDraftProvider.describe(d),
                               );
                               transfers++;
                             } else {
@@ -431,7 +430,7 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
         toId: to.id!,
         amount: amount,
         date: _date ?? DateTime.now(),
-        note: 'Auto-captured from ${widget.draft.bank} SMS (withdrawal)',
+        note: SmsDraftProvider.describe(updated),
       );
       await provider.markSaved(widget.draft.id!);
     } else {
