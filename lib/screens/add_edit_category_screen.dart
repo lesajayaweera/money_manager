@@ -36,9 +36,8 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     _type = widget.editCategory?.type ?? widget.initialType;
     _selectedIcon =
         widget.editCategory?.icon ?? AppCategory.availableIcons.first;
-    _selectedColor = widget.editCategory?.color ??
-        Colors.white ??
-        AppCategory.availableColors.first;
+    _selectedColor =
+        widget.editCategory?.color ?? AppCategory.availableColors.first;
 
     if (widget.editCategory != null) {
       final e = widget.editCategory!;

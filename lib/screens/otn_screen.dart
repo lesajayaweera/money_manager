@@ -714,7 +714,7 @@ class _TodayCard extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       isWorked
-                          ? '${_fmtTime(entry?.inTime)}  →  ${_fmtTime(entry?.outTime)}'
+                          ? '${_fmtTime(entry.inTime)}  →  ${_fmtTime(entry.outTime)}'
                           : '--:--  →  --:--',
                       maxLines: 1,
                       softWrap: false,

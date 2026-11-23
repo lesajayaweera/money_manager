@@ -512,7 +512,7 @@ class _TransactionItem extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '${_formatDate(transaction.date)} • ${transaction.walletName ?? 'Cash'}',
+                '${_formatDate(transaction.date)} • ${transaction.walletName}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(

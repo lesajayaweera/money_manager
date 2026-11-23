@@ -165,15 +165,20 @@ class _LendBorrowDetailScreenState extends State<LendBorrowDetailScreen> {
                     final provider = context.read<LendBorrowProvider>();
                     final txProvider = context.read<TransactionProvider>();
                     final walletProvider = context.read<WalletProvider>();
-                    
+                    // Grab the sheet's navigator before the awaits so closing
+                    // it never touches a stale BuildContext.
+                    final sheetNav = Navigator.of(ctx);
+
                     await provider.addRepayment(_entry.id!, amount, walletName: selectedWalletName);
-                    if (mounted) {
-                      await txProvider.loadAll();
-                      await walletProvider.loadWallets();
-                      final updated = provider.entries.firstWhere((e) => e.id == _entry.id);
-                      setState(() => _entry = updated);
-                      Navigator.pop(context);
-                    }
+                    await txProvider.loadAll();
+                    await walletProvider.loadWallets();
+                    if (!mounted) return;
+                    final updated = provider.entries.firstWhere(
+                      (e) => e.id == _entry.id,
+                      orElse: () => _entry,
+                    );
+                    setState(() => _entry = updated);
+                    sheetNav.pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

@@ -1189,7 +1189,6 @@ class _SettingsRow extends StatelessWidget {
   final Color iconColor;
   final String label;
   final String value;
-  final String valuePrefix;
   final Color? labelColor;
   final bool isLast;
   final VoidCallback onTap;
@@ -1199,7 +1198,6 @@ class _SettingsRow extends StatelessWidget {
     required this.iconColor,
     required this.label,
     required this.value,
-    this.valuePrefix = '',
     this.labelColor,
     this.isLast = false,
     required this.onTap,
@@ -1259,7 +1257,7 @@ class _SettingsRow extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerRight,
                       child: Text(
-                        '$valuePrefix$value',
+                        value,
                         maxLines: 1,
                         softWrap: false,
                         style: GoogleFonts.poppins(

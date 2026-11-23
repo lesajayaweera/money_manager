@@ -903,7 +903,6 @@ class _SpendingOverTimeChart extends StatelessWidget {
   final String currencySymbol;
 
   const _SpendingOverTimeChart({
-    super.key,
     required this.txs,
     required this.period,
     this.customDateRange,
@@ -1167,7 +1166,6 @@ class _CashFlowChart extends StatelessWidget {
   final String currencySymbol;
 
   const _CashFlowChart({
-    super.key,
     required this.txs,
     required this.period,
     this.customDateRange,
@@ -1477,7 +1475,6 @@ class _WalletPieSection extends StatelessWidget {
   final String currencySymbol;
 
   const _WalletPieSection({
-    super.key,
     required this.wallets,
     required this.touchedIndex,
     required this.onTouch,
