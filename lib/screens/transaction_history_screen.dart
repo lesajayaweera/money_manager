@@ -116,6 +116,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                     date: t.date,
                     note: null, // Note is integrated into title
                     walletName: fromW?.name ?? 'Unknown',
+                    smsBody: t.smsBody,
                   );
 
                   final inTx = TransactionModel(
@@ -127,6 +128,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                     date: t.date,
                     note: null,
                     walletName: toW?.name ?? 'Unknown',
+                    smsBody: t.smsBody,
                   );
 
                   return [outTx, inTx];

@@ -372,6 +372,10 @@ class WalletTransfer {
   final String? note;
   final DateTime createdAt;
 
+  /// Full text of the bank SMS this transfer was created from (e.g. an ATM
+  /// withdrawal captured by SMS auto-capture). Null for manual transfers.
+  final String? smsBody;
+
   const WalletTransfer({
     this.id,
     required this.fromWalletId,
@@ -380,6 +384,7 @@ class WalletTransfer {
     required this.date,
     this.note,
     required this.createdAt,
+    this.smsBody,
   });
 
   Map<String, dynamic> toMap() {
@@ -391,6 +396,7 @@ class WalletTransfer {
       'date': date.toIso8601String(),
       'note': note,
       'created_at': createdAt.toIso8601String(),
+      'sms_body': smsBody,
     };
   }
 
@@ -403,6 +409,7 @@ class WalletTransfer {
       date: DateTime.parse(map['date'] as String),
       note: map['note'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
+      smsBody: map['sms_body'] as String?,
     );
   }
 }

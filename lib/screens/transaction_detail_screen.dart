@@ -304,8 +304,71 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 ],
               ),
             ),
+            if (_tx.hasSmsBody) ...[
+              const SizedBox(height: 16),
+              _buildSmsNote(_tx.smsBody!.trim()),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  /// Notes card showing the bank SMS an auto-captured transaction came from.
+  Widget _buildSmsNote(String message) {
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodyMedium?.color ?? Colors.white;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.sms_outlined, size: 20, color: muted),
+              const SizedBox(width: 12),
+              Text(
+                'Notes · SMS message',
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: muted,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? AppColors.darkPrimarySurface
+                  : AppColors.primarySurface,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SelectableText(
+              message,
+              style: GoogleFonts.poppins(
+                fontSize: 13.5,
+                height: 1.5,
+                color: theme.textTheme.titleLarge?.color ?? Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

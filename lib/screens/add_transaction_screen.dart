@@ -141,6 +141,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ? null
             : _noteController.text.trim(),
         walletName: _selectedPaymentMethod,
+        // Keep the source SMS when editing an auto-captured transaction.
+        smsBody: widget.editTransaction?.smsBody,
       );
 
       final provider = context.read<TransactionProvider>();

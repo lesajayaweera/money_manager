@@ -86,6 +86,7 @@ class WalletProvider extends ChangeNotifier {
     required double amount,
     required DateTime date,
     String? note,
+    String? smsBody,
   }) async {
     try {
       final transfer = WalletTransfer(
@@ -95,6 +96,7 @@ class WalletProvider extends ChangeNotifier {
         date: date,
         note: note,
         createdAt: DateTime.now(),
+        smsBody: smsBody,
       );
       await _db.insertWalletTransfer(transfer);
 

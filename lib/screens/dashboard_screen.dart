@@ -18,7 +18,6 @@ import '../providers/sms_draft_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/wallet_provider.dart';
 import '../widgets/sms_message_card.dart';
-import 'add_transaction_screen.dart';
 import 'create_budget_screen.dart';
 import 'goals_screen.dart';
 import 'lends_borrowed_screen.dart';
@@ -1977,6 +1976,7 @@ class _DashboardDraftEditSheetState extends State<_DashboardDraftEditSheet> {
         amount: amount,
         date: _date ?? DateTime.now(),
         note: SmsDraftProvider.describe(updated),
+        smsBody: SmsDraftProvider.messageText(updated),
       );
       await smsProvider.markSaved(widget.draft.id!);
     } else {

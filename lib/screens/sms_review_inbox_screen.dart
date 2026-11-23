@@ -92,6 +92,7 @@ class _SmsReviewInboxScreenState extends State<SmsReviewInboxScreen> {
                                 amount: d.amount,
                                 date: d.transactionDate ?? DateTime.now(),
                                 note: SmsDraftProvider.describe(d),
+                                smsBody: SmsDraftProvider.messageText(d),
                               );
                               transfers++;
                             } else {
@@ -431,6 +432,7 @@ class _DraftEditSheetState extends State<_DraftEditSheet> {
         amount: amount,
         date: _date ?? DateTime.now(),
         note: SmsDraftProvider.describe(updated),
+        smsBody: SmsDraftProvider.messageText(updated),
       );
       await provider.markSaved(widget.draft.id!);
     } else {

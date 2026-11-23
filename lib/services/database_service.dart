@@ -13,7 +13,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 14;
+  static const int _dbVersion = 15;
   static const String _tableName = 'transactions';
   static const String _draftsTable = 'sms_drafts';
 
@@ -52,6 +52,7 @@ class DatabaseService {
         note TEXT,
         wallet_name TEXT NOT NULL DEFAULT 'Cash',
         lend_borrow_id INTEGER,
+        sms_body TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       )
     ''');
@@ -124,6 +125,7 @@ class DatabaseService {
         date TEXT NOT NULL,
         note TEXT,
         created_at TEXT NOT NULL,
+        sms_body TEXT,
         FOREIGN KEY (from_wallet_id) REFERENCES wallets(id) ON DELETE CASCADE,
         FOREIGN KEY (to_wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
       )
@@ -329,6 +331,18 @@ class DatabaseService {
           'ALTER TABLE $_draftsTable ADD COLUMN original_body TEXT NOT NULL DEFAULT \'\'',
         );
       } catch (_) {}
+    }
+    if (oldVersion < 15) {
+      // Keep the source SMS text on saved transactions / transfers so the
+      // transaction detail screen can show it.
+      for (final sql in [
+        'ALTER TABLE $_tableName ADD COLUMN sms_body TEXT',
+        'ALTER TABLE wallet_transfers ADD COLUMN sms_body TEXT',
+      ]) {
+        try {
+          await db.execute(sql);
+        } catch (_) {}
+      }
     }
   }
 

@@ -536,8 +536,15 @@ class SmsDraftProvider extends ChangeNotifier with WidgetsBindingObserver {
       date: draft.transactionDate ?? DateTime.now(),
       walletName: draft.walletName,
       note: describe(draft),
+      smsBody: messageText(draft),
     );
   }
+
+  /// The SMS text to keep on the saved transaction: the original message as
+  /// received, or the redacted copy for drafts captured before the original
+  /// was stored.
+  static String messageText(SmsDraftModel draft) =>
+      draft.originalBody.trim().isNotEmpty ? draft.originalBody : draft.rawBody;
 
   /// Human-readable description for a saved draft, shown as the transaction's
   /// headline in lists (e.g. "KEELLS SUPER", "Payment via HNB",

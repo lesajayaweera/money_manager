@@ -14,6 +14,10 @@ class TransactionModel {
   final String walletName;
   final int? lendBorrowId;
 
+  /// Full text of the bank SMS this transaction was created from, when it
+  /// came from SMS auto-capture. Null for manually added transactions.
+  final String? smsBody;
+
   const TransactionModel({
     this.id,
     required this.title,
@@ -24,7 +28,10 @@ class TransactionModel {
     this.note,
     this.walletName = 'Cash',
     this.lendBorrowId,
+    this.smsBody,
   });
+
+  bool get hasSmsBody => smsBody != null && smsBody!.trim().isNotEmpty;
 
   bool get isIncome => type == TransactionType.income;
   bool get isExpense => type == TransactionType.expense;
@@ -56,6 +63,7 @@ class TransactionModel {
       'note': note,
       'wallet_name': walletName,
       if (lendBorrowId != null) 'lend_borrow_id': lendBorrowId,
+      'sms_body': smsBody,
     };
   }
 
@@ -73,6 +81,7 @@ class TransactionModel {
       note: map['note'] as String?,
       walletName: map['wallet_name'] as String? ?? 'Cash',
       lendBorrowId: map['lend_borrow_id'] as int?,
+      smsBody: map['sms_body'] as String?,
     );
   }
 
@@ -86,6 +95,7 @@ class TransactionModel {
     String? note,
     String? walletName,
     int? lendBorrowId,
+    String? smsBody,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -97,6 +107,7 @@ class TransactionModel {
       note: note ?? this.note,
       walletName: walletName ?? this.walletName,
       lendBorrowId: lendBorrowId ?? this.lendBorrowId,
+      smsBody: smsBody ?? this.smsBody,
     );
   }
 
