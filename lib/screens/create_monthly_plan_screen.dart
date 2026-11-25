@@ -282,13 +282,13 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: _income > 0
-                              ? AppColors.income.withOpacity(0.12)
+                              ? AppColors.primary.withOpacity(0.12)
                               : Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
                           Icons.add_rounded,
-                          color: _income > 0 ? AppColors.income : Colors.grey,
+                          color: _income > 0 ? AppColors.primary : Colors.grey,
                           size: 20,
                         ),
                       ),
@@ -417,8 +417,8 @@ class _SummaryCard extends StatelessWidget {
     final remainingColor = unallocated < 0
         ? AppColors.expense
         : unallocated == 0 && income > 0
-            ? AppColors.income
-            : AppColors.income;
+            ? AppColors.primary
+            : AppColors.primary;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -474,7 +474,7 @@ class _SummaryCard extends StatelessWidget {
                     ? AppColors.darkDivider
                     : AppColors.primary.withOpacity(0.12),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  unallocated < 0 ? AppColors.expense : AppColors.income,
+                  unallocated < 0 ? AppColors.expense : AppColors.primary,
                 ),
               ),
             ),
@@ -632,8 +632,8 @@ class _EmptyAllocations extends StatelessWidget {
               label: Text('Add Allocation',
                   style: GoogleFonts.poppins(fontSize: 13)),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.income,
-                side: BorderSide(color: AppColors.income),
+                foregroundColor: AppColors.primary,
+                side: BorderSide(color: AppColors.primary),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
@@ -858,10 +858,10 @@ class _BottomButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: isSaving ? null : onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.income,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 0,
-            disabledBackgroundColor: AppColors.income.withOpacity(0.6),
+            disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
@@ -1133,7 +1133,7 @@ class _AddAllocationSheetState extends State<_AddAllocationSheet> {
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 color: widget.unallocated <= 0
-                    ? AppColors.income
+                    ? AppColors.primary
                     : Theme.of(context).textTheme.bodySmall?.color,
               ),
             ),
@@ -1575,14 +1575,14 @@ class _CopyFromPreviousButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: hasCopied
-              ? AppColors.income.withOpacity(0.08)
+              ? AppColors.primary.withOpacity(0.08)
               : isDark
                   ? AppColors.darkBackground
                   : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hasCopied
-                ? AppColors.income.withOpacity(0.3)
+                ? AppColors.primary.withOpacity(0.3)
                 : isDark
                     ? AppColors.darkDivider
                     : Colors.grey.shade200,
@@ -1593,7 +1593,7 @@ class _CopyFromPreviousButton extends StatelessWidget {
             Icon(
               hasCopied ? Icons.check_circle_rounded : Icons.copy_all_rounded,
               size: 16,
-              color: hasCopied ? AppColors.income : AppColors.primary,
+              color: hasCopied ? AppColors.primary : AppColors.primary,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -1605,7 +1605,7 @@ class _CopyFromPreviousButton extends StatelessWidget {
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: hasCopied
-                      ? AppColors.income
+                      ? AppColors.primary
                       : Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),

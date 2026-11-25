@@ -163,7 +163,7 @@ class _SmsCaptureScreenState extends State<SmsCaptureScreen> {
                         _SectionRow(
                           icon: Icons.sms_rounded,
                           iconColor: _hasPermission
-                              ? AppColors.income
+                              ? AppColors.primary
                               : AppColors.expense,
                           title: 'Read bank SMS',
                           subtitle: _hasPermission
@@ -469,11 +469,11 @@ class _DetectedBanksCard extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.income.withValues(alpha: 0.12),
+                      color: AppColors.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.account_balance_rounded,
-                        color: AppColors.income, size: 22),
+                        color: AppColors.primary, size: 22),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

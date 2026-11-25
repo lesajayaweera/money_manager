@@ -134,7 +134,7 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
   Widget _buildFab() {
     return FloatingActionButton(
       onPressed: () => _openCreate(),
-      backgroundColor: AppColors.income,
+      backgroundColor: AppColors.primary,
       elevation: 4,
       child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
     );
@@ -319,7 +319,7 @@ class _EmptyState extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onCreateTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.income,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -597,7 +597,7 @@ class _PlanCardState extends State<_PlanCard> {
                         ? AppColors.darkDivider
                         : AppColors.primary.withOpacity(0.08),
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      isComplete ? AppColors.income : AppColors.primary,
+                      isComplete ? AppColors.primary : AppColors.primary,
                     ),
                   ),
                 ),
@@ -665,7 +665,7 @@ class _PlanCardState extends State<_PlanCard> {
                                 color: unallocated < 0
                                     ? AppColors.expense
                                     : isComplete
-                                        ? AppColors.income
+                                        ? AppColors.primary
                                         : AppColors.primary,
                               ),
                             ),
@@ -828,7 +828,7 @@ class _PlanCardState extends State<_PlanCard> {
                                   decoration: BoxDecoration(
                                     color: isOver
                                         ? AppColors.expense
-                                        : AppColors.income,
+                                        : AppColors.primary,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                 ),
@@ -900,7 +900,7 @@ class _PlanCardState extends State<_PlanCard> {
                                 fontWeight: FontWeight.w700,
                                 color: _totalActualSpent > plan.categoryTotal
                                     ? AppColors.expense
-                                    : AppColors.income,
+                                    : AppColors.primary,
                               ),
                             ),
                           ),
@@ -928,7 +928,7 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: isComplete
-            ? AppColors.income.withOpacity(0.12)
+            ? AppColors.primary.withOpacity(0.12)
             : AppColors.spending.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -937,7 +937,7 @@ class _StatusChip extends StatelessWidget {
         style: GoogleFonts.poppins(
           fontSize: 10,
           fontWeight: FontWeight.w600,
-          color: isComplete ? AppColors.income : AppColors.spending,
+          color: isComplete ? AppColors.primary : AppColors.spending,
         ),
       ),
     );
@@ -1033,7 +1033,7 @@ class _AllocationBreakdownSheet extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: plan.unallocated <= 0
-                        ? AppColors.income
+                        ? AppColors.primary
                         : AppColors.spending,
                   ),
                 ),

@@ -374,7 +374,7 @@ class _Tag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: isDefault
-            ? AppColors.income.withValues(alpha: 0.12)
+            ? AppColors.primary.withValues(alpha: 0.12)
             : Theme.of(context).brightness == Brightness.dark
                 ? AppColors.darkSurface2
                 : const Color(0xFFF0F0F5),
@@ -386,7 +386,7 @@ class _Tag extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: isDefault
-              ? AppColors.income
+              ? AppColors.primary
               : Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white,
         ),
       ),

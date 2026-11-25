@@ -142,7 +142,7 @@ class _FinancialOverviewScreenState extends State<FinancialOverviewScreen>
                         label: 'TOTAL ASSETS',
                         amount: totalAssets,
                         symbol: sym,
-                        color: AppColors.income,
+                        color: AppColors.primary,
                         isDark: isDark,
                       ),
                     ),
@@ -190,7 +190,7 @@ class _FinancialOverviewScreenState extends State<FinancialOverviewScreen>
                   label: 'TOTAL ASSETS',
                   total: totalAssets,
                   symbol: sym,
-                  iconColor: AppColors.income,
+                  iconColor: AppColors.primary,
                   icon: Icons.account_balance_wallet_rounded,
                   isDark: isDark,
                   textPrimary: textPrimary,
@@ -418,7 +418,7 @@ class _NetWorthCard extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 34,
                 fontWeight: FontWeight.w800,
-                color: AppColors.income,
+                color: AppColors.primary,
                 letterSpacing: -1,
               ),
             ),
@@ -748,7 +748,7 @@ class _BalanceSheetCard extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.income,
+                            color: iconColor,
                           ),
                         ),
                       ),
@@ -831,7 +831,7 @@ class _DonutChartCard extends StatelessWidget {
               painter: _DonutPainter(
                 assetsPercent: assetsPercent,
                 liabPercent: liabPercent,
-                assetsColor: AppColors.income,
+                assetsColor: AppColors.primary,
                 liabColor: AppColors.expense,
                 bgColor: isDark
                     ? AppColors.darkSurface2
@@ -847,7 +847,7 @@ class _DonutChartCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.income,
+                        color: AppColors.primary,
                         letterSpacing: -1,
                       ),
                     ),
@@ -863,7 +863,7 @@ class _DonutChartCard extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _LegendRow(
-            color: AppColors.income,
+            color: AppColors.primary,
             label: 'Assets',
             amount: assetsAmount,
             percent: assetsPercent * 100,
@@ -978,7 +978,7 @@ class _MiniBar extends StatelessWidget {
           children: [
             Expanded(
               flex: (assetsPercent * 100).round().clamp(1, 99),
-              child: Container(color: AppColors.income),
+              child: Container(color: AppColors.primary),
             ),
             Expanded(
               flex: (liabPercent * 100).round().clamp(1, 99),
