@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../models/transaction_model.dart';
+import '../services/budget_alert_service.dart';
 import '../services/database_service.dart';
 
 enum TransactionFilter { all, income, expense, today, thisMonth }
@@ -122,8 +123,9 @@ class TransactionProvider extends ChangeNotifier {
       _db.getBudgetSpending(now.year, now.month),
     ]);
 
-    // Load the active budget's spending limit for the remaining-budget stat.
-    final activeBudget = await _db.getLatestBudget();
+    // Load this month's budget (budgets repeat until replaced) for the
+    // remaining-budget stat, so it matches the Budgets screen.
+    final activeBudget = await _db.getEffectiveBudget(now.year, now.month);
     final budgetLimit = activeBudget?.totalAmount ?? 0.0;
     final spentAmount = results[4];
     final remaining = budgetLimit == 0 ? 0.0 : (budgetLimit - spentAmount).clamp(0.0, budgetLimit);
@@ -141,9 +143,12 @@ class TransactionProvider extends ChangeNotifier {
 
   Future<void> addTransaction(TransactionModel tx) async {
     try {
+      final before = await BudgetAlertService.snapshot(tx);
       await _db.insertTransaction(tx);
       await _loadTransactions();
       await _loadSummary();
+      // Warn if this expense crossed the budget's alert point or limit.
+      await BudgetAlertService.checkAfter(tx, before);
     } catch (e) {
       _error = e.toString();
       notifyListeners();

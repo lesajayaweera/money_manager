@@ -108,7 +108,7 @@ class _MonthlyPlanScreenState extends State<MonthlyPlanScreen> {
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
-        'Monthly Plan',
+        'Salary Planner',
         style: GoogleFonts.poppins(
           fontSize: 20,
           fontWeight: FontWeight.w700,

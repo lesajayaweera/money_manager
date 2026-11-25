@@ -114,7 +114,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.calendar_month_rounded,
-                  title: 'Monthly Planner',
+                  title: 'Salary Planner',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(

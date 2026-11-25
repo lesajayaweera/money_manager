@@ -78,6 +78,13 @@ class _BudgetsScreenState extends State<BudgetsScreen>
   // ── Open create / edit ──────────────────────────────────────────────────────
 
   Future<void> _openCreateOrEdit({BudgetModel? existing}) async {
+    final bp = context.read<BudgetProvider>();
+    // A budget repeated from an earlier month is changed from the viewed
+    // month onward: edit a copy that saves as this month's own budget, so
+    // earlier months keep their original limits.
+    if (existing != null && bp.isRepeatedBudget) {
+      existing = existing.asNewBudgetFor(bp.selectedMonth);
+    }
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => CreateBudgetScreen(existing: existing),
@@ -253,6 +260,10 @@ class _BudgetsScreenState extends State<BudgetsScreen>
             categorySpending: budgetProvider.categorySpending,
             isOverBudget: budgetProvider.isOverBudget,
             overBudgetAmount: budgetProvider.overBudgetAmount,
+            isNearLimit: budgetProvider.isNearLimit,
+            categoriesNearLimit: budgetProvider.categoriesNearLimit,
+            isRepeated: budgetProvider.isRepeatedBudget,
+            selectedMonth: selectedMonth,
             symbol: symbol,
             isDark: isDark,
             textPrimary: textPrimary,
@@ -310,7 +321,7 @@ class _NoBudgetView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'No Budget Set',
+              'No budget yet',
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -319,7 +330,7 @@ class _NoBudgetView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "You haven't created a budget yet.\nSet one to track your spending.",
+              "Set a monthly spending limit. It repeats\nevery month and warns you before you overspend.",
               style: GoogleFonts.poppins(fontSize: 14, color: textSub),
               textAlign: TextAlign.center,
             ),
@@ -345,14 +356,16 @@ class _NoBudgetView extends StatelessWidget {
                 elevation: 0,
               ),
             ),
-            if (hasPlan) ...[
+            // The salary planner is an optional helper that fills in the
+            // budget, so always offer it as the secondary choice.
+            ...[
               const SizedBox(height: 16),
               TextButton.icon(
                 onPressed: onOpenPlan,
-                icon: Icon(Icons.calendar_month_rounded,
+                icon: Icon(Icons.payments_rounded,
                     color: AppColors.primary, size: 16),
                 label: Text(
-                  'View Monthly Plan',
+                  hasPlan ? 'View salary plan' : 'Or plan it from my salary',
                   style: GoogleFonts.poppins(
                     color: AppColors.primary,
                     fontSize: 14,
@@ -376,6 +389,10 @@ class _HasBudgetView extends StatelessWidget {
   final Map<String, double> categorySpending;
   final bool isOverBudget;
   final double overBudgetAmount;
+  final bool isNearLimit;
+  final List<String> categoriesNearLimit;
+  final bool isRepeated;
+  final DateTime selectedMonth;
   final String symbol;
   final bool isDark;
   final Color textPrimary;
@@ -392,6 +409,10 @@ class _HasBudgetView extends StatelessWidget {
     required this.categorySpending,
     required this.isOverBudget,
     required this.overBudgetAmount,
+    required this.isNearLimit,
+    required this.categoriesNearLimit,
+    required this.isRepeated,
+    required this.selectedMonth,
     required this.symbol,
     required this.isDark,
     required this.textPrimary,
@@ -413,11 +434,54 @@ class _HasBudgetView extends StatelessWidget {
     final limitedCats =
         budget.categories.where((c) => c.allocatedAmount > 0).toList();
 
-    final monthYear = DateFormat('MMMM yyyy').format(budget.startDate);
+    final monthYear = DateFormat('MMMM yyyy').format(selectedMonth);
+    final nearCats = categoriesNearLimit
+        .where((n) =>
+            (categorySpending[n] ?? 0) <=
+            budget.categories
+                .firstWhere((c) => c.categoryName == n)
+                .allocatedAmount)
+        .toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
       children: [
+        // ── Repeating budget notice ──────────────────────────────────────
+        if (isRepeated) ...[
+          _InfoBanner(
+            icon: Icons.repeat_rounded,
+            color: AppColors.primary,
+            text:
+                'Repeating your ${DateFormat('MMMM yyyy').format(budget.startDate)} budget. Tap edit to change it from this month on.',
+            onTap: onEdit,
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // ── Alert: close to the overall limit ────────────────────────────
+        if (isNearLimit) ...[
+          _InfoBanner(
+            icon: Icons.notifications_active_rounded,
+            color: AppColors.spending,
+            text:
+                "You've used ${(spentAmount / budget.totalAmount * 100).floor()}% of your budget. "
+                '${CurrencyFormatter.format(remaining, symbol: symbol)} left for ${DateFormat('MMMM').format(selectedMonth)}.',
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // ── Alert: categories close to their limit ───────────────────────
+        if (nearCats.isNotEmpty) ...[
+          _InfoBanner(
+            icon: Icons.warning_amber_rounded,
+            color: AppColors.spending,
+            text: nearCats.length == 1
+                ? '${nearCats.first} is at ${budget.alertPercent}% or more of its limit.'
+                : '${nearCats.join(', ')} are at ${budget.alertPercent}% or more of their limits.',
+          ),
+          const SizedBox(height: 12),
+        ],
+
         // ── Monthly Plan link banner ─────────────────────────────────────
         if (hasPlan) ...[
           _PlanLinkBanner(
@@ -641,6 +705,10 @@ class _HasBudgetView extends StatelessWidget {
                   final color = meta?.color ?? AppColors.primary;
                   final catSpent = categorySpending[cat.categoryName] ?? 0.0;
                   final catOver = catSpent > cat.allocatedAmount;
+                  final catNear = !catOver &&
+                      cat.allocatedAmount > 0 &&
+                      catSpent >=
+                          cat.allocatedAmount * budget.alertPercent / 100;
                   final pct = cat.allocatedAmount == 0
                       ? 0.0
                       : (catSpent / cat.allocatedAmount).clamp(0.0, 1.0);
@@ -772,7 +840,9 @@ class _HasBudgetView extends StatelessWidget {
                                             fontSize: 11,
                                             color: catOver
                                                 ? AppColors.expense
-                                                : AppColors.income,
+                                                : catNear
+                                                    ? AppColors.spending
+                                                    : AppColors.income,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -800,7 +870,9 @@ class _HasBudgetView extends StatelessWidget {
                                         decoration: BoxDecoration(
                                           color: catOver
                                               ? AppColors.expense
-                                              : color,
+                                              : catNear
+                                                  ? AppColors.spending
+                                                  : color,
                                           borderRadius:
                                               BorderRadius.circular(4),
                                         ),
@@ -884,6 +956,57 @@ class _HasBudgetView extends StatelessWidget {
   }
 }
 
+// ─── Info / alert banner ──────────────────────────────────────────────────────
+
+class _InfoBanner extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String text;
+  final VoidCallback? onTap;
+
+  const _InfoBanner({
+    required this.icon,
+    required this.color,
+    required this.text,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: 0.30)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                text,
+                style: GoogleFonts.poppins(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                  color: color,
+                ),
+              ),
+            ),
+            if (onTap != null) ...[
+              const SizedBox(width: 6),
+              Icon(Icons.edit_rounded, color: color, size: 16),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Plan Link Banner ─────────────────────────────────────────────────────────
 
 class _PlanLinkBanner extends StatelessWidget {
@@ -918,7 +1041,7 @@ class _PlanLinkBanner extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Monthly Plan active for this period',
+                'Limits set from your salary plan · View plan',
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,

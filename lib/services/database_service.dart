@@ -13,7 +13,7 @@ class DatabaseService {
   DatabaseService._internal();
 
   static const String _dbName = 'money_manager.db';
-  static const int _dbVersion = 15;
+  static const int _dbVersion = 16;
   static const String _tableName = 'transactions';
   static const String _draftsTable = 'sms_drafts';
 
@@ -136,7 +136,8 @@ class DatabaseService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         total_amount REAL NOT NULL,
         start_date TEXT NOT NULL,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        alert_percent INTEGER NOT NULL DEFAULT 80
       )
     ''');
 
@@ -343,6 +344,14 @@ class DatabaseService {
           await db.execute(sql);
         } catch (_) {}
       }
+    }
+    if (oldVersion < 16) {
+      // Budget alert threshold (percent of the limit spent before warning).
+      try {
+        await db.execute(
+          'ALTER TABLE budgets ADD COLUMN alert_percent INTEGER NOT NULL DEFAULT 80',
+        );
+      } catch (_) {}
     }
   }
 
@@ -922,6 +931,28 @@ class DatabaseService {
   /// Total real spending for an explicit year+month.
   Future<double> getBudgetSpendingForMonth(int year, int month) async {
     return getBudgetSpending(year, month);
+  }
+
+  /// The budget that applies to [year]/[month]: the one starting in that
+  /// month, or else the most recent budget that started before it. Budgets
+  /// therefore repeat every month until a newer one replaces them.
+  Future<BudgetModel?> getEffectiveBudget(int year, int month) async {
+    final db = await database;
+    final end = DateTime(year, month + 1, 1).toIso8601String();
+    final budgetRows = await db.query(
+      'budgets',
+      where: 'start_date < ?',
+      whereArgs: [end],
+      orderBy: 'start_date DESC, id DESC',
+      limit: 1,
+    );
+    if (budgetRows.isEmpty) return null;
+    final row = budgetRows.first;
+    final id = row['id'] as int;
+    final catRows = await db
+        .query('budget_categories', where: 'budget_id = ?', whereArgs: [id]);
+    final cats = catRows.map(BudgetCategoryAllocation.fromMap).toList();
+    return BudgetModel.fromMap(row, cats);
   }
 
   Future<BudgetModel?> getLatestBudget() async {

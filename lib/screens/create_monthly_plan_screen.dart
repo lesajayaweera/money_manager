@@ -338,7 +338,7 @@ class _CreateMonthlyPlanScreenState extends State<CreateMonthlyPlanScreen> {
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
-        widget.existing != null ? 'Edit Monthly Plan' : 'Create Monthly Plan',
+        widget.existing != null ? 'Edit Salary Plan' : 'Plan My Salary',
         style: GoogleFonts.poppins(
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -1510,7 +1510,7 @@ class _TypeHint extends StatelessWidget {
   String get _hint {
     switch (type) {
       case AllocationType.category:
-        return 'Creates a spending limit — money you expect to consume. Syncs to the Budget screen.';
+        return "Sets this category's monthly spending limit on your Budget.";
       case AllocationType.savingsGoal:
         return 'A contribution — money that moves to a savings goal. Not counted as spending.';
       case AllocationType.loan:

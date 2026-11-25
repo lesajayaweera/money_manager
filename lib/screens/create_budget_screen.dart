@@ -32,6 +32,9 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   final _amountController = TextEditingController();
   DateTime _startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
 
+  /// Percent of the limit spent at which the user is warned.
+  int _alertPercent = BudgetModel.defaultAlertPercent;
+
   // Step 2 state: category name -> allocated amount
   late Map<String, double> _allocations;
 
@@ -53,6 +56,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
       if (existing != null) {
         _amountController.text = existing.totalAmount.toStringAsFixed(0);
         _startDate = existing.startDate;
+        _alertPercent = existing.alertPercent;
         // Seed with 0 for every expense category, then overlay saved values.
         _allocations = {for (final c in allExpense) c.name: 0.0};
         for (final cat in existing.categories) {
@@ -268,10 +272,13 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
               ))
           .toList(),
       createdAt: DateTime.now().toIso8601String(),
+      alertPercent: _alertPercent,
     );
 
     try {
-      if (widget.existing != null) {
+      // An existing budget with no id is a repeating budget being changed
+      // from this month onward: save it as a new budget for this month.
+      if (widget.existing?.id != null) {
         await provider.updateBudget(budget);
       } else {
         // saveBudget handles duplicate-month detection internally
@@ -389,6 +396,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                 amountController: _amountController,
                 startDate: _startDate,
                 onDateChanged: (d) => setState(() => _startDate = d),
+                alertPercent: _alertPercent,
+                onAlertChanged: (v) => setState(() => _alertPercent = v),
                 onContinue: _next,
                 currencySymbol: settings.currencySymbol,
                 isDark: isDark,
@@ -421,6 +430,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                     startDate: _startDate,
                     allocations: _allocations,
                     totalAllocated: _totalAllocated,
+                    alertPercent: _alertPercent,
                     onBack: () => _confirmBack(toParent: false),
                     onSave: _isSaving ? () {} : _save,
                     isSaving: _isSaving,
@@ -438,6 +448,8 @@ class _Step1 extends StatelessWidget {
   final TextEditingController amountController;
   final DateTime startDate;
   final ValueChanged<DateTime> onDateChanged;
+  final int alertPercent;
+  final ValueChanged<int> onAlertChanged;
   final VoidCallback onContinue;
   final String currencySymbol;
   final bool isDark;
@@ -447,6 +459,8 @@ class _Step1 extends StatelessWidget {
     required this.amountController,
     required this.startDate,
     required this.onDateChanged,
+    required this.alertPercent,
+    required this.onAlertChanged,
     required this.onContinue,
     required this.currencySymbol,
     required this.isDark,
@@ -550,7 +564,7 @@ class _Step1 extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'Budget Starts From',
+              'Starts From',
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -604,7 +618,68 @@ class _Step1 extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.repeat_rounded, size: 16, color: textSub),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Repeats every month until you change it.',
+                  style: GoogleFonts.poppins(fontSize: 12, color: textSub),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Alert threshold
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "Warn me when I've spent",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: textPrimary,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  value: alertPercent.toDouble(),
+                  min: 50,
+                  max: 100,
+                  divisions: 10,
+                  activeColor: AppColors.primary,
+                  label: '$alertPercent%',
+                  onChanged: (v) => onAlertChanged(v.round()),
+                ),
+              ),
+              SizedBox(
+                width: 48,
+                child: Text(
+                  '$alertPercent%',
+                  textAlign: TextAlign.right,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'of the budget or a category limit.',
+              style: GoogleFonts.poppins(fontSize: 12, color: textSub),
+            ),
+          ),
+          const SizedBox(height: 32),
 
           // Continue button
           _PrimaryButton(label: 'Continue', onTap: onContinue),
@@ -1299,6 +1374,7 @@ class _Step3 extends StatelessWidget {
   final DateTime startDate;
   final Map<String, double> allocations;
   final double totalAllocated;
+  final int alertPercent;
   final VoidCallback onBack;
   final VoidCallback onSave;
   final bool isSaving;
@@ -1311,6 +1387,7 @@ class _Step3 extends StatelessWidget {
     required this.startDate,
     required this.allocations,
     required this.totalAllocated,
+    required this.alertPercent,
     required this.onBack,
     required this.onSave,
     required this.isSaving,
@@ -1382,6 +1459,18 @@ class _Step3 extends StatelessWidget {
                       _ReviewRow(
                         label: 'Start Date',
                         value: DateFormat('dd MMMM yyyy').format(startDate),
+                        valueColor: textPrimary,
+                        dividerColor: dividerColor,
+                      ),
+                      _ReviewRow(
+                        label: 'Repeats',
+                        value: 'Every month',
+                        valueColor: textPrimary,
+                        dividerColor: dividerColor,
+                      ),
+                      _ReviewRow(
+                        label: 'Warn at',
+                        value: '$alertPercent% spent',
                         valueColor: textPrimary,
                         dividerColor: dividerColor,
                       ),

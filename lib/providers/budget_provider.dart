@@ -46,6 +46,34 @@ class BudgetProvider extends ChangeNotifier {
       ? _spentAmount - _currentBudget!.totalAmount
       : 0;
 
+  /// True when [currentBudget] started in an earlier month and is being
+  /// repeated for [selectedMonth] (no budget of its own this month).
+  bool get isRepeatedBudget =>
+      _currentBudget != null &&
+      (_currentBudget!.startDate.year != _selectedMonth.year ||
+          _currentBudget!.startDate.month != _selectedMonth.month);
+
+  /// Spending has reached the alert threshold but not the limit yet.
+  bool get isNearLimit =>
+      _currentBudget != null &&
+      !isOverBudget &&
+      _currentBudget!.totalAmount > 0 &&
+      _spentAmount >= _currentBudget!.alertAmount;
+
+  /// Category names whose spending reached the alert threshold (including
+  /// those already over their limit).
+  List<String> get categoriesNearLimit {
+    final budget = _currentBudget;
+    if (budget == null) return const [];
+    return [
+      for (final c in budget.categories)
+        if (c.allocatedAmount > 0 &&
+            (_categorySpending[c.categoryName] ?? 0) >=
+                c.allocatedAmount * budget.alertPercent / 100)
+          c.categoryName,
+    ];
+  }
+
   // ── Month navigation ────────────────────────────────────────────────────────
 
   Future<void> setSelectedMonth(DateTime month) async {
@@ -67,7 +95,8 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   Future<void> _loadBudgetForMonth() async {
-    _currentBudget = await _db.getBudgetByMonth(
+    // Budgets repeat: use this month's own budget, else the latest earlier one.
+    _currentBudget = await _db.getEffectiveBudget(
         _selectedMonth.year, _selectedMonth.month);
     await _loadSpending();
     notifyListeners();
@@ -114,6 +143,7 @@ class BudgetProvider extends ChangeNotifier {
                   ))
               .toList(),
           createdAt: existing.createdAt,
+          alertPercent: budget.alertPercent,
         );
         await _db.updateBudget(updated);
       } else {

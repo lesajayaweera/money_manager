@@ -18,6 +18,7 @@ import 'providers/sms_draft_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/wallet_provider.dart';
 import 'screens/splash_screen.dart';
+import 'services/budget_alert_service.dart';
 import 'services/database_service.dart';
 
 Future<void> main() async {
@@ -106,6 +107,7 @@ class MoneyManagerApp extends StatelessWidget {
           return AnnotatedRegion<SystemUiOverlayStyle>(
             value: overlayStyle,
             child: MaterialApp(
+              scaffoldMessengerKey: rootMessengerKey,
               title: 'Money Manager',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,

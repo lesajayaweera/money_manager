@@ -182,6 +182,7 @@ class SalaryPlanProvider extends ChangeNotifier {
                   ))
               .toList(),
           createdAt: existing.createdAt,
+          alertPercent: existing.alertPercent,
         );
         await db.updateBudget(updated);
       } else {

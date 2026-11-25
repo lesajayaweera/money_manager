@@ -44,11 +44,21 @@ class BudgetCategoryAllocation {
 // ─── Budget Model ─────────────────────────────────────────────────────────────
 
 class BudgetModel {
+  /// Default point (percent of the limit spent) at which the user is warned.
+  static const int defaultAlertPercent = 80;
+
   final int? id;
   final double totalAmount;
+
+  /// First month this budget applies to. A budget keeps applying to every
+  /// later month until a newer budget starts (see
+  /// DatabaseService.getEffectiveBudget), so it repeats monthly by default.
   final DateTime startDate;
   final List<BudgetCategoryAllocation> categories;
   final String createdAt;
+
+  /// Percent of a limit (overall or per category) at which to warn, 50–100.
+  final int alertPercent;
 
   const BudgetModel({
     this.id,
@@ -56,16 +66,21 @@ class BudgetModel {
     required this.startDate,
     required this.categories,
     required this.createdAt,
+    this.alertPercent = defaultAlertPercent,
   });
 
   double get totalAllocated =>
       categories.fold(0, (s, c) => s + c.allocatedAmount);
+
+  /// Amount of spending at which the overall alert fires.
+  double get alertAmount => totalAmount * alertPercent / 100;
 
   Map<String, dynamic> toMap() => {
         if (id != null) 'id': id,
         'total_amount': totalAmount,
         'start_date': startDate.toIso8601String(),
         'created_at': createdAt,
+        'alert_percent': alertPercent,
       };
 
   factory BudgetModel.fromMap(
@@ -78,6 +93,24 @@ class BudgetModel {
         startDate: DateTime.parse(m['start_date'] as String),
         categories: categories,
         createdAt: m['created_at'] as String,
+        alertPercent:
+            (m['alert_percent'] as num?)?.toInt() ?? defaultAlertPercent,
+      );
+
+  /// A copy of this budget as a new, unsaved budget starting in [month]
+  /// (used to change a repeating budget from a given month onward).
+  BudgetModel asNewBudgetFor(DateTime month) => BudgetModel(
+        totalAmount: totalAmount,
+        startDate: DateTime(month.year, month.month, 1),
+        categories: categories
+            .map((c) => BudgetCategoryAllocation(
+                  budgetId: 0,
+                  categoryName: c.categoryName,
+                  allocatedAmount: c.allocatedAmount,
+                ))
+            .toList(),
+        createdAt: DateTime.now().toIso8601String(),
+        alertPercent: alertPercent,
       );
 }
 
