@@ -137,13 +137,34 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     if (_step > 0) setState(() => _step--);
   }
 
-  /// Shows a "Discard changes?" bottom sheet before navigating back when the
-  /// user has entered allocations. Falls through to a plain back if nothing
-  /// has been entered yet.
+  /// True when leaving the screen now would lose something the user typed.
+  bool get _isDirty {
+    final existing = widget.existing;
+    if (existing == null) return _totalBudget > 0 || _hasAllocations;
+    if (_totalBudget != existing.totalAmount ||
+        _alertPercent != existing.alertPercent) {
+      return true;
+    }
+    final saved = {
+      for (final c in existing.categories) c.categoryName: c.allocatedAmount
+    };
+    return _allocations.entries.any((e) => (saved[e.key] ?? 0) != e.value);
+  }
+
+  /// Back inside the flow just moves to the previous step: nothing is lost,
+  /// so no warning. Leaving the screen with unsaved input asks first.
+  void _handleBack() {
+    if (_step > 0) {
+      _back();
+    } else {
+      _confirmBack(toParent: true);
+    }
+  }
+
+  /// Shows a "Discard changes?" bottom sheet before leaving the screen when
+  /// there is unsaved input. Moving between steps never discards anything.
   Future<void> _confirmBack({bool toParent = false}) async {
-    // Only warn if on step 2/3 and there is actual data to lose.
-    final needsConfirm =
-        (_step >= 1 && _hasAllocations) || (_step == 2 && _hasAllocations);
+    final needsConfirm = toParent && _isDirty;
     if (!needsConfirm) {
       if (toParent) {
         Navigator.pop(context);
@@ -311,7 +332,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
             const SizedBox(width: 10),
             Text('Budget saved!', style: GoogleFonts.poppins(fontSize: 14)),
           ]),
-          backgroundColor: AppColors.income,
+          backgroundColor: AppColors.primary,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape:
@@ -348,7 +369,13 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
     final textSub =
         Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
 
-    return Scaffold(
+    return PopScope(
+      // System back: step back inside the flow, or confirm before leaving.
+      canPop: _step == 0 && !_isDirty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _handleBack();
+      },
+      child: Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: bg,
@@ -356,9 +383,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_rounded, color: textPrimary),
-          onPressed: _step == 0
-              ? () => Navigator.pop(context)
-              : () => _confirmBack(toParent: false),
+          onPressed: _handleBack,
         ),
         title: Column(
           children: [
@@ -409,7 +434,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                     allocations: _allocations,
                     onAllocationChanged: (name, val) =>
                         setState(() => _allocations[name] = val),
-                    onBack: () => _confirmBack(toParent: false),
+                    onBack: _back,
                     onContinue: _next,
                     onManageCategories: () async {
                       await Navigator.push(
@@ -431,12 +456,13 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
                     allocations: _allocations,
                     totalAllocated: _totalAllocated,
                     alertPercent: _alertPercent,
-                    onBack: () => _confirmBack(toParent: false),
+                    onBack: _back,
                     onSave: _isSaving ? () {} : _save,
                     isSaving: _isSaving,
                     currencySymbol: settings.currencySymbol,
                     isDark: isDark,
                   ),
+      ),
       ),
     );
   }
@@ -787,10 +813,9 @@ class _Step2 extends StatelessWidget {
                             isOverBudget
                                 ? 'Over budget — reduce some categories'
                                 : allocatedCount == 0
-                                    ? 'No categories allocated yet'
+                                    ? 'No categories set yet'
                                     : '$allocatedCount ${allocatedCount == 1 ? 'category' : 'categories'} allocated',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -1215,12 +1240,12 @@ class _Step2 extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isOver
                         ? AppColors.expense.withValues(alpha: 0.08)
-                        : AppColors.income.withValues(alpha: 0.08),
+                        : AppColors.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isOver
                           ? AppColors.expense.withValues(alpha: 0.3)
-                          : AppColors.income.withValues(alpha: 0.3),
+                          : AppColors.primary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -1231,7 +1256,7 @@ class _Step2 extends StatelessWidget {
                             ? Icons.warning_amber_rounded
                             : Icons.account_balance_wallet_rounded,
                         size: 14,
-                        color: isOver ? AppColors.expense : AppColors.income,
+                        color: isOver ? AppColors.expense : AppColors.primary,
                       ),
                       const SizedBox(width: 6),
                       Flexible(
@@ -1243,7 +1268,7 @@ class _Step2 extends StatelessWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color:
-                                isOver ? AppColors.expense : AppColors.income,
+                                isOver ? AppColors.expense : AppColors.primary,
                           ),
                         ),
                       ),
@@ -1405,6 +1430,8 @@ class _Step3 extends StatelessWidget {
     final dividerColor =
         Theme.of(context).dividerTheme.color ?? const Color(0xFFF0F0F0);
     final allocatedCats = allocations.entries.where((e) => e.value > 0).length;
+    final unassigned =
+        (totalBudget - totalAllocated).clamp(0.0, double.infinity);
 
     return Column(
       children: [
@@ -1484,25 +1511,76 @@ class _Step3 extends StatelessWidget {
                         label: 'Total Allocation',
                         value: CurrencyFormatter.format(totalAllocated,
                             symbol: currencySymbol),
-                        valueColor: AppColors.income,
+                        valueColor: AppColors.primary,
                         dividerColor: dividerColor,
                         isLast: true,
                       ),
                     ],
                   ),
                 ),
+
+                // Which categories got which limit, plus what's left over.
+                if (allocatedCats > 0 || unassigned > 0) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        for (final e in allocations.entries
+                            .where((e) => e.value > 0))
+                          _ReviewRow(
+                            label: e.key,
+                            value: CurrencyFormatter.format(e.value,
+                                symbol: currencySymbol),
+                            valueColor: textPrimary,
+                            dividerColor: dividerColor,
+                            isFirst: e.key ==
+                                allocations.entries
+                                    .firstWhere((x) => x.value > 0)
+                                    .key,
+                            isLast: unassigned <= 0 &&
+                                e.key ==
+                                    allocations.entries
+                                        .lastWhere((x) => x.value > 0)
+                                        .key,
+                          ),
+                        if (unassigned > 0)
+                          _ReviewRow(
+                            label: 'Not in a category',
+                            value: CurrencyFormatter.format(unassigned,
+                                symbol: currencySymbol),
+                            valueColor: textSub,
+                            dividerColor: dividerColor,
+                            isFirst: allocatedCats == 0,
+                            isLast: true,
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (unassigned > 0) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Spending in other categories still counts toward your monthly budget.',
+                      style: GoogleFonts.poppins(fontSize: 12, color: textSub),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ],
                 const SizedBox(height: 24),
               ],
             ),
           ),
         ),
 
-        // Bottom buttons — Save Budget uses green
         _BottomButtonRow(
           onBack: isSaving ? () {} : onBack,
           onContinue: isSaving ? () {} : onSave,
           continueLabel: isSaving ? 'Saving…' : 'Save Budget',
-          continueColor: isSaving ? Colors.grey.shade400 : AppColors.income,
+          continueColor: isSaving ? Colors.grey.shade400 : AppColors.primary,
         ),
       ],
     );

@@ -974,12 +974,16 @@ class _AmountInputField extends StatelessWidget {
       ],
       style: GoogleFonts.poppins(fontSize: 15),
       decoration: InputDecoration(
-        prefixText: '$symbol  ',
-        prefixStyle: GoogleFonts.poppins(
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 8),
+          child: Text(symbol, style: GoogleFonts.poppins(
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+        )),
         ),
+        prefixIconConstraints:
+            const BoxConstraints(minWidth: 0, minHeight: 0),
         hintText: hintText,
         hintStyle: GoogleFonts.poppins(
             fontSize: 15,
@@ -1227,12 +1231,16 @@ class _AddAllocationSheetState extends State<_AddAllocationSheet> {
                     ],
                     style: GoogleFonts.poppins(fontSize: 14),
                     decoration: InputDecoration(
-                      prefixText: '$symbol  ',
-                      prefixStyle: GoogleFonts.poppins(
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 8),
+                        child: Text(symbol, style: GoogleFonts.poppins(
                           fontSize: 14,
                           color: isDark
                               ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary),
+                              : AppColors.textSecondary)),
+                      ),
+                      prefixIconConstraints:
+                          const BoxConstraints(minWidth: 0, minHeight: 0),
                       hintText: '0',
                       errorText: _amountError,
                       filled: true,
@@ -1429,20 +1437,18 @@ class _TypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: AllocationType.values
-            .map((t) => Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _TypeChip(
-                    type: t,
-                    isSelected: selected == t,
-                    onTap: () => onChanged(t),
-                  ),
-                ))
-            .toList(),
-      ),
+    // Wrap onto a second line instead of scrolling, so no option is hidden
+    // off the edge (e.g. "Credit Card" on narrow phones).
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: AllocationType.values
+          .map((t) => _TypeChip(
+                type: t,
+                isSelected: selected == t,
+                onTap: () => onChanged(t),
+              ))
+          .toList(),
     );
   }
 }
